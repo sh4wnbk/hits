@@ -2,3 +2,8 @@
 __pycache__/
 .env
 *.pyc
+
+# scratch: diagnostics, staging, planning
+data/_*.py
+data/_*.json
+phase1-*-plan.md
