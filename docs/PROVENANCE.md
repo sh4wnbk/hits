@@ -33,22 +33,22 @@ hand-entered. Every entry carries the date it was pulled, because Horizons
 updates as observations accumulate and a number computed later for the same
 target can differ.
 
-| Body | Role | Epoch or window (TDB) | Frame | Center | Retrieved | Committed states |
+| Body | Role | Epoch or window (TDB) | Frame | Center | Retrieved (UTC) | Committed states |
 |---|---|---|---|---|---|---|
-| 1I/'Oumuamua | self-check (perihelion) | single, ~2017-09-09 (confirm at fetch) | ECLIPJ2000 | Sun | TO FILL | 1 state, TO FILL |
-| Earth | Sample A/B launch | single, 2017-06-07 12:00:00 | ECLIPJ2000 | Sun | TO FILL | 1 state (shared by A and B), TO FILL |
-| 1I/'Oumuamua | Sample A arrival | single, 2018-06-07 12:00:00 | ECLIPJ2000 | Sun | TO FILL | 1 state, TO FILL |
-| 1I/'Oumuamua | Sample B arrival | single, 2037-06-07 12:00:00 | ECLIPJ2000 | Sun | TO FILL | 1 state, TO FILL |
-| Earth | C3 grid launch window | window, 2018-01-01 to 2032-12-13, daily | ECLIPJ2000 | Sun | TO FILL | daily set, TO FILL |
-| 1I/'Oumuamua | C3 grid arrival window | window, launch + (5 to 30 yr), to ~2062 | ECLIPJ2000 | Sun | TO FILL | daily set, TO FILL |
+| 1I/'Oumuamua | self-check (perihelion) | single, 2017-09-09 00:00:00 (JD 2458005.5) | ECLIPJ2000 | Sun | 2026-08-27T18:36:35Z | 1 state (position/velocity at perihelion epoch) |
+| Earth | Sample A/B launch | single, 2017-06-07 12:00:00 (JD 2457912.0) | ECLIPJ2000 | Sun | 2026-08-27T19:52:26Z | 1 state, shared by A and B |
+| 1I/'Oumuamua | Sample A arrival | single, 2018-06-07 12:00:00 (JD 2458277.0) | ECLIPJ2000 | Sun | 2026-08-27T19:52:27Z | 1 state at 5.852 AU |
+| 1I/'Oumuamua | Sample B arrival | single, 2037-06-07 12:00:00 (JD 2465217.0) | ECLIPJ2000 | Sun | 2026-08-27T19:52:29Z | 1 state at 115.079 AU |
+| Earth | C3 grid launch window | window, 2018-01-01 to 2032-12-13, 14-day step | ECLIPJ2000 | Sun | 2026-08-27T19:52:50Z | 391 states (JD 2458119.5 to 2463579.5) |
+| 1I/'Oumuamua | C3 grid arrival window | window, 2023-01-01 to 2062-12-24, 14-day step | ECLIPJ2000 | Sun | 2026-08-27T19:52:52Z | 1044 states (JD 2459945.5 to 2474547.5) |
 
 The C3 grid window reproduces Fig. 1, whose launch-date axis runs from
 01-Jan-2018 to the early 2030s and whose duration axis runs 5 to 30 years. The
 1400 km^2/s^2 point at a 2027 launch is read off this same grid at the 2027
 launch column near 15-year duration; it needs no separately committed states.
-The window row expands to a set of daily state vectors in `state_vectors.json`
-over its `[start, end]` range; the row records the bounds and step, the JSON
-holds the states.
+The window rows expand to sets of 14-day-step state vectors in `state_vectors.json`
+over their `[start, end]` ranges; the rows record the bounds and step count, the
+JSON holds the states. Horizons id used for all 1I/'Oumuamua fetches is "1I".
 
 Frame, center, and time scale are fixed by CONVENTIONS.md and are not per-row
 choices. The Horizons id for the target is 1I/'Oumuamua (record the exact
@@ -66,6 +66,12 @@ years, encounter at 111.4 AU, arrival relative velocity 0.6 km/s. Both samples
 therefore share one launch instant and have exact flight times, so each arrival
 epoch is the launch plus the stated duration: Sample A arrives 2018-06-07
 12:00:00, Sample B arrives 2037-06-07 12:00:00.
+
+Sample B encounter distance: HITS places 1I at 115.079 AU (retrieved 2026-08-27)
+vs Lyra Fig. 6 at 111.4 AU. The 3.7 AU gap is orbit-solution drift between
+Lyra's 2019 ephemeris and the 2026 retrieval, not a solver discrepancy. The same
+calendar date maps to a different position because Horizons refines the orbit
+solution as new observations accumulate.
 
 Both samples are single pinned transfers and both are asserted. The launch-day
 sweep, the window-width reporting, and the assert-versus-report branch were
@@ -137,6 +143,23 @@ a truncation artifact, because 2017 to 2018 is the earliest meaningful launch;
 the boundary-minimum suspect flag applies to the duration axis, not to that edge.
 The gap between the measured floor and 703 is reported as orbit-solution drift
 tied to the retrieval date, never tuned away by adjusting flight time.
+
+Extended-trend confirmation (Phase 1 closeout, 2026-08-27): the oumuamua_c3_grid
+extends to 2062-12-24, giving ~44-yr TOF from a 2018-06-04 departure. C3 at
+30 yr is 714.36 km^2/s^2; at 44 yr it is 710.97 km^2/s^2 — a drop of only
+3.39 km^2/s^2 across the full 30-to-44-yr span. The curve has effectively
+levelled. The C3 floor is therefore ASSERTED: 714.36 km^2/s^2 (HITS, 2026
+retrieval) vs 703 km^2/s^2 (Lyra) = 1.6% agreement, attributed to orbit-solution
+drift. Lyra's Fig. 1 also stops at 30 years and reads the same converged floor
+region; neither value is a mid-descent boundary read.
+
+## Perihelion self-check epoch
+
+JD 2458005.5 (2017-09-09 00:00:00 TDB) is HITS's chosen self-check anchor for
+the frame-gate validation. It is the single epoch retrieved near 1I/'Oumuamua's
+perihelion passage and is used only as the heliocentric v_inf reference. It is
+not a validation target requiring a published perihelion-passage date and carries
+no external citation obligation.
 
 ## Retrieval discipline
 
