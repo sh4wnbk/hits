@@ -658,10 +658,58 @@ def freeze_validate_fixture(path: str = "tests/fixtures/manifests/validate_full.
     return path
 
 
+# ---------------------------------------------------------------------------
+# Redacted view for black-box corpus authoring
+# ---------------------------------------------------------------------------
+
+def redacted_for_corpus_authoring(m: Manifest) -> Dict[str, Any]:
+    """
+    The manifest as an adversarial author is allowed to see it.
+
+    Bob writes the reject corpus black-box, from the solver's public outputs
+    only. The full manifest cannot be handed over, because `renderings` IS the
+    matching policy: an author who can read the permitted strings is picking
+    near-misses against a known answer key rather than against the fabrication
+    patterns the gate has to survive in the wild.
+
+    So `renderings` and `precision` are withheld, and the numbers, units,
+    frames, kinds, labels, and citations are given in full. That is the solver's
+    public output, which is exactly what the brief in docs/BOB_BRIEF_CORPUS.md
+    says the author gets.
+    """
+    return {
+        "note": (
+            "Redacted view for corpus authoring. Values, units, frames and "
+            "citations are complete. The permitted renderings of each value "
+            "and its declared precision are withheld deliberately."
+        ),
+        "producer": m.producer,
+        "fidelity_note": m.fidelity_note,
+        "inputs": m.inputs,
+        "entries": [
+            {
+                "id": e.id,
+                "label": e.label,
+                "value": e.value,
+                "unit": e.unit,
+                "frame": e.frame,
+                "kind": e.kind,
+                "citation": e.citation,
+            }
+            for e in m.entries
+        ],
+    }
+
+
 if __name__ == "__main__":
     import sys
     if "--freeze" in sys.argv:
         out = freeze_validate_fixture()
         print(f"frozen: {out}")
+    elif "--bob-view" in sys.argv:
+        from solver.fetch import load_state_vectors
+        from solver.validate import validate
+        r = validate(load_state_vectors("data/state_vectors.json"), verbose=False)
+        print(json.dumps(redacted_for_corpus_authoring(r.manifest), indent=2))
     else:
         print(__doc__)
