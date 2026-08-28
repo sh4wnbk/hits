@@ -92,16 +92,28 @@ def validate_frame_gate(
     )
 
 
-def print_frame_gate(result: FrameGateResult) -> None:
-    """Print the frame-gate comparison row as specified in the plan."""
+def print_frame_gate(result: FrameGateResult, manifest=None) -> None:
+    """
+    Print the frame-gate comparison row.
+
+    Numbers come from the manifest's canonical renderings, not from format
+    specifiers held here. That binding is the point: the rows a judge reads and
+    the set of numbers an explanation is allowed to quote are the same strings,
+    so they cannot drift apart. tests/test_groundedness.py runs the gate over
+    this output to prove it.
+    """
+    if manifest is None:
+        from solver.manifest import Manifest, _frame_gate_entries
+        manifest = Manifest(producer="validate", entries=_frame_gate_entries(result))
+    c = manifest.canonical
     status = "PASS" if result.passed else "FAIL"
     print(f"\n{'='*60}")
     print(f"FRAME GATE | v_inf_helio  [formula: {result.formula}]")
-    print(f"  computed:   {result.computed_km_s:.5f} km/s")
-    print(f"  published:  {result.published_km_s:.2f} km/s  ({result.citation})")
-    print(f"  abs diff:   {result.abs_diff_km_s:.5f} km/s")
-    print(f"  rel diff:   {result.rel_diff_pct:.3f}%")
-    print(f"  tolerance:  {result.tolerance_km_s} km/s")
+    print(f"  computed:   {c('validate.frame_gate.computed')} km/s")
+    print(f"  published:  {c('validate.frame_gate.published')} km/s  ({result.citation})")
+    print(f"  abs diff:   {c('validate.frame_gate.abs_diff')} km/s")
+    print(f"  rel diff:   {c('validate.frame_gate.rel_diff_pct')}%")
+    print(f"  tolerance:  {c('validate.frame_gate.tolerance')} km/s")
     print(f"  {status}")
     print(f"  NOTE: {result.fidelity_note}")
     print(f"{'='*60}")
@@ -272,28 +284,35 @@ def validate_c3(
     )
 
 
-def print_c3_result(result: C3Result) -> None:
-    """Print C3 comparison rows."""
-    from astropy.time import Time as _Time
-    dep_iso_2027 = _Time(result.c3_2027_departure_jd, format="jd", scale="tdb").iso[:10]
-    dep_iso_floor = _Time(result.c3_floor_departure_jd, format="jd", scale="tdb").iso[:10]
+def print_c3_result(result: C3Result, manifest=None) -> None:
+    """
+    Print both C3 comparison rows, Earth-relative frame.
+
+    Manifest-bound for the same reason as print_frame_gate.
+    """
+    if manifest is None:
+        from solver.manifest import Manifest, _c3_entries
+        manifest = Manifest(producer="validate", entries=_c3_entries(result))
+    c = manifest.canonical
     print(f"\n{'='*60}")
     print("C3 VALIDATION | Earth-relative departure frame")
-    print(f"  2027 launch column minimum:")
-    print(f"    computed:   {result.c3_2027_computed_km2_s2:.2f} km^2/s^2  "
-          f"(departure {dep_iso_2027}, TOF {result.c3_2027_tof_days/365.25:.1f} yr)")
-    print(f"    published:  {result.c3_2027_published_km2_s2:.1f} km^2/s^2  ({result.c3_2027_citation})")
-    print(f"    abs diff:   {result.c3_2027_abs_diff:.2f} km^2/s^2")
-    print(f"    rel diff:   {result.c3_2027_rel_diff_pct:.2f}%")
-    print(f"    tolerance:  {100*result.c3_2027_tolerance_frac:.0f}%")
+    print("  2027 launch column minimum:")
+    print(f"    computed:   {c('validate.c3.y2027.computed')} km^2/s^2  "
+          f"(departure {c('validate.c3.y2027.departure.iso')}, "
+          f"TOF {c('validate.c3.y2027.tof_years')} yr)")
+    print(f"    published:  {c('validate.c3.y2027.published')} km^2/s^2  ({result.c3_2027_citation})")
+    print(f"    abs diff:   {c('validate.c3.y2027.abs_diff')} km^2/s^2")
+    print(f"    rel diff:   {c('validate.c3.y2027.rel_diff_pct')}%")
+    print(f"    tolerance:  {c('validate.c3.y2027.tolerance_pct')}%")
     print(f"    {'PASS' if result.c3_2027_passed else 'FAIL'}")
-    print(f"  C3 floor (global grid minimum):")
-    print(f"    computed:   {result.c3_floor_computed_km2_s2:.2f} km^2/s^2  "
-          f"(departure {dep_iso_floor}, TOF {result.c3_floor_tof_days/365.25:.1f} yr)")
-    print(f"    published:  {result.c3_floor_published_km2_s2:.1f} km^2/s^2  ({result.c3_floor_citation})")
-    print(f"    abs diff:   {result.c3_floor_abs_diff:.2f} km^2/s^2")
-    print(f"    rel diff:   {result.c3_floor_rel_diff_pct:.2f}%")
-    print(f"    tolerance:  {100*result.c3_floor_tolerance_frac:.0f}%")
+    print("  C3 floor (global grid minimum):")
+    print(f"    computed:   {c('validate.c3.floor.computed')} km^2/s^2  "
+          f"(departure {c('validate.c3.floor.departure.iso')}, "
+          f"TOF {c('validate.c3.floor.tof_years')} yr)")
+    print(f"    published:  {c('validate.c3.floor.published')} km^2/s^2  ({result.c3_floor_citation})")
+    print(f"    abs diff:   {c('validate.c3.floor.abs_diff')} km^2/s^2")
+    print(f"    rel diff:   {c('validate.c3.floor.rel_diff_pct')}%")
+    print(f"    tolerance:  {c('validate.c3.floor.tolerance_pct')}%")
     print(f"    edge type:  {result.c3_floor_edge_type}")
     print(f"    gap attribution: {result.c3_floor_gap_attribution}")
     print(f"    {'PASS' if result.c3_floor_passed else 'FAIL'}")
@@ -390,27 +409,40 @@ def validate_arrival(
     )
 
 
-def print_arrival_result(result: "ArrivalResult") -> None:
-    """Print arrival validation comparison rows."""
+def print_arrival_result(result: "ArrivalResult", manifest=None,
+                         sample: str = "") -> None:
+    """
+    Print one arrival-sample comparison row, target-relative frame.
+
+    Manifest-bound. `sample` is "a" or "b" and selects the entry prefix; it is
+    inferred from the label when not given.
+    """
+    if not sample:
+        sample = "b" if "Sample B" in result.sample_label else "a"
+    if manifest is None:
+        from solver.manifest import Manifest, _arrival_entries
+        manifest = Manifest(producer="validate",
+                            entries=_arrival_entries(result, sample))
+    b = f"validate.arrival_{sample}"
+    c = manifest.canonical
     status = "PASS" if result.passed else "FAIL"
     print(f"\n{'='*60}")
     print(f"ARRIVAL VELOCITY | {result.sample_label}  [ASSERTED]")
-    print(f"  Epoch:          launch JD {result.launch_epoch_jd:.1f}  "
-          f"arrival JD {result.arrival_epoch_jd:.1f}")
-    print(f"  TOF:            {result.tof_days:.2f} days  "
-          f"({result.tof_days/365.25:.4f} yr)")
-    print(f"  Encounter dist: {result.encounter_distance_au:.3f} AU")
-    print(f"  v_inf2 (eq.4):  {result.v_inf2_km_s:.5f} km/s  "
+    print(f"  Epoch:          launch JD {c(b + '.launch.jd')}  "
+          f"arrival JD {c(b + '.arrival.jd')}")
+    print(f"  TOF:            {c(b + '.tof_days')} days  "
+          f"({c(b + '.tof_years')} yr)")
+    print(f"  Encounter dist: {c(b + '.encounter_distance_au')} AU")
+    print(f"  v_inf2 (eq.4):  {c(b + '.v_inf2')} km/s  "
           f"(asymptotic, compared to published)")
-    print(f"  v_arr (local):  {result.v_arr_local_km_s:.5f} km/s  "
+    print(f"  v_arr (local):  {c(b + '.v_arr_local')} km/s  "
           f"(HITS native local encounter)")
-    print(f"  def. gap:       {result.definitional_gap_km_s:.5f} km/s  "
+    print(f"  def. gap:       {c(b + '.definitional_gap')} km/s  "
           f"(|v_inf2 - v_arr|; hyperbolic geometry, not error)")
-    print(f"  published:      {result.published_km_s:.5f} km/s  ({result.citation})")
-    print(f"  abs diff:       {result.abs_diff_km_s:.5f} km/s  "
-          f"(v_inf2 vs published)")
-    print(f"  rel diff:       {result.rel_diff_pct:.3f}%")
-    print(f"  tolerance:      {result.tolerance_km_s} km/s")
+    print(f"  published:      {c(b + '.published')} km/s  ({result.citation})")
+    print(f"  abs diff:       {c(b + '.abs_diff')} km/s  (v_inf2 vs published)")
+    print(f"  rel diff:       {c(b + '.rel_diff_pct')}%")
+    print(f"  tolerance:      {c(b + '.tolerance')} km/s")
     print(f"  {status}")
     print(f"  {result.fidelity_note}")
     print(f"{'='*60}")
@@ -506,6 +538,7 @@ class ValidationResults:
     arrival_b: Optional[ArrivalResult] = None
     grid_result: Optional[GridResult] = None
     retrieval_date: str = ""
+    manifest: Optional[object] = None   # solver.manifest.Manifest
 
     @property
     def all_passed(self) -> bool:
@@ -548,6 +581,7 @@ def validate(state_vectors: dict, lyra_constants: Optional[dict] = None,
     ValidationResults
     """
     from solver.lyra import LYRA_CONSTANTS
+    from solver.manifest import from_validation_results
 
     if lyra_constants is None:
         lyra_constants = LYRA_CONSTANTS
@@ -559,13 +593,13 @@ def validate(state_vectors: dict, lyra_constants: Optional[dict] = None,
         tolerance_km_s=lyra_constants["v_inf_helio_km_s"]["tolerance_km_s"],
         citation=lyra_constants["v_inf_helio_km_s"]["citation"],
     )
-    if verbose:
-        print_frame_gate(fg)
-
     if not fg.passed:
+        partial = ValidationResults(frame_gate=fg)
+        partial.manifest = from_validation_results(partial, inputs=_manifest_inputs(state_vectors))
         if verbose:
+            print_frame_gate(fg, partial.manifest)
             print("\nFRAME GATE FAILED. C3 and arrival validation skipped.")
-        return ValidationResults(frame_gate=fg)
+        return partial
 
     retrieval_date = state_vectors["earth_c3_grid"][0].retrieved_utc
 
@@ -584,8 +618,6 @@ def validate(state_vectors: dict, lyra_constants: Optional[dict] = None,
         c3_floor_citation=lyra_constants["c3_floor_km2_s2"]["citation"],
         retrieval_date=retrieval_date,
     )
-    if verbose:
-        print_c3_result(c3)
 
     # 3. Arrival relative velocity (target-relative), both pinned samples
     sample_a_cfg = lyra_constants["v_arr_sample_a_km_s"]
@@ -598,8 +630,6 @@ def validate(state_vectors: dict, lyra_constants: Optional[dict] = None,
         sample_label="Sample A (launch 2017-06-07, ToF 1.0 yr, ~5.85 AU)",
         citation=sample_a_cfg["citation"],
     )
-    if verbose:
-        print_arrival_result(arrival_a)
 
     sample_b_cfg = lyra_constants["v_arr_sample_b_km_s"]
     arrival_b = validate_arrival(
@@ -611,10 +641,8 @@ def validate(state_vectors: dict, lyra_constants: Optional[dict] = None,
         sample_label="Sample B (launch 2017-06-07, ToF 20.0 yr, ~115 AU)",
         citation=sample_b_cfg["citation"],
     )
-    if verbose:
-        print_arrival_result(arrival_b)
 
-    return ValidationResults(
+    results = ValidationResults(
         frame_gate=fg,
         c3=c3,
         arrival_a=arrival_a,
@@ -622,3 +650,37 @@ def validate(state_vectors: dict, lyra_constants: Optional[dict] = None,
         grid_result=grid_result,
         retrieval_date=retrieval_date,
     )
+
+    # The manifest is built before anything is printed, and the rows are then
+    # printed from it. That ordering is the guarantee in miniature: the set of
+    # citable numbers is fixed first, and every number a reader sees is drawn
+    # from that set.
+    results.manifest = from_validation_results(
+        results, inputs=_manifest_inputs(state_vectors))
+
+    if verbose:
+        print_frame_gate(fg, results.manifest)
+        print_c3_result(c3, results.manifest)
+        print_arrival_result(arrival_a, results.manifest, sample="a")
+        print_arrival_result(arrival_b, results.manifest, sample="b")
+
+    return results
+
+
+def _manifest_inputs(state_vectors: dict) -> dict:
+    """Header provenance: which committed states this call read, and when they
+    were retrieved."""
+    inputs = {"state_vectors": {}}
+    for key, val in state_vectors.items():
+        svs = val if isinstance(val, list) else [val]
+        if not svs:
+            continue
+        inputs["state_vectors"][key] = {
+            "n_states": len(svs),
+            "epoch_first_jd": svs[0].epoch_tdb_jd,
+            "epoch_last_jd": svs[-1].epoch_tdb_jd,
+            "retrieved_utc": svs[0].retrieved_utc,
+            "frame": svs[0].frame,
+            "center": svs[0].center,
+        }
+    return inputs

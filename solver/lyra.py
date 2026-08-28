@@ -62,6 +62,14 @@ LYRA_CONSTANTS = {
         "launch_epoch_tdb": "2017-06-07 12:00:00",
         "arrival_epoch_tdb": "2018-06-07 12:00:00",
         "tof_days": 365.0,
+        # The paper states the flight time and the encounter distance. Both are
+        # published figures in their own right, and both differ slightly from
+        # what HITS computes: 365 days is 0.99932 Julian years, not 1.0, and the
+        # 2026 orbit solution puts the encounter at 5.852 AU, not 5.8. The
+        # manifest carries the published values separately so an explanation can
+        # state the disagreement instead of eliding it.
+        "published_tof_years": 1.0,
+        "published_encounter_au": 5.8,
     },
     "v_arr_sample_b_km_s": {
         "value": 0.6,
@@ -72,6 +80,8 @@ LYRA_CONSTANTS = {
         "launch_epoch_tdb": "2017-06-07 12:00:00",
         "arrival_epoch_tdb": "2037-06-07 12:00:00",
         "tof_days": 7305.0,
+        "published_tof_years": 20.0,
+        "published_encounter_au": 111.4,
     },
 }
 

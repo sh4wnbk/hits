@@ -1,0 +1,1241 @@
+{
+  "manifest_version": "1.0.0",
+  "call_id": "frozen-validate-full",
+  "emitted_utc": "frozen",
+  "producer": "validate",
+  "inputs": {
+    "state_vectors": {
+      "oumuamua_perihelion": {
+        "n_states": 1,
+        "epoch_first_jd": 2458005.5,
+        "epoch_last_jd": 2458005.5,
+        "retrieved_utc": "2026-08-27T18:36:35Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      },
+      "earth_sample_ab_launch": {
+        "n_states": 1,
+        "epoch_first_jd": 2457912.0,
+        "epoch_last_jd": 2457912.0,
+        "retrieved_utc": "2026-08-27T19:52:26Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      },
+      "oumuamua_sample_a_arrival": {
+        "n_states": 1,
+        "epoch_first_jd": 2458277.0,
+        "epoch_last_jd": 2458277.0,
+        "retrieved_utc": "2026-08-27T19:52:27Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      },
+      "oumuamua_sample_b_arrival": {
+        "n_states": 1,
+        "epoch_first_jd": 2465217.0,
+        "epoch_last_jd": 2465217.0,
+        "retrieved_utc": "2026-08-27T19:52:29Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      },
+      "earth_c3_grid": {
+        "n_states": 391,
+        "epoch_first_jd": 2458119.5,
+        "epoch_last_jd": 2463579.5,
+        "retrieved_utc": "2026-08-27T19:52:50Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      },
+      "oumuamua_c3_grid": {
+        "n_states": 1044,
+        "epoch_first_jd": 2459945.5,
+        "epoch_last_jd": 2474547.5,
+        "retrieved_utc": "2026-08-27T19:52:52Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      }
+    }
+  },
+  "fidelity_note": "Patched-conic, two-body. No n-body integration and no non-gravitational forces. A manifest entry records what the solver computed, which is not a claim that the number is correct to the precision it is quoted at.",
+  "solver_git_sha": "frozen",
+  "entries": [
+    {
+      "id": "validate.frame_gate.computed",
+      "label": "Heliocentric v_inf of 1I/'Oumuamua at perihelion, computed",
+      "value": 26.28614,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "heliocentric",
+      "kind": "computed",
+      "renderings": [
+        "26.28614",
+        "26.2861",
+        "26.286",
+        "26.29",
+        "26.3"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.FrameGateResult.computed_km_s"
+    },
+    {
+      "id": "validate.frame_gate.published",
+      "label": "Heliocentric v_inf of 1I/'Oumuamua, published",
+      "value": 26.33,
+      "precision": 2,
+      "unit": "km/s",
+      "frame": "heliocentric",
+      "kind": "published",
+      "renderings": [
+        "26.33"
+      ],
+      "citation": "Hein et al. 2019, p.553 col 1 / abstract",
+      "provenance": "solver.validate.FrameGateResult.published_km_s"
+    },
+    {
+      "id": "validate.frame_gate.abs_diff",
+      "label": "Frame gate absolute difference, computed minus published",
+      "value": 0.04386,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "heliocentric",
+      "kind": "derived",
+      "renderings": [
+        "0.04386",
+        "0.0439",
+        "0.044"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.FrameGateResult.abs_diff_km_s"
+    },
+    {
+      "id": "validate.frame_gate.rel_diff_pct",
+      "label": "Frame gate relative difference",
+      "value": 0.167,
+      "precision": 3,
+      "unit": "%",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "0.167",
+        "0.17"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.FrameGateResult.rel_diff_pct"
+    },
+    {
+      "id": "validate.frame_gate.tolerance",
+      "label": "Frame gate tolerance",
+      "value": 0.5,
+      "precision": 1,
+      "unit": "km/s",
+      "frame": "heliocentric",
+      "kind": "tolerance",
+      "renderings": [
+        "0.5"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.FrameGateResult.tolerance_km_s"
+    },
+    {
+      "id": "validate.c3.y2027.computed",
+      "label": "2027 launch departure C3, computed",
+      "value": 1331.16,
+      "precision": 2,
+      "unit": "km^2/s^2",
+      "frame": "earth_relative",
+      "kind": "computed",
+      "renderings": [
+        "1331.16",
+        "1331.2",
+        "1331"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_y2027_computed_km2_s2"
+    },
+    {
+      "id": "validate.c3.y2027.published",
+      "label": "2027 launch departure C3, published",
+      "value": 1400.0,
+      "precision": 0,
+      "unit": "km^2/s^2",
+      "frame": "earth_relative",
+      "kind": "published",
+      "renderings": [
+        "1400"
+      ],
+      "citation": "Hein et al. 2019, p.554 col 1 (37.4 km/s, ~15-yr duration)",
+      "provenance": "solver.validate.C3Result.c3_y2027_published_km2_s2"
+    },
+    {
+      "id": "validate.c3.y2027.abs_diff",
+      "label": "2027 launch C3 absolute difference",
+      "value": 68.84,
+      "precision": 2,
+      "unit": "km^2/s^2",
+      "frame": "earth_relative",
+      "kind": "derived",
+      "renderings": [
+        "68.84",
+        "68.8"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_y2027_abs_diff"
+    },
+    {
+      "id": "validate.c3.y2027.rel_diff_pct",
+      "label": "2027 launch C3 relative difference",
+      "value": 4.92,
+      "precision": 2,
+      "unit": "%",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "4.92",
+        "4.9"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_y2027_rel_diff_pct"
+    },
+    {
+      "id": "validate.c3.y2027.tolerance_frac",
+      "label": "2027 launch C3 tolerance, fraction",
+      "value": 0.2,
+      "precision": 2,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "tolerance",
+      "renderings": [
+        "0.2"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_y2027_tolerance_frac"
+    },
+    {
+      "id": "validate.c3.y2027.tolerance_pct",
+      "label": "2027 launch C3 tolerance, percent",
+      "value": 20.0,
+      "precision": 0,
+      "unit": "%",
+      "frame": "n_a",
+      "kind": "tolerance",
+      "renderings": [
+        "20"
+      ],
+      "citation": "",
+      "provenance": "derived from solver.validate.C3Result.c3_y2027_tolerance_frac"
+    },
+    {
+      "id": "validate.c3.y2027.tolerance_abs",
+      "label": "2027 launch C3 tolerance, absolute",
+      "value": 280.0,
+      "precision": 2,
+      "unit": "km^2/s^2",
+      "frame": "earth_relative",
+      "kind": "derived",
+      "renderings": [
+        "280",
+        "280.0"
+      ],
+      "citation": "",
+      "provenance": "derived: tolerance_frac * published"
+    },
+    {
+      "id": "validate.c3.y2027.tof_days",
+      "label": "2027 launch flight time",
+      "value": 5478.75,
+      "precision": 2,
+      "unit": "d",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "5478.75",
+        "5478.8",
+        "5479"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_y2027_tof_days"
+    },
+    {
+      "id": "validate.c3.y2027.tof_years",
+      "label": "2027 launch flight time in years",
+      "value": 15.0,
+      "precision": 2,
+      "unit": "yr",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "15",
+        "15.0"
+      ],
+      "citation": "",
+      "provenance": "derived: solver.validate.C3Result.c3_y2027_tof_days / 365.25"
+    },
+    {
+      "id": "validate.c3.y2027.departure.jd",
+      "label": "2027 launch departure epoch (TDB Julian Date)",
+      "value": 2461577.5,
+      "precision": 1,
+      "unit": "JD",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2461577.5"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd"
+    },
+    {
+      "id": "validate.c3.y2027.departure.iso",
+      "label": "2027 launch departure epoch (calendar date, TDB)",
+      "value": 2027.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2027-06-21"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd"
+    },
+    {
+      "id": "validate.c3.y2027.departure.year",
+      "label": "2027 launch departure epoch (year)",
+      "value": 2027.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2027"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd"
+    },
+    {
+      "id": "validate.c3.floor.computed",
+      "label": "C3 floor departure C3, computed",
+      "value": 714.36,
+      "precision": 2,
+      "unit": "km^2/s^2",
+      "frame": "earth_relative",
+      "kind": "computed",
+      "renderings": [
+        "714.36",
+        "714.4",
+        "714"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_floor_computed_km2_s2"
+    },
+    {
+      "id": "validate.c3.floor.published",
+      "label": "C3 floor departure C3, published",
+      "value": 703.0,
+      "precision": 0,
+      "unit": "km^2/s^2",
+      "frame": "earth_relative",
+      "kind": "published",
+      "renderings": [
+        "703"
+      ],
+      "citation": "Hein et al. 2019, p.553 col 2 / Fig.1",
+      "provenance": "solver.validate.C3Result.c3_floor_published_km2_s2"
+    },
+    {
+      "id": "validate.c3.floor.abs_diff",
+      "label": "C3 floor C3 absolute difference",
+      "value": 11.36,
+      "precision": 2,
+      "unit": "km^2/s^2",
+      "frame": "earth_relative",
+      "kind": "derived",
+      "renderings": [
+        "11.36",
+        "11.4"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_floor_abs_diff"
+    },
+    {
+      "id": "validate.c3.floor.rel_diff_pct",
+      "label": "C3 floor C3 relative difference",
+      "value": 1.62,
+      "precision": 2,
+      "unit": "%",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "1.62",
+        "1.6"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_floor_rel_diff_pct"
+    },
+    {
+      "id": "validate.c3.floor.tolerance_frac",
+      "label": "C3 floor C3 tolerance, fraction",
+      "value": 0.2,
+      "precision": 2,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "tolerance",
+      "renderings": [
+        "0.2"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_floor_tolerance_frac"
+    },
+    {
+      "id": "validate.c3.floor.tolerance_pct",
+      "label": "C3 floor C3 tolerance, percent",
+      "value": 20.0,
+      "precision": 0,
+      "unit": "%",
+      "frame": "n_a",
+      "kind": "tolerance",
+      "renderings": [
+        "20"
+      ],
+      "citation": "",
+      "provenance": "derived from solver.validate.C3Result.c3_floor_tolerance_frac"
+    },
+    {
+      "id": "validate.c3.floor.tolerance_abs",
+      "label": "C3 floor C3 tolerance, absolute",
+      "value": 140.6,
+      "precision": 2,
+      "unit": "km^2/s^2",
+      "frame": "earth_relative",
+      "kind": "derived",
+      "renderings": [
+        "140.6",
+        "141"
+      ],
+      "citation": "",
+      "provenance": "derived: tolerance_frac * published"
+    },
+    {
+      "id": "validate.c3.floor.tof_days",
+      "label": "C3 floor flight time",
+      "value": 10957.5,
+      "precision": 2,
+      "unit": "d",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "10957.5",
+        "10958"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_floor_tof_days"
+    },
+    {
+      "id": "validate.c3.floor.tof_years",
+      "label": "C3 floor flight time in years",
+      "value": 30.0,
+      "precision": 2,
+      "unit": "yr",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "30",
+        "30.0"
+      ],
+      "citation": "",
+      "provenance": "derived: solver.validate.C3Result.c3_floor_tof_days / 365.25"
+    },
+    {
+      "id": "validate.c3.floor.departure.jd",
+      "label": "C3 floor departure epoch (TDB Julian Date)",
+      "value": 2458273.5,
+      "precision": 1,
+      "unit": "JD",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2458273.5"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_floor_departure_jd"
+    },
+    {
+      "id": "validate.c3.floor.departure.iso",
+      "label": "C3 floor departure epoch (calendar date, TDB)",
+      "value": 2018.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2018-06-04"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_floor_departure_jd"
+    },
+    {
+      "id": "validate.c3.floor.departure.year",
+      "label": "C3 floor departure epoch (year)",
+      "value": 2018.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2018"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.C3Result.c3_floor_departure_jd"
+    },
+    {
+      "id": "validate.c3.grid.n_departures",
+      "label": "C3 grid departure epochs",
+      "value": 391.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "count",
+      "renderings": [
+        "391"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.c3_grid.shape[0]"
+    },
+    {
+      "id": "validate.c3.grid.n_durations",
+      "label": "C3 grid duration values",
+      "value": 26.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "count",
+      "renderings": [
+        "26"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.c3_grid.shape[1]"
+    },
+    {
+      "id": "validate.c3.grid.n_cells",
+      "label": "C3 grid cells",
+      "value": 10166.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "count",
+      "renderings": [
+        "10166"
+      ],
+      "citation": "",
+      "provenance": "derived: n_departures * n_durations"
+    },
+    {
+      "id": "validate.c3.grid.n_solved",
+      "label": "C3 grid cells with a solution",
+      "value": 10166.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "count",
+      "renderings": [
+        "10166"
+      ],
+      "citation": "",
+      "provenance": "derived: non-NaN cells of c3_grid"
+    },
+    {
+      "id": "validate.c3.grid.duration_min_years",
+      "label": "C3 grid shortest duration",
+      "value": 5.0,
+      "precision": 2,
+      "unit": "yr",
+      "frame": "n_a",
+      "kind": "metadata",
+      "renderings": [
+        "5",
+        "5.0"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.tof_days[0] / 365.25"
+    },
+    {
+      "id": "validate.c3.grid.duration_max_years",
+      "label": "C3 grid longest duration",
+      "value": 30.0,
+      "precision": 2,
+      "unit": "yr",
+      "frame": "n_a",
+      "kind": "metadata",
+      "renderings": [
+        "30",
+        "30.0"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.tof_days[-1] / 365.25"
+    },
+    {
+      "id": "validate.c3.grid.launch_window_start.jd",
+      "label": "C3 grid earliest launch (TDB Julian Date)",
+      "value": 2458119.5,
+      "precision": 1,
+      "unit": "JD",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2458119.5"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.departure_jds[0]"
+    },
+    {
+      "id": "validate.c3.grid.launch_window_start.iso",
+      "label": "C3 grid earliest launch (calendar date, TDB)",
+      "value": 2018.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2018-01-01"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.departure_jds[0]"
+    },
+    {
+      "id": "validate.c3.grid.launch_window_start.year",
+      "label": "C3 grid earliest launch (year)",
+      "value": 2018.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2018"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.departure_jds[0]"
+    },
+    {
+      "id": "validate.c3.grid.launch_window_end.jd",
+      "label": "C3 grid latest launch (TDB Julian Date)",
+      "value": 2463579.5,
+      "precision": 1,
+      "unit": "JD",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2463579.5"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.departure_jds[-1]"
+    },
+    {
+      "id": "validate.c3.grid.launch_window_end.iso",
+      "label": "C3 grid latest launch (calendar date, TDB)",
+      "value": 2032.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2032-12-13"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.departure_jds[-1]"
+    },
+    {
+      "id": "validate.c3.grid.launch_window_end.year",
+      "label": "C3 grid latest launch (year)",
+      "value": 2032.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2032"
+      ],
+      "citation": "",
+      "provenance": "solver.grid.GridResult.departure_jds[-1]"
+    },
+    {
+      "id": "validate.arrival_a.v_inf2",
+      "label": "Sample A arrival relative velocity, eq.4 asymptotic",
+      "value": 13.96737,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "computed",
+      "renderings": [
+        "13.96737",
+        "13.9674",
+        "13.967",
+        "13.97"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.v_inf2_km_s"
+    },
+    {
+      "id": "validate.arrival_a.v_arr_local",
+      "label": "Sample A local encounter relative velocity",
+      "value": 13.71605,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "computed",
+      "renderings": [
+        "13.71605",
+        "13.716",
+        "13.72",
+        "13.7"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.v_arr_local_km_s"
+    },
+    {
+      "id": "validate.arrival_a.published",
+      "label": "Sample A arrival relative velocity, published",
+      "value": 13.6,
+      "precision": 1,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "published",
+      "renderings": [
+        "13.6"
+      ],
+      "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
+      "provenance": "solver.validate.ArrivalResult.published_km_s"
+    },
+    {
+      "id": "validate.arrival_a.abs_diff",
+      "label": "Sample A absolute difference, eq.4 versus published",
+      "value": 0.36737,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "derived",
+      "renderings": [
+        "0.36737",
+        "0.3674",
+        "0.367",
+        "0.37"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.abs_diff_km_s"
+    },
+    {
+      "id": "validate.arrival_a.rel_diff_pct",
+      "label": "Sample A relative difference",
+      "value": 2.701,
+      "precision": 3,
+      "unit": "%",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "2.701",
+        "2.7"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.rel_diff_pct"
+    },
+    {
+      "id": "validate.arrival_a.tolerance",
+      "label": "Sample A tolerance",
+      "value": 2.0,
+      "precision": 1,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "tolerance",
+      "renderings": [
+        "2"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.tolerance_km_s"
+    },
+    {
+      "id": "validate.arrival_a.definitional_gap",
+      "label": "Sample A definitional gap, eq.4 minus local",
+      "value": 0.25132,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "derived",
+      "renderings": [
+        "0.25132",
+        "0.2513",
+        "0.251",
+        "0.25"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.definitional_gap_km_s"
+    },
+    {
+      "id": "validate.arrival_a.encounter_distance_au",
+      "label": "Sample A encounter heliocentric distance",
+      "value": 5.852,
+      "precision": 3,
+      "unit": "AU",
+      "frame": "heliocentric",
+      "kind": "computed",
+      "renderings": [
+        "5.852",
+        "5.85",
+        "5.9"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.encounter_distance_au"
+    },
+    {
+      "id": "validate.arrival_a.tof_days",
+      "label": "Sample A flight time",
+      "value": 365.0,
+      "precision": 2,
+      "unit": "d",
+      "frame": "n_a",
+      "kind": "computed",
+      "renderings": [
+        "365",
+        "365.0"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.tof_days"
+    },
+    {
+      "id": "validate.arrival_a.tof_years",
+      "label": "Sample A flight time in years",
+      "value": 1.0,
+      "precision": 2,
+      "unit": "yr",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "1",
+        "1.0"
+      ],
+      "citation": "",
+      "provenance": "derived: solver.validate.ArrivalResult.tof_days / 365.25"
+    },
+    {
+      "id": "validate.arrival_a.published_tof_years",
+      "label": "Sample A flight time, published",
+      "value": 1.0,
+      "precision": 1,
+      "unit": "yr",
+      "frame": "n_a",
+      "kind": "published",
+      "renderings": [
+        "1.0",
+        "1"
+      ],
+      "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
+      "provenance": "solver.lyra.LYRA_CONSTANTS"
+    },
+    {
+      "id": "validate.arrival_a.published_encounter_au",
+      "label": "Sample A encounter heliocentric distance, published",
+      "value": 5.8,
+      "precision": 1,
+      "unit": "AU",
+      "frame": "heliocentric",
+      "kind": "published",
+      "renderings": [
+        "5.8"
+      ],
+      "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
+      "provenance": "solver.lyra.LYRA_CONSTANTS"
+    },
+    {
+      "id": "validate.arrival_a.launch.jd",
+      "label": "Sample A launch epoch (TDB Julian Date)",
+      "value": 2457912.0,
+      "precision": 1,
+      "unit": "JD",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2457912.0"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_a.launch.iso",
+      "label": "Sample A launch epoch (calendar date, TDB)",
+      "value": 2017.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2017-06-07"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_a.launch.year",
+      "label": "Sample A launch epoch (year)",
+      "value": 2017.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2017"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_a.arrival.jd",
+      "label": "Sample A arrival epoch (TDB Julian Date)",
+      "value": 2458277.0,
+      "precision": 1,
+      "unit": "JD",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2458277.0"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_a.arrival.iso",
+      "label": "Sample A arrival epoch (calendar date, TDB)",
+      "value": 2018.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2018-06-07"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_a.arrival.year",
+      "label": "Sample A arrival epoch (year)",
+      "value": 2018.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2018"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_b.v_inf2",
+      "label": "Sample B arrival relative velocity, eq.4 asymptotic",
+      "value": 0.64166,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "computed",
+      "renderings": [
+        "0.64166",
+        "0.6417",
+        "0.642",
+        "0.64"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.v_inf2_km_s"
+    },
+    {
+      "id": "validate.arrival_b.v_arr_local",
+      "label": "Sample B local encounter relative velocity",
+      "value": 0.64351,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "computed",
+      "renderings": [
+        "0.64351",
+        "0.6435",
+        "0.644",
+        "0.64"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.v_arr_local_km_s"
+    },
+    {
+      "id": "validate.arrival_b.published",
+      "label": "Sample B arrival relative velocity, published",
+      "value": 0.6,
+      "precision": 1,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "published",
+      "renderings": [
+        "0.6"
+      ],
+      "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
+      "provenance": "solver.validate.ArrivalResult.published_km_s"
+    },
+    {
+      "id": "validate.arrival_b.abs_diff",
+      "label": "Sample B absolute difference, eq.4 versus published",
+      "value": 0.04166,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "derived",
+      "renderings": [
+        "0.04166",
+        "0.0417",
+        "0.042"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.abs_diff_km_s"
+    },
+    {
+      "id": "validate.arrival_b.rel_diff_pct",
+      "label": "Sample B relative difference",
+      "value": 6.943,
+      "precision": 3,
+      "unit": "%",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "6.943",
+        "6.94",
+        "6.9"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.rel_diff_pct"
+    },
+    {
+      "id": "validate.arrival_b.tolerance",
+      "label": "Sample B tolerance",
+      "value": 0.3,
+      "precision": 1,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "tolerance",
+      "renderings": [
+        "0.3"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.tolerance_km_s"
+    },
+    {
+      "id": "validate.arrival_b.definitional_gap",
+      "label": "Sample B definitional gap, eq.4 minus local",
+      "value": 0.00186,
+      "precision": 5,
+      "unit": "km/s",
+      "frame": "target_relative",
+      "kind": "derived",
+      "renderings": [
+        "0.00186",
+        "0.0019"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.definitional_gap_km_s"
+    },
+    {
+      "id": "validate.arrival_b.encounter_distance_au",
+      "label": "Sample B encounter heliocentric distance",
+      "value": 115.079,
+      "precision": 3,
+      "unit": "AU",
+      "frame": "heliocentric",
+      "kind": "computed",
+      "renderings": [
+        "115.079",
+        "115.08",
+        "115.1",
+        "115"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.encounter_distance_au"
+    },
+    {
+      "id": "validate.arrival_b.tof_days",
+      "label": "Sample B flight time",
+      "value": 7305.0,
+      "precision": 2,
+      "unit": "d",
+      "frame": "n_a",
+      "kind": "computed",
+      "renderings": [
+        "7305",
+        "7305.0"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.tof_days"
+    },
+    {
+      "id": "validate.arrival_b.tof_years",
+      "label": "Sample B flight time in years",
+      "value": 20.0,
+      "precision": 2,
+      "unit": "yr",
+      "frame": "n_a",
+      "kind": "derived",
+      "renderings": [
+        "20",
+        "20.0"
+      ],
+      "citation": "",
+      "provenance": "derived: solver.validate.ArrivalResult.tof_days / 365.25"
+    },
+    {
+      "id": "validate.arrival_b.published_tof_years",
+      "label": "Sample B flight time, published",
+      "value": 20.0,
+      "precision": 1,
+      "unit": "yr",
+      "frame": "n_a",
+      "kind": "published",
+      "renderings": [
+        "20.0",
+        "20"
+      ],
+      "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
+      "provenance": "solver.lyra.LYRA_CONSTANTS"
+    },
+    {
+      "id": "validate.arrival_b.published_encounter_au",
+      "label": "Sample B encounter heliocentric distance, published",
+      "value": 111.4,
+      "precision": 1,
+      "unit": "AU",
+      "frame": "heliocentric",
+      "kind": "published",
+      "renderings": [
+        "111.4"
+      ],
+      "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
+      "provenance": "solver.lyra.LYRA_CONSTANTS"
+    },
+    {
+      "id": "validate.arrival_b.launch.jd",
+      "label": "Sample B launch epoch (TDB Julian Date)",
+      "value": 2457912.0,
+      "precision": 1,
+      "unit": "JD",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2457912.0"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_b.launch.iso",
+      "label": "Sample B launch epoch (calendar date, TDB)",
+      "value": 2017.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2017-06-07"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_b.launch.year",
+      "label": "Sample B launch epoch (year)",
+      "value": 2017.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2017"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_b.arrival.jd",
+      "label": "Sample B arrival epoch (TDB Julian Date)",
+      "value": 2465217.0,
+      "precision": 1,
+      "unit": "JD",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2465217.0"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_b.arrival.iso",
+      "label": "Sample B arrival epoch (calendar date, TDB)",
+      "value": 2037.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2037-06-07"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+    },
+    {
+      "id": "validate.arrival_b.arrival.year",
+      "label": "Sample B arrival epoch (year)",
+      "value": 2037.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "epoch",
+      "renderings": [
+        "2037"
+      ],
+      "citation": "",
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+    },
+    {
+      "id": "source.lyra.publication_year",
+      "label": "Lyra source publication year",
+      "value": 2019.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "metadata",
+      "renderings": [
+        "2019"
+      ],
+      "citation": "",
+      "provenance": "solver.lyra.PUBLICATION_YEAR"
+    },
+    {
+      "id": "source.horizons.retrieval_year",
+      "label": "Horizons retrieval year",
+      "value": 2026.0,
+      "precision": 0,
+      "unit": "calendar_year",
+      "frame": "n_a",
+      "kind": "metadata",
+      "renderings": [
+        "2026"
+      ],
+      "citation": "",
+      "provenance": "StateVector.retrieved_utc"
+    },
+    {
+      "id": "source.horizons.retrieval_date",
+      "label": "Horizons retrieval date",
+      "value": 2026.0,
+      "precision": 0,
+      "unit": "1",
+      "frame": "n_a",
+      "kind": "metadata",
+      "renderings": [
+        "2026-08-27"
+      ],
+      "citation": "",
+      "provenance": "StateVector.retrieved_utc"
+    }
+  ]
+}
