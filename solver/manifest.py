@@ -150,9 +150,18 @@ def _with_integral_decimal(ladder: List[str], value: float, unit: str) -> List[s
 
 @dataclass(frozen=True)
 class ManifestEntry:
+    """
+    One citable number, or one citable text value.
+
+    `value` is None for entries whose quantity is not numeric, which today
+    means calendar dates. A date has no float that means anything, and filling
+    the field with the year to satisfy the type was a placeholder that made the
+    entry look like it had lost its month and day. `text_value` carries the
+    real content in those cases, and `renderings` carries it either way.
+    """
     id: str
     label: str
-    value: float
+    value: Optional[float]
     precision: int
     unit: str
     frame: str
@@ -160,8 +169,11 @@ class ManifestEntry:
     renderings: List[str]
     citation: str = ""
     provenance: str = ""
+    text_value: str = ""
 
     def __post_init__(self) -> None:
+        assert self.value is not None or self.text_value, (
+            f"{self.id}: an entry needs either a numeric value or a text_value")
         assert self.unit in UNITS, f"{self.id}: unit {self.unit!r} outside the lexicon"
         assert self.frame in FRAMES, f"{self.id}: frame {self.frame!r} outside the lexicon"
         assert self.kind in KINDS, f"{self.id}: kind {self.kind!r} outside the lexicon"
@@ -177,7 +189,7 @@ class ManifestEntry:
 def entry(
     id: str,
     label: str,
-    value: float,
+    value: Optional[float],
     unit: str,
     kind: str,
     precision: int,
@@ -185,6 +197,7 @@ def entry(
     citation: str = "",
     provenance: str = "",
     renderings: Optional[Sequence[str]] = None,
+    text_value: str = "",
 ) -> ManifestEntry:
     """
     Build one entry.
@@ -195,6 +208,8 @@ def entry(
     declared parameter has a conventional written form.
     """
     if renderings is None:
+        if value is None:
+            raise ValueError(f"{id}: a text-valued entry must declare its renderings")
         ladder = build_renderings(value, precision)
         ladder = _with_integral_decimal(ladder, round(float(value), precision), unit)
     else:
@@ -202,7 +217,7 @@ def entry(
     return ManifestEntry(
         id=id,
         label=label,
-        value=round(float(value), precision),
+        value=None if value is None else round(float(value), precision),
         precision=precision,
         unit=unit,
         frame=frame,
@@ -210,6 +225,7 @@ def entry(
         renderings=ladder,
         citation=citation,
         provenance=provenance,
+        text_value=text_value,
     )
 
 
@@ -348,8 +364,9 @@ def _epoch_entries(prefix: str, label: str, jd_tdb: float,
         entry(f"{prefix}.jd", f"{label} (TDB Julian Date)", jd_tdb, "JD", "epoch",
               precision=1, provenance=provenance,
               renderings=[f"{jd_tdb:.1f}"]),
-        entry(f"{prefix}.iso", f"{label} (calendar date, TDB)", float(year), "1",
-              "epoch", precision=0, provenance=provenance, renderings=[iso]),
+        entry(f"{prefix}.iso", f"{label} (calendar date, TDB)", None, "1",
+              "epoch", precision=0, provenance=provenance, renderings=[iso],
+              text_value=iso),
         entry(f"{prefix}.year", f"{label} (year)", float(year), "calendar_year",
               "epoch", precision=0, provenance=provenance, renderings=[str(year)]),
     ]
@@ -572,9 +589,10 @@ def _source_entries(retrieval_date: str) -> List[ManifestEntry]:
                          provenance="StateVector.retrieved_utc",
                          renderings=[str(y)]))
         out.append(entry("source.horizons.retrieval_date",
-                         "Horizons retrieval date", float(y), "1", "metadata",
+                         "Horizons retrieval date", None, "1", "metadata",
                          precision=0, provenance="StateVector.retrieved_utc",
-                         renderings=[retrieval_date[:10]]))
+                         renderings=[retrieval_date[:10]],
+                         text_value=retrieval_date[:10]))
     return out
 
 
@@ -679,9 +697,11 @@ def redacted_for_corpus_authoring(m: Manifest) -> Dict[str, Any]:
     """
     return {
         "note": (
-            "Redacted view for corpus authoring. Values, units, frames and "
-            "citations are complete. The permitted renderings of each value "
-            "and its declared precision are withheld deliberately."
+            "Redacted view for corpus authoring. Values, units, frames, "
+            "citations, and the text of date-valued entries are complete. The "
+            "permitted renderings of each number and its declared precision "
+            "are withheld deliberately. An entry with a text_value and no "
+            "value is a date, not a number that lost its digits."
         ),
         "producer": m.producer,
         "fidelity_note": m.fidelity_note,
@@ -695,6 +715,7 @@ def redacted_for_corpus_authoring(m: Manifest) -> Dict[str, Any]:
                 "frame": e.frame,
                 "kind": e.kind,
                 "citation": e.citation,
+                **({"text_value": e.text_value} if e.text_value else {}),
             }
             for e in m.entries
         ],

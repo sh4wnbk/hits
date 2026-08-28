@@ -49,7 +49,8 @@ structure the gate cannot use.
 |---|---|
 | `id` | Stable dotted key, e.g. `validate.c3.floor.rel_diff_pct` |
 | `label` | Human name for the reject report |
-| `value` | Canonical float, rounded to `precision` |
+| `value` | Canonical float, rounded to `precision`. `null` for a text-valued entry |
+| `text_value` | The content of a non-numeric entry, today only calendar dates |
 | `precision` | Decimals the solver computed to, declared per field |
 | `unit` | From the closed unit lexicon below |
 | `frame` | `earth_relative`, `target_relative`, `heliocentric`, `n_a` |
@@ -57,6 +58,21 @@ structure the gate cannot use.
 | `renderings` | Ordered list of permitted strings. First is canonical |
 | `citation` | Required when `kind` is `published` |
 | `provenance` | Which result field or fields the entry came from |
+
+### Dates are text, not numbers
+
+A calendar date has no float that means anything, so a date entry carries
+`value: null` and holds its content in `text_value`. An earlier version filled
+`value` with the year to satisfy the type, which made the entry look, in any
+view that withholds renderings, like an ISO field that had silently lost its
+month and day. It had not: the full date was always in `renderings` and always
+groundable. But a field filled with a placeholder is a field that has stopped
+meaning anything, and the next reader has no way to tell the placeholder from
+the data.
+
+The manifest therefore grounds a full calendar date and its year separately, as
+two entries with different units. `2018-06-04` grounds as a date; `2018` grounds
+as a `calendar_year`, which is what lets the unit check reject `2018 km^2/s^2`.
 
 ### Unit lexicon
 
@@ -123,8 +139,18 @@ If it cannot, the policy is not pinned and the emitter is wrong.
 | `validate.c3.floor.rel_diff_pct` | 1.62 | 2 | `1.62`, `1.6` |
 | `validate.frame_gate.computed` | 26.28614 | 5 | `26.28614`, `26.2861`, `26.286`, `26.29`, `26.3` |
 | `validate.arrival_b.v_inf2` | 0.64166 | 5 | `0.64166`, `0.6417`, `0.642`, `0.64` |
+| `validate.frame_gate.abs_diff` | 0.04386 | 5 | `0.04386`, `0.0439`, `0.044` |
+| `validate.arrival_b.definitional_gap` | 0.00186 | 5 | `0.00186`, `0.0019` |
 
-Three of these are worth reading closely. The frame-gate ladder stops before a
+The last two pin the sub-0.1 regime, where the two-significant-digits clause is
+least obviously right. It needs no special case: leading zeros are not
+significant, so the floor scales with magnitude on its own. `0.044` is two
+significant figures with a fraction and survives; `0.04` is one and does not.
+That matters because "the frame gate agrees to within 0.044 km/s" is the truest
+sentence in the whole validation, and a gate that rejected it would be worse
+than useless.
+
+Three of the others are worth reading closely. The frame-gate ladder stops before a
 bare `26`, which has two significant digits and no fractional part, so the
 coarse rung that would let an explanation say "26 km/s" for a 26.28614 km/s
 result is excluded. The Sample B ladder stops before `0.6`, which has one

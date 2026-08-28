@@ -53,6 +53,14 @@ PINNED_LADDERS = [
     (1.62, 2, ["1.62", "1.6"]),
     (26.28614, 5, ["26.28614", "26.2861", "26.286", "26.29", "26.3"]),
     (0.64166, 5, ["0.64166", "0.6417", "0.642", "0.64"]),
+    # The sub-0.1 regime, pinned because it is where the two-significant-digits
+    # clause was least obviously right. Leading zeros are not significant, so
+    # the floor scales with magnitude on its own and needs no special case:
+    # 0.044 is two significant figures with a fraction and survives, 0.04 is
+    # one and does not. "The frame gate agrees to within 0.044 km/s" is the
+    # truest sentence in the validation and it has to stay sayable.
+    (0.04386, 5, ["0.04386", "0.0439", "0.044"]),
+    (0.00186, 5, ["0.00186", "0.0019"]),
 ]
 
 
@@ -77,6 +85,11 @@ def test_ladder_excludes_the_near_misses_it_is_meant_to():
     # not offer a five-decimal rendering claiming digits it does not have.
     assert build_renderings(0.044, 5) == ["0.044"]
     assert "0.04400" not in build_renderings(0.044, 5)
+    # Sub-0.1 values keep the rung that reads naturally and drop the one that
+    # has thrown away a significant figure.
+    assert "0.044" in build_renderings(0.04386, 5)
+    assert "0.04" not in build_renderings(0.04386, 5)
+    assert "0.002" not in build_renderings(0.00186, 5)
     # Nor may a two-decimal value offer a third decimal.
     assert "1.620" not in build_renderings(1.62, 2)
 
@@ -138,7 +151,7 @@ def test_every_float_of_every_public_result_is_in_the_manifest(results, manifest
     ):
         for fname, val in _numeric_fields(obj).items():
             found = any(
-                abs(e.value - val) < 10 ** (-e.precision) / 2
+                e.value is not None and abs(e.value - val) < 10 ** (-e.precision) / 2
                 for entries in index.values() for e in entries
             )
             if not found:
@@ -190,6 +203,42 @@ def test_declared_derived_entries_all_present(manifest):
     ids = {e.id for e in manifest.entries}
     missing = [i for i in DECLARED_DERIVED if i not in ids]
     assert not missing, f"declared derived entries missing: {missing}"
+
+
+def test_date_entries_carry_their_date_and_no_invented_number(manifest):
+    """
+    A calendar date has no float that means anything. Filling `value` with the
+    year to satisfy the type made the entry look, in any view that withholds
+    renderings, like an ISO field that had silently lost its month and day.
+    The date is the content, so it lives in `text_value`, and `value` is None.
+    """
+    dated = [e for e in manifest.entries if e.id.endswith(".iso")
+             or e.id == "source.horizons.retrieval_date"]
+    assert dated
+    for e in dated:
+        assert e.value is None, f"{e.id} carries an invented numeric value {e.value}"
+        assert e.text_value, f"{e.id} has no text_value"
+        assert e.renderings == [e.text_value]
+        assert len(e.text_value) == 10 and e.text_value[4] == "-", (
+            f"{e.id}: {e.text_value!r} is not a full ISO date")
+
+
+def test_full_dates_are_groundable_not_just_years(manifest):
+    """
+    The manifest grounds a full calendar date, not only its year. Asserted
+    directly because a redacted view that hides renderings makes this look
+    otherwise, and the question is worth settling in a test rather than in a
+    reading of one.
+    """
+    index = manifest.index()
+    for date in ("2018-06-04", "2027-06-21", "2017-06-07", "2037-06-07",
+                 "2018-01-01", "2032-12-13", "2026-08-27"):
+        assert date in index, f"{date} is not groundable"
+    # And the year alone remains separately groundable, with its own unit, so a
+    # fabricated quantity wearing a year's clothes still fails the unit check.
+    for year in ("2018", "2027", "2017", "2037", "2032", "2026", "2019"):
+        assert year in index
+        assert any(e.unit == "calendar_year" for e in index[year])
 
 
 def test_entry_vocabularies_are_closed(manifest):

@@ -74,7 +74,8 @@
         "26.3"
       ],
       "citation": "",
-      "provenance": "solver.validate.FrameGateResult.computed_km_s"
+      "provenance": "solver.validate.FrameGateResult.computed_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.frame_gate.published",
@@ -88,7 +89,8 @@
         "26.33"
       ],
       "citation": "Hein et al. 2019, p.553 col 1 / abstract",
-      "provenance": "solver.validate.FrameGateResult.published_km_s"
+      "provenance": "solver.validate.FrameGateResult.published_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.frame_gate.abs_diff",
@@ -104,7 +106,8 @@
         "0.044"
       ],
       "citation": "",
-      "provenance": "solver.validate.FrameGateResult.abs_diff_km_s"
+      "provenance": "solver.validate.FrameGateResult.abs_diff_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.frame_gate.rel_diff_pct",
@@ -119,7 +122,8 @@
         "0.17"
       ],
       "citation": "",
-      "provenance": "solver.validate.FrameGateResult.rel_diff_pct"
+      "provenance": "solver.validate.FrameGateResult.rel_diff_pct",
+      "text_value": ""
     },
     {
       "id": "validate.frame_gate.tolerance",
@@ -133,7 +137,8 @@
         "0.5"
       ],
       "citation": "",
-      "provenance": "solver.validate.FrameGateResult.tolerance_km_s"
+      "provenance": "solver.validate.FrameGateResult.tolerance_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.computed",
@@ -149,7 +154,8 @@
         "1331"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_y2027_computed_km2_s2"
+      "provenance": "solver.validate.C3Result.c3_y2027_computed_km2_s2",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.published",
@@ -163,7 +169,8 @@
         "1400"
       ],
       "citation": "Hein et al. 2019, p.554 col 1 (37.4 km/s, ~15-yr duration)",
-      "provenance": "solver.validate.C3Result.c3_y2027_published_km2_s2"
+      "provenance": "solver.validate.C3Result.c3_y2027_published_km2_s2",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.abs_diff",
@@ -178,7 +185,8 @@
         "68.8"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_y2027_abs_diff"
+      "provenance": "solver.validate.C3Result.c3_y2027_abs_diff",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.rel_diff_pct",
@@ -193,7 +201,8 @@
         "4.9"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_y2027_rel_diff_pct"
+      "provenance": "solver.validate.C3Result.c3_y2027_rel_diff_pct",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.tolerance_frac",
@@ -207,7 +216,8 @@
         "0.2"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_y2027_tolerance_frac"
+      "provenance": "solver.validate.C3Result.c3_y2027_tolerance_frac",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.tolerance_pct",
@@ -221,7 +231,8 @@
         "20"
       ],
       "citation": "",
-      "provenance": "derived from solver.validate.C3Result.c3_y2027_tolerance_frac"
+      "provenance": "derived from solver.validate.C3Result.c3_y2027_tolerance_frac",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.tolerance_abs",
@@ -236,7 +247,8 @@
         "280.0"
       ],
       "citation": "",
-      "provenance": "derived: tolerance_frac * published"
+      "provenance": "derived: tolerance_frac * published",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.tof_days",
@@ -252,7 +264,8 @@
         "5479"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_y2027_tof_days"
+      "provenance": "solver.validate.C3Result.c3_y2027_tof_days",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.tof_years",
@@ -267,7 +280,8 @@
         "15.0"
       ],
       "citation": "",
-      "provenance": "derived: solver.validate.C3Result.c3_y2027_tof_days / 365.25"
+      "provenance": "derived: solver.validate.C3Result.c3_y2027_tof_days / 365.25",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.departure.jd",
@@ -281,12 +295,13 @@
         "2461577.5"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd"
+      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd",
+      "text_value": ""
     },
     {
       "id": "validate.c3.y2027.departure.iso",
       "label": "2027 launch departure epoch (calendar date, TDB)",
-      "value": 2027.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -295,7 +310,8 @@
         "2027-06-21"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd"
+      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd",
+      "text_value": "2027-06-21"
     },
     {
       "id": "validate.c3.y2027.departure.year",
@@ -309,7 +325,8 @@
         "2027"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd"
+      "provenance": "solver.validate.C3Result.c3_y2027_departure_jd",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.computed",
@@ -325,7 +342,8 @@
         "714"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_floor_computed_km2_s2"
+      "provenance": "solver.validate.C3Result.c3_floor_computed_km2_s2",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.published",
@@ -339,7 +357,8 @@
         "703"
       ],
       "citation": "Hein et al. 2019, p.553 col 2 / Fig.1",
-      "provenance": "solver.validate.C3Result.c3_floor_published_km2_s2"
+      "provenance": "solver.validate.C3Result.c3_floor_published_km2_s2",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.abs_diff",
@@ -354,7 +373,8 @@
         "11.4"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_floor_abs_diff"
+      "provenance": "solver.validate.C3Result.c3_floor_abs_diff",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.rel_diff_pct",
@@ -369,7 +389,8 @@
         "1.6"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_floor_rel_diff_pct"
+      "provenance": "solver.validate.C3Result.c3_floor_rel_diff_pct",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.tolerance_frac",
@@ -383,7 +404,8 @@
         "0.2"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_floor_tolerance_frac"
+      "provenance": "solver.validate.C3Result.c3_floor_tolerance_frac",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.tolerance_pct",
@@ -397,7 +419,8 @@
         "20"
       ],
       "citation": "",
-      "provenance": "derived from solver.validate.C3Result.c3_floor_tolerance_frac"
+      "provenance": "derived from solver.validate.C3Result.c3_floor_tolerance_frac",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.tolerance_abs",
@@ -412,7 +435,8 @@
         "141"
       ],
       "citation": "",
-      "provenance": "derived: tolerance_frac * published"
+      "provenance": "derived: tolerance_frac * published",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.tof_days",
@@ -427,7 +451,8 @@
         "10958"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_floor_tof_days"
+      "provenance": "solver.validate.C3Result.c3_floor_tof_days",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.tof_years",
@@ -442,7 +467,8 @@
         "30.0"
       ],
       "citation": "",
-      "provenance": "derived: solver.validate.C3Result.c3_floor_tof_days / 365.25"
+      "provenance": "derived: solver.validate.C3Result.c3_floor_tof_days / 365.25",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.departure.jd",
@@ -456,12 +482,13 @@
         "2458273.5"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_floor_departure_jd"
+      "provenance": "solver.validate.C3Result.c3_floor_departure_jd",
+      "text_value": ""
     },
     {
       "id": "validate.c3.floor.departure.iso",
       "label": "C3 floor departure epoch (calendar date, TDB)",
-      "value": 2018.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -470,7 +497,8 @@
         "2018-06-04"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_floor_departure_jd"
+      "provenance": "solver.validate.C3Result.c3_floor_departure_jd",
+      "text_value": "2018-06-04"
     },
     {
       "id": "validate.c3.floor.departure.year",
@@ -484,7 +512,8 @@
         "2018"
       ],
       "citation": "",
-      "provenance": "solver.validate.C3Result.c3_floor_departure_jd"
+      "provenance": "solver.validate.C3Result.c3_floor_departure_jd",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.n_departures",
@@ -498,7 +527,8 @@
         "391"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.c3_grid.shape[0]"
+      "provenance": "solver.grid.GridResult.c3_grid.shape[0]",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.n_durations",
@@ -512,7 +542,8 @@
         "26"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.c3_grid.shape[1]"
+      "provenance": "solver.grid.GridResult.c3_grid.shape[1]",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.n_cells",
@@ -526,7 +557,8 @@
         "10166"
       ],
       "citation": "",
-      "provenance": "derived: n_departures * n_durations"
+      "provenance": "derived: n_departures * n_durations",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.n_solved",
@@ -540,7 +572,8 @@
         "10166"
       ],
       "citation": "",
-      "provenance": "derived: non-NaN cells of c3_grid"
+      "provenance": "derived: non-NaN cells of c3_grid",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.duration_min_years",
@@ -555,7 +588,8 @@
         "5.0"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.tof_days[0] / 365.25"
+      "provenance": "solver.grid.GridResult.tof_days[0] / 365.25",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.duration_max_years",
@@ -570,7 +604,8 @@
         "30.0"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.tof_days[-1] / 365.25"
+      "provenance": "solver.grid.GridResult.tof_days[-1] / 365.25",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.launch_window_start.jd",
@@ -584,12 +619,13 @@
         "2458119.5"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.departure_jds[0]"
+      "provenance": "solver.grid.GridResult.departure_jds[0]",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.launch_window_start.iso",
       "label": "C3 grid earliest launch (calendar date, TDB)",
-      "value": 2018.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -598,7 +634,8 @@
         "2018-01-01"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.departure_jds[0]"
+      "provenance": "solver.grid.GridResult.departure_jds[0]",
+      "text_value": "2018-01-01"
     },
     {
       "id": "validate.c3.grid.launch_window_start.year",
@@ -612,7 +649,8 @@
         "2018"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.departure_jds[0]"
+      "provenance": "solver.grid.GridResult.departure_jds[0]",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.launch_window_end.jd",
@@ -626,12 +664,13 @@
         "2463579.5"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.departure_jds[-1]"
+      "provenance": "solver.grid.GridResult.departure_jds[-1]",
+      "text_value": ""
     },
     {
       "id": "validate.c3.grid.launch_window_end.iso",
       "label": "C3 grid latest launch (calendar date, TDB)",
-      "value": 2032.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -640,7 +679,8 @@
         "2032-12-13"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.departure_jds[-1]"
+      "provenance": "solver.grid.GridResult.departure_jds[-1]",
+      "text_value": "2032-12-13"
     },
     {
       "id": "validate.c3.grid.launch_window_end.year",
@@ -654,7 +694,8 @@
         "2032"
       ],
       "citation": "",
-      "provenance": "solver.grid.GridResult.departure_jds[-1]"
+      "provenance": "solver.grid.GridResult.departure_jds[-1]",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.v_inf2",
@@ -671,7 +712,8 @@
         "13.97"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.v_inf2_km_s"
+      "provenance": "solver.validate.ArrivalResult.v_inf2_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.v_arr_local",
@@ -688,7 +730,8 @@
         "13.7"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.v_arr_local_km_s"
+      "provenance": "solver.validate.ArrivalResult.v_arr_local_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.published",
@@ -702,7 +745,8 @@
         "13.6"
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
-      "provenance": "solver.validate.ArrivalResult.published_km_s"
+      "provenance": "solver.validate.ArrivalResult.published_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.abs_diff",
@@ -719,7 +763,8 @@
         "0.37"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.abs_diff_km_s"
+      "provenance": "solver.validate.ArrivalResult.abs_diff_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.rel_diff_pct",
@@ -734,7 +779,8 @@
         "2.7"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.rel_diff_pct"
+      "provenance": "solver.validate.ArrivalResult.rel_diff_pct",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.tolerance",
@@ -748,7 +794,8 @@
         "2"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.tolerance_km_s"
+      "provenance": "solver.validate.ArrivalResult.tolerance_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.definitional_gap",
@@ -765,7 +812,8 @@
         "0.25"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.definitional_gap_km_s"
+      "provenance": "solver.validate.ArrivalResult.definitional_gap_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.encounter_distance_au",
@@ -781,7 +829,8 @@
         "5.9"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.encounter_distance_au"
+      "provenance": "solver.validate.ArrivalResult.encounter_distance_au",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.tof_days",
@@ -796,7 +845,8 @@
         "365.0"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.tof_days"
+      "provenance": "solver.validate.ArrivalResult.tof_days",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.tof_years",
@@ -811,7 +861,8 @@
         "1.0"
       ],
       "citation": "",
-      "provenance": "derived: solver.validate.ArrivalResult.tof_days / 365.25"
+      "provenance": "derived: solver.validate.ArrivalResult.tof_days / 365.25",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.published_tof_years",
@@ -826,7 +877,8 @@
         "1"
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
-      "provenance": "solver.lyra.LYRA_CONSTANTS"
+      "provenance": "solver.lyra.LYRA_CONSTANTS",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.published_encounter_au",
@@ -840,7 +892,8 @@
         "5.8"
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
-      "provenance": "solver.lyra.LYRA_CONSTANTS"
+      "provenance": "solver.lyra.LYRA_CONSTANTS",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.launch.jd",
@@ -854,12 +907,13 @@
         "2457912.0"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.launch.iso",
       "label": "Sample A launch epoch (calendar date, TDB)",
-      "value": 2017.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -868,7 +922,8 @@
         "2017-06-07"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
+      "text_value": "2017-06-07"
     },
     {
       "id": "validate.arrival_a.launch.year",
@@ -882,7 +937,8 @@
         "2017"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.arrival.jd",
@@ -896,12 +952,13 @@
         "2458277.0"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_a.arrival.iso",
       "label": "Sample A arrival epoch (calendar date, TDB)",
-      "value": 2018.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -910,7 +967,8 @@
         "2018-06-07"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
+      "text_value": "2018-06-07"
     },
     {
       "id": "validate.arrival_a.arrival.year",
@@ -924,7 +982,8 @@
         "2018"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.v_inf2",
@@ -941,7 +1000,8 @@
         "0.64"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.v_inf2_km_s"
+      "provenance": "solver.validate.ArrivalResult.v_inf2_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.v_arr_local",
@@ -958,7 +1018,8 @@
         "0.64"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.v_arr_local_km_s"
+      "provenance": "solver.validate.ArrivalResult.v_arr_local_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.published",
@@ -972,7 +1033,8 @@
         "0.6"
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
-      "provenance": "solver.validate.ArrivalResult.published_km_s"
+      "provenance": "solver.validate.ArrivalResult.published_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.abs_diff",
@@ -988,7 +1050,8 @@
         "0.042"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.abs_diff_km_s"
+      "provenance": "solver.validate.ArrivalResult.abs_diff_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.rel_diff_pct",
@@ -1004,7 +1067,8 @@
         "6.9"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.rel_diff_pct"
+      "provenance": "solver.validate.ArrivalResult.rel_diff_pct",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.tolerance",
@@ -1018,7 +1082,8 @@
         "0.3"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.tolerance_km_s"
+      "provenance": "solver.validate.ArrivalResult.tolerance_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.definitional_gap",
@@ -1033,7 +1098,8 @@
         "0.0019"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.definitional_gap_km_s"
+      "provenance": "solver.validate.ArrivalResult.definitional_gap_km_s",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.encounter_distance_au",
@@ -1050,7 +1116,8 @@
         "115"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.encounter_distance_au"
+      "provenance": "solver.validate.ArrivalResult.encounter_distance_au",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.tof_days",
@@ -1065,7 +1132,8 @@
         "7305.0"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.tof_days"
+      "provenance": "solver.validate.ArrivalResult.tof_days",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.tof_years",
@@ -1080,7 +1148,8 @@
         "20.0"
       ],
       "citation": "",
-      "provenance": "derived: solver.validate.ArrivalResult.tof_days / 365.25"
+      "provenance": "derived: solver.validate.ArrivalResult.tof_days / 365.25",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.published_tof_years",
@@ -1095,7 +1164,8 @@
         "20"
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
-      "provenance": "solver.lyra.LYRA_CONSTANTS"
+      "provenance": "solver.lyra.LYRA_CONSTANTS",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.published_encounter_au",
@@ -1109,7 +1179,8 @@
         "111.4"
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
-      "provenance": "solver.lyra.LYRA_CONSTANTS"
+      "provenance": "solver.lyra.LYRA_CONSTANTS",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.launch.jd",
@@ -1123,12 +1194,13 @@
         "2457912.0"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.launch.iso",
       "label": "Sample B launch epoch (calendar date, TDB)",
-      "value": 2017.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -1137,7 +1209,8 @@
         "2017-06-07"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
+      "text_value": "2017-06-07"
     },
     {
       "id": "validate.arrival_b.launch.year",
@@ -1151,7 +1224,8 @@
         "2017"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.arrival.jd",
@@ -1165,12 +1239,13 @@
         "2465217.0"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
+      "text_value": ""
     },
     {
       "id": "validate.arrival_b.arrival.iso",
       "label": "Sample B arrival epoch (calendar date, TDB)",
-      "value": 2037.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -1179,7 +1254,8 @@
         "2037-06-07"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
+      "text_value": "2037-06-07"
     },
     {
       "id": "validate.arrival_b.arrival.year",
@@ -1193,7 +1269,8 @@
         "2037"
       ],
       "citation": "",
-      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd"
+      "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
+      "text_value": ""
     },
     {
       "id": "source.lyra.publication_year",
@@ -1207,7 +1284,8 @@
         "2019"
       ],
       "citation": "",
-      "provenance": "solver.lyra.PUBLICATION_YEAR"
+      "provenance": "solver.lyra.PUBLICATION_YEAR",
+      "text_value": ""
     },
     {
       "id": "source.horizons.retrieval_year",
@@ -1221,12 +1299,13 @@
         "2026"
       ],
       "citation": "",
-      "provenance": "StateVector.retrieved_utc"
+      "provenance": "StateVector.retrieved_utc",
+      "text_value": ""
     },
     {
       "id": "source.horizons.retrieval_date",
       "label": "Horizons retrieval date",
-      "value": 2026.0,
+      "value": null,
       "precision": 0,
       "unit": "1",
       "frame": "n_a",
@@ -1235,7 +1314,8 @@
         "2026-08-27"
       ],
       "citation": "",
-      "provenance": "StateVector.retrieved_utc"
+      "provenance": "StateVector.retrieved_utc",
+      "text_value": "2026-08-27"
     }
   ]
 }
