@@ -167,7 +167,7 @@ Phase 1 built and validated (initial 2025-07-13; revision completed 2026-08-27):
 - Validation result (revision): 41 passed, 1 skipped, 1 xfailed (matplotlib/NumPy2 pre-existing), 0 failed
 - Frame gate: v_inf = 26.286 km/s vs 26.33 published (diff 0.044 km/s, PASS). Citation: Hein et al. 2019, p.553 col 1.
 - C3 2027: 1331.16 km^2/s^2 vs 1400 published (diff 68.84, 4.92%, within 20% tol, PASS). Citation: p.554 col 1.
-- C3 floor: 714.36 km^2/s^2 vs 703 published (diff 11.36, 1.62%, REPORTED NOT ASSERTED — duration-axis boundary min at 2018-06-04, TOF 30 yr). Gap attributed to orbit-solution epoch drift (retrieval 2026-08-27 vs Lyra 2019). Citation: p.553 col 2 / Fig.1.
+- C3 floor: 714.36 km^2/s^2 vs 703 published (diff 11.36, 1.62%, ASSERTED). Floor at 2018-06-04, TOF 30 yr. The extended-trend check on the committed oumuamua_c3_grid shows C3 dropping only 3.39 km^2/s^2 across the 30-to-44-yr span, so the curve has levelled and the duration-axis read is not mid-descent. Gap attributed to orbit-solution epoch drift (retrieval 2026-08-27 vs Lyra 2019). Citation: p.553 col 2 / Fig.1.
 - Sample A: v_inf2 (eq.4) = 13.967 km/s vs 13.6 published (diff 0.367 km/s, within 2.0 tol, ASSERTED). v_arr_local = 13.716 km/s. Def. gap 0.251 km/s (hyperbolic geometry at 5.852 AU). Citation: p.554 col 2 / Fig.5.
 - Sample B: v_inf2 (eq.4) = 0.642 km/s vs 0.6 published (diff 0.042 km/s, within 0.3 tol, ASSERTED). v_arr_local = 0.644 km/s. Encounter at 115.079 AU vs paper's 111.4 AU (3.7 AU orbit-solution drift). Citation: p.554 col 2 / Fig.6.
 - All Lyra citations filled from Hein et al. 2019 (Acta Astronautica 161, 552-561). PDF committed to data/lyra/.
