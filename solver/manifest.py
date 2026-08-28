@@ -51,6 +51,10 @@ FRAMES = ("earth_relative", "target_relative", "heliocentric", "n_a")
 KINDS = ("computed", "derived", "published", "tolerance", "epoch", "count",
          "metadata")
 
+# What sort of thing an entry holds. Declared per entry, never inferred from
+# whether `value` happens to be None.
+VALUE_TYPES = ("number", "date")
+
 
 # ---------------------------------------------------------------------------
 # The rendering ladder
@@ -153,11 +157,17 @@ class ManifestEntry:
     """
     One citable number, or one citable text value.
 
-    `value` is None for entries whose quantity is not numeric, which today
-    means calendar dates. A date has no float that means anything, and filling
-    the field with the year to satisfy the type was a placeholder that made the
-    entry look like it had lost its month and day. `text_value` carries the
-    real content in those cases, and `renderings` carries it either way.
+    `value_type` is declared, not inferred. An entry is a `number` or a `date`,
+    and the two are checked against each other: a number must have a value and
+    no text, a date must have text and no value. Nothing downstream keys on
+    `value is None` to decide what kind of entry it is looking at, because a
+    check written that way stops distinguishing "this is a date" from "this
+    number went missing", and the second is exactly the failure the
+    completeness test exists to catch.
+
+    A date has no float that means anything. Filling `value` with the year to
+    satisfy the type was a placeholder that made the entry look, in any view
+    withholding renderings, like an ISO field that had lost its month and day.
     """
     id: str
     label: str
@@ -170,10 +180,31 @@ class ManifestEntry:
     citation: str = ""
     provenance: str = ""
     text_value: str = ""
+    value_type: str = "number"
 
     def __post_init__(self) -> None:
-        assert self.value is not None or self.text_value, (
-            f"{self.id}: an entry needs either a numeric value or a text_value")
+        assert self.value_type in VALUE_TYPES, (
+            f"{self.id}: value_type {self.value_type!r} outside {VALUE_TYPES}")
+        if self.value_type == "number":
+            assert self.value is not None, (
+                f"{self.id}: declared a number but carries no value. If this is "
+                "a date, declare value_type='date'; if it is a number that went "
+                "missing, that is the bug")
+            assert not self.text_value, (
+                f"{self.id}: a number does not carry a text_value")
+        else:
+            assert self.value is None, (
+                f"{self.id}: declared a date but carries a numeric value "
+                f"{self.value!r}, which is the placeholder this field exists to "
+                "avoid")
+            assert self.text_value, f"{self.id}: a date with no text_value"
+            assert self.renderings == [self.text_value], (
+                f"{self.id}: a date renders as itself and nothing else")
+
+    @property
+    def is_number(self) -> bool:
+        """True for entries a numeric completeness check may match against."""
+        return self.value_type == "number"
         assert self.unit in UNITS, f"{self.id}: unit {self.unit!r} outside the lexicon"
         assert self.frame in FRAMES, f"{self.id}: frame {self.frame!r} outside the lexicon"
         assert self.kind in KINDS, f"{self.id}: kind {self.kind!r} outside the lexicon"
@@ -198,6 +229,7 @@ def entry(
     provenance: str = "",
     renderings: Optional[Sequence[str]] = None,
     text_value: str = "",
+    value_type: str = "number",
 ) -> ManifestEntry:
     """
     Build one entry.
@@ -208,8 +240,10 @@ def entry(
     declared parameter has a conventional written form.
     """
     if renderings is None:
-        if value is None:
-            raise ValueError(f"{id}: a text-valued entry must declare its renderings")
+        if value_type != "number" or value is None:
+            raise ValueError(
+                f"{id}: only a number can have its renderings generated; a "
+                "date must declare them")
         ladder = build_renderings(value, precision)
         ladder = _with_integral_decimal(ladder, round(float(value), precision), unit)
     else:
@@ -226,6 +260,7 @@ def entry(
         citation=citation,
         provenance=provenance,
         text_value=text_value,
+        value_type=value_type,
     )
 
 
@@ -366,7 +401,7 @@ def _epoch_entries(prefix: str, label: str, jd_tdb: float,
               renderings=[f"{jd_tdb:.1f}"]),
         entry(f"{prefix}.iso", f"{label} (calendar date, TDB)", None, "1",
               "epoch", precision=0, provenance=provenance, renderings=[iso],
-              text_value=iso),
+              text_value=iso, value_type="date"),
         entry(f"{prefix}.year", f"{label} (year)", float(year), "calendar_year",
               "epoch", precision=0, provenance=provenance, renderings=[str(year)]),
     ]
@@ -592,7 +627,7 @@ def _source_entries(retrieval_date: str) -> List[ManifestEntry]:
                          "Horizons retrieval date", None, "1", "metadata",
                          precision=0, provenance="StateVector.retrieved_utc",
                          renderings=[retrieval_date[:10]],
-                         text_value=retrieval_date[:10]))
+                         text_value=retrieval_date[:10], value_type="date"))
     return out
 
 
@@ -715,6 +750,7 @@ def redacted_for_corpus_authoring(m: Manifest) -> Dict[str, Any]:
                 "frame": e.frame,
                 "kind": e.kind,
                 "citation": e.citation,
+                "value_type": e.value_type,
                 **({"text_value": e.text_value} if e.text_value else {}),
             }
             for e in m.entries

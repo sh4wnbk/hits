@@ -49,8 +49,9 @@ structure the gate cannot use.
 |---|---|
 | `id` | Stable dotted key, e.g. `validate.c3.floor.rel_diff_pct` |
 | `label` | Human name for the reject report |
-| `value` | Canonical float, rounded to `precision`. `null` for a text-valued entry |
-| `text_value` | The content of a non-numeric entry, today only calendar dates |
+| `value` | Canonical float, rounded to `precision`. `null` only when `value_type` is `date` |
+| `value_type` | `number` or `date`. Declared, never inferred from whether `value` is null |
+| `text_value` | The content of a date entry. Empty for a number |
 | `precision` | Decimals the solver computed to, declared per field |
 | `unit` | From the closed unit lexicon below |
 | `frame` | `earth_relative`, `target_relative`, `heliocentric`, `n_a` |
@@ -73,6 +74,16 @@ the data.
 The manifest therefore grounds a full calendar date and its year separately, as
 two entries with different units. `2018-06-04` grounds as a date; `2018` grounds
 as a `calendar_year`, which is what lets the unit check reject `2018 km^2/s^2`.
+
+`value_type` is declared per entry and checked both ways at construction: a
+number must have a value and no text, a date must have text and no value, and a
+date must render as itself and nothing else. Nothing downstream is allowed to
+key on `value is None` to decide what it is looking at. That distinction is
+narrow and it matters: a check written that way stops separating "this is a
+date" from "this number went missing", and the second is precisely what the
+completeness test exists to catch. The set of entries permitted to be
+non-numeric is pinned in `tests/test_manifest.py` as `DATE_TYPED_IDS`, so a new
+one is added deliberately rather than appearing.
 
 ### Unit lexicon
 

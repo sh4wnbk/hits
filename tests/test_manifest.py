@@ -150,8 +150,12 @@ def test_every_float_of_every_public_result_is_in_the_manifest(results, manifest
         (results.arrival_b, "ArrivalResult(B)"),
     ):
         for fname, val in _numeric_fields(obj).items():
+            # Keyed on the declared type, not on whether `value` happens to
+            # be None. Those read the same and are not the same: this skips
+            # entries that are dates, and still fails on a number that arrived
+            # without a value, which is the failure this test exists to catch.
             found = any(
-                e.value is not None and abs(e.value - val) < 10 ** (-e.precision) / 2
+                e.is_number and abs(e.value - val) < 10 ** (-e.precision) / 2
                 for entries in index.values() for e in entries
             )
             if not found:
@@ -205,6 +209,53 @@ def test_declared_derived_entries_all_present(manifest):
     assert not missing, f"declared derived entries missing: {missing}"
 
 
+# The complete set of entries permitted to be non-numeric. Declared here so a
+# new one has to be added deliberately.
+DATE_TYPED_IDS = {
+    "validate.c3.y2027.departure.iso",
+    "validate.c3.floor.departure.iso",
+    "validate.c3.grid.launch_window_start.iso",
+    "validate.c3.grid.launch_window_end.iso",
+    "validate.arrival_a.launch.iso",
+    "validate.arrival_a.arrival.iso",
+    "validate.arrival_b.launch.iso",
+    "validate.arrival_b.arrival.iso",
+    "source.horizons.retrieval_date",
+}
+
+
+def test_only_declared_date_entries_are_non_numeric(manifest):
+    """
+    The set of entries without a numeric value is exactly the declared date set.
+
+    Without this, the completeness guard's exemption has no boundary: an entry
+    could arrive non-numeric, not be a date, and go unremarked, which is the
+    same class of hole as a field quietly filled with a placeholder. A new
+    date-typed entry has to be added to DATE_TYPED_IDS on purpose.
+    """
+    non_numeric = {e.id for e in manifest.entries if not e.is_number}
+    assert non_numeric == DATE_TYPED_IDS, (
+        f"unexpected non-numeric entries: {sorted(non_numeric - DATE_TYPED_IDS)}; "
+        f"declared but now numeric or absent: {sorted(DATE_TYPED_IDS - non_numeric)}")
+    assert all(e.value is None for e in manifest.entries if not e.is_number)
+    assert all(e.value is not None for e in manifest.entries if e.is_number)
+
+
+def test_a_number_that_lost_its_value_is_rejected_at_construction():
+    """
+    The failure the type split exists to catch, asserted directly rather than
+    left to the completeness test's search direction.
+    """
+    from solver.manifest import entry
+    with pytest.raises(AssertionError, match="declared a number but carries no value"):
+        entry("t.lost", "a computed float that went missing", None, "km/s",
+              "computed", precision=5, renderings=["0.5"], text_value="oops")
+    with pytest.raises(AssertionError, match="declared a date but carries a numeric value"):
+        entry("t.placeholder", "a date with an invented year", 2018.0, "1",
+              "epoch", precision=0, renderings=["2018-06-04"],
+              text_value="2018-06-04", value_type="date")
+
+
 def test_date_entries_carry_their_date_and_no_invented_number(manifest):
     """
     A calendar date has no float that means anything. Filling `value` with the
@@ -212,8 +263,7 @@ def test_date_entries_carry_their_date_and_no_invented_number(manifest):
     renderings, like an ISO field that had silently lost its month and day.
     The date is the content, so it lives in `text_value`, and `value` is None.
     """
-    dated = [e for e in manifest.entries if e.id.endswith(".iso")
-             or e.id == "source.horizons.retrieval_date"]
+    dated = [e for e in manifest.entries if e.value_type == "date"]
     assert dated
     for e in dated:
         assert e.value is None, f"{e.id} carries an invented numeric value {e.value}"

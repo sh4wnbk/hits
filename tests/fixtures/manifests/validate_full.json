@@ -75,7 +75,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.FrameGateResult.computed_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.frame_gate.published",
@@ -90,7 +91,8 @@
       ],
       "citation": "Hein et al. 2019, p.553 col 1 / abstract",
       "provenance": "solver.validate.FrameGateResult.published_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.frame_gate.abs_diff",
@@ -107,7 +109,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.FrameGateResult.abs_diff_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.frame_gate.rel_diff_pct",
@@ -123,7 +126,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.FrameGateResult.rel_diff_pct",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.frame_gate.tolerance",
@@ -138,7 +142,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.FrameGateResult.tolerance_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.computed",
@@ -155,7 +160,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_computed_km2_s2",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.published",
@@ -170,7 +176,8 @@
       ],
       "citation": "Hein et al. 2019, p.554 col 1 (37.4 km/s, ~15-yr duration)",
       "provenance": "solver.validate.C3Result.c3_y2027_published_km2_s2",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.abs_diff",
@@ -186,7 +193,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_abs_diff",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.rel_diff_pct",
@@ -202,7 +210,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_rel_diff_pct",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.tolerance_frac",
@@ -217,7 +226,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_tolerance_frac",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.tolerance_pct",
@@ -232,7 +242,8 @@
       ],
       "citation": "",
       "provenance": "derived from solver.validate.C3Result.c3_y2027_tolerance_frac",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.tolerance_abs",
@@ -248,7 +259,8 @@
       ],
       "citation": "",
       "provenance": "derived: tolerance_frac * published",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.tof_days",
@@ -265,7 +277,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_tof_days",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.tof_years",
@@ -281,7 +294,8 @@
       ],
       "citation": "",
       "provenance": "derived: solver.validate.C3Result.c3_y2027_tof_days / 365.25",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.departure.jd",
@@ -296,7 +310,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_departure_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.y2027.departure.iso",
@@ -311,7 +326,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_departure_jd",
-      "text_value": "2027-06-21"
+      "text_value": "2027-06-21",
+      "value_type": "date"
     },
     {
       "id": "validate.c3.y2027.departure.year",
@@ -326,7 +342,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_departure_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.computed",
@@ -343,7 +360,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_computed_km2_s2",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.published",
@@ -358,7 +376,8 @@
       ],
       "citation": "Hein et al. 2019, p.553 col 2 / Fig.1",
       "provenance": "solver.validate.C3Result.c3_floor_published_km2_s2",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.abs_diff",
@@ -374,7 +393,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_abs_diff",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.rel_diff_pct",
@@ -390,7 +410,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_rel_diff_pct",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.tolerance_frac",
@@ -405,7 +426,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_tolerance_frac",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.tolerance_pct",
@@ -420,7 +442,8 @@
       ],
       "citation": "",
       "provenance": "derived from solver.validate.C3Result.c3_floor_tolerance_frac",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.tolerance_abs",
@@ -436,7 +459,8 @@
       ],
       "citation": "",
       "provenance": "derived: tolerance_frac * published",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.tof_days",
@@ -452,7 +476,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_tof_days",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.tof_years",
@@ -468,7 +493,8 @@
       ],
       "citation": "",
       "provenance": "derived: solver.validate.C3Result.c3_floor_tof_days / 365.25",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.departure.jd",
@@ -483,7 +509,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_departure_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.floor.departure.iso",
@@ -498,7 +525,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_departure_jd",
-      "text_value": "2018-06-04"
+      "text_value": "2018-06-04",
+      "value_type": "date"
     },
     {
       "id": "validate.c3.floor.departure.year",
@@ -513,7 +541,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_departure_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.n_departures",
@@ -528,7 +557,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.c3_grid.shape[0]",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.n_durations",
@@ -543,7 +573,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.c3_grid.shape[1]",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.n_cells",
@@ -558,7 +589,8 @@
       ],
       "citation": "",
       "provenance": "derived: n_departures * n_durations",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.n_solved",
@@ -573,7 +605,8 @@
       ],
       "citation": "",
       "provenance": "derived: non-NaN cells of c3_grid",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.duration_min_years",
@@ -589,7 +622,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.tof_days[0] / 365.25",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.duration_max_years",
@@ -605,7 +639,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.tof_days[-1] / 365.25",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.launch_window_start.jd",
@@ -620,7 +655,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.departure_jds[0]",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.launch_window_start.iso",
@@ -635,7 +671,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.departure_jds[0]",
-      "text_value": "2018-01-01"
+      "text_value": "2018-01-01",
+      "value_type": "date"
     },
     {
       "id": "validate.c3.grid.launch_window_start.year",
@@ -650,7 +687,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.departure_jds[0]",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.launch_window_end.jd",
@@ -665,7 +703,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.departure_jds[-1]",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.c3.grid.launch_window_end.iso",
@@ -680,7 +719,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.departure_jds[-1]",
-      "text_value": "2032-12-13"
+      "text_value": "2032-12-13",
+      "value_type": "date"
     },
     {
       "id": "validate.c3.grid.launch_window_end.year",
@@ -695,7 +735,8 @@
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.departure_jds[-1]",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.v_inf2",
@@ -713,7 +754,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.v_inf2_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.v_arr_local",
@@ -731,7 +773,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.v_arr_local_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.published",
@@ -746,7 +789,8 @@
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
       "provenance": "solver.validate.ArrivalResult.published_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.abs_diff",
@@ -764,7 +808,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.abs_diff_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.rel_diff_pct",
@@ -780,7 +825,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.rel_diff_pct",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.tolerance",
@@ -795,7 +841,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.tolerance_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.definitional_gap",
@@ -813,7 +860,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.definitional_gap_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.encounter_distance_au",
@@ -830,7 +878,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.encounter_distance_au",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.tof_days",
@@ -846,7 +895,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.tof_days",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.tof_years",
@@ -862,7 +912,8 @@
       ],
       "citation": "",
       "provenance": "derived: solver.validate.ArrivalResult.tof_days / 365.25",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.published_tof_years",
@@ -878,7 +929,8 @@
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
       "provenance": "solver.lyra.LYRA_CONSTANTS",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.published_encounter_au",
@@ -893,7 +945,8 @@
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
       "provenance": "solver.lyra.LYRA_CONSTANTS",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.launch.jd",
@@ -908,7 +961,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.launch.iso",
@@ -923,7 +977,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
-      "text_value": "2017-06-07"
+      "text_value": "2017-06-07",
+      "value_type": "date"
     },
     {
       "id": "validate.arrival_a.launch.year",
@@ -938,7 +993,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.arrival.jd",
@@ -953,7 +1009,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_a.arrival.iso",
@@ -968,7 +1025,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
-      "text_value": "2018-06-07"
+      "text_value": "2018-06-07",
+      "value_type": "date"
     },
     {
       "id": "validate.arrival_a.arrival.year",
@@ -983,7 +1041,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.v_inf2",
@@ -1001,7 +1060,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.v_inf2_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.v_arr_local",
@@ -1019,7 +1079,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.v_arr_local_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.published",
@@ -1034,7 +1095,8 @@
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
       "provenance": "solver.validate.ArrivalResult.published_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.abs_diff",
@@ -1051,7 +1113,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.abs_diff_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.rel_diff_pct",
@@ -1068,7 +1131,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.rel_diff_pct",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.tolerance",
@@ -1083,7 +1147,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.tolerance_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.definitional_gap",
@@ -1099,7 +1164,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.definitional_gap_km_s",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.encounter_distance_au",
@@ -1117,7 +1183,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.encounter_distance_au",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.tof_days",
@@ -1133,7 +1200,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.tof_days",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.tof_years",
@@ -1149,7 +1217,8 @@
       ],
       "citation": "",
       "provenance": "derived: solver.validate.ArrivalResult.tof_days / 365.25",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.published_tof_years",
@@ -1165,7 +1234,8 @@
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
       "provenance": "solver.lyra.LYRA_CONSTANTS",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.published_encounter_au",
@@ -1180,7 +1250,8 @@
       ],
       "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
       "provenance": "solver.lyra.LYRA_CONSTANTS",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.launch.jd",
@@ -1195,7 +1266,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.launch.iso",
@@ -1210,7 +1282,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
-      "text_value": "2017-06-07"
+      "text_value": "2017-06-07",
+      "value_type": "date"
     },
     {
       "id": "validate.arrival_b.launch.year",
@@ -1225,7 +1298,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.arrival.jd",
@@ -1240,7 +1314,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "validate.arrival_b.arrival.iso",
@@ -1255,7 +1330,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
-      "text_value": "2037-06-07"
+      "text_value": "2037-06-07",
+      "value_type": "date"
     },
     {
       "id": "validate.arrival_b.arrival.year",
@@ -1270,7 +1346,8 @@
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "source.lyra.publication_year",
@@ -1285,7 +1362,8 @@
       ],
       "citation": "",
       "provenance": "solver.lyra.PUBLICATION_YEAR",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "source.horizons.retrieval_year",
@@ -1300,7 +1378,8 @@
       ],
       "citation": "",
       "provenance": "StateVector.retrieved_utc",
-      "text_value": ""
+      "text_value": "",
+      "value_type": "number"
     },
     {
       "id": "source.horizons.retrieval_date",
@@ -1315,7 +1394,8 @@
       ],
       "citation": "",
       "provenance": "StateVector.retrieved_utc",
-      "text_value": "2026-08-27"
+      "text_value": "2026-08-27",
+      "value_type": "date"
     }
   ]
 }
