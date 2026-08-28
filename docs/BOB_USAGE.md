@@ -95,3 +95,15 @@ groundedness gate) is authored in Claude Code. The switch is at the phase
 boundary and is recorded here so the split is legible: Bob built and validated
 the solver core against Hein et al. 2019; Claude Code builds the interpretation
 layer on top of it.
+### Phase 2 session log (Claude Code)
+
+Recorded here alongside the Bob sessions so the two tools' contributions stay
+separable in one document. Bob's Phase 2 role is the adversarial corpus and is
+logged as its own row when it happens.
+
+| Step | Tool | Action | Output |
+|---|---|---|---|
+| Pre-flight | Claude Code | Corrected CLAUDE.md's C3 floor status from REPORTED NOT ASSERTED to ASSERTED, matching the code and PROVENANCE.md after the Phase 1 closeout extended-trend check | CLAUDE.md |
+| Branch | Claude Code | Fast-forwarded main to docs/input-contracts (the validated Phase 1 core had been sitting on a docs-named branch), cut feat/groundedness-gate off main | git |
+| Baseline | Claude Code | Recorded the pre-Phase-2 suite state so later breakage cannot be mistaken for pre-existing: 41 passed, 1 skipped, 1 xfailed, 0 failed in 14.36s | (run only) |
+| Sub-task 0 | Claude Code | Phase 1/2 tool handoff recorded | docs/BOB_USAGE.md |
