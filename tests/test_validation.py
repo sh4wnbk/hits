@@ -22,43 +22,21 @@ import pytest
 from astropy.time import Time
 
 from solver.validate import (
+    build_c3_grid,
     validate_frame_gate, print_frame_gate, FrameGateResult,
     validate_c3, print_c3_result,
     validate_arrival, print_arrival_result,
 )
 from solver.grid import grid as make_grid, GridResult
 from solver.fetch import load_state_vectors
+from solver.lyra import LYRA_CONSTANTS
 
 DATA_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "state_vectors.json")
 
-# Lyra constants — all citations filled from Hein et al. 2019
-LYRA = {
-    "v_inf_helio_km_s": {
-        "value": 26.33, "tol_km_s": 0.5,
-        "citation": "Hein et al. 2019, p.553 col 1 / abstract",
-    },
-    "c3_2027_km2_s2": {
-        "value": 1400.0, "tol_frac": 0.20,
-        "citation": "Hein et al. 2019, p.554 col 1 (37.4 km/s, ~15-yr duration)",
-    },
-    "c3_floor_km2_s2": {
-        "value": 703.0, "tol_frac": 0.20,
-        "citation": "Hein et al. 2019, p.553 col 2 / Fig.1 floor",
-    },
-    # Sample A: eq.4 v_inf,2 = 13.6 km/s at 5.8 AU (Fig. 5, p.554)
-    # Compared against v_inf2_km_s (asymptotic), not v_arr_km_s (local).
-    "v_arr_sample_a_km_s": {
-        "value": 13.6, "tol_km_s": 2.0, "tof_days": 365.0,
-        "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
-    },
-    # Sample B: eq.4 v_inf,2 ~ 600 m/s = 0.6 km/s at 111.4 AU (Fig. 6, p.554)
-    # Wide tolerance: at 115 AU, orbit-solution drift of ~3.7 AU changes local
-    # speeds appreciably. Tolerance 0.3 km/s is wide and explicitly stated.
-    "v_arr_sample_b_km_s": {
-        "value": 0.6, "tol_km_s": 0.3, "tof_days": 7305.0,
-        "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
-    },
-}
+# Lyra constants live in solver/lyra.py as of Phase 2, so the manifest emitter
+# and the judges endpoints read the same published figures the tests assert
+# against. All citations from Hein et al. 2019.
+LYRA = LYRA_CONSTANTS
 
 
 # ---------------------------------------------------------------------------
@@ -76,7 +54,7 @@ def frame_gate_result(svs):
     return validate_frame_gate(
         sv,
         published_km_s=LYRA["v_inf_helio_km_s"]["value"],
-        tolerance_km_s=LYRA["v_inf_helio_km_s"]["tol_km_s"],
+        tolerance_km_s=LYRA["v_inf_helio_km_s"]["tolerance_km_s"],
         citation=LYRA["v_inf_helio_km_s"]["citation"],
     )
 
@@ -84,52 +62,13 @@ def frame_gate_result(svs):
 @pytest.fixture(scope="module")
 def c3_grid_result(svs):
     """
-    Build the C3 porkchop grid over Fig. 1 axes.
+    The Fig. 1 C3 porkchop grid.
 
-    Launch: earth_c3_grid, 2018-2032, 14-day step (~391 epochs).
-    Duration: 5 to 30 years, 1-year step (26 TOF values).
-    Total: ~391 x 26 ~ 10,166 Lambert solves.
-
-    Arrival lookup: nearest 'Oumuamua state in oumuamua_c3_grid (14-day step).
-    Skip if nearest is more than 8 days away (half of 14-day step).
+    The construction moved to solver.validate.build_c3_grid in Phase 2 so the
+    manifest emitter grids exactly what the test suite asserts against. Axes,
+    step, and arrival-matching tolerance are unchanged from Phase 1.
     """
-    from solver.solve import solve as _solve
-
-    earth_svs    = svs["earth_c3_grid"]
-    oumu_arrival = svs["oumuamua_c3_grid"]
-
-    oumu_jds = np.array([sv.epoch_tdb_jd for sv in oumu_arrival])
-
-    # Duration axis: 5 to 30 years, 1-year step
-    tof_array = np.arange(5.0, 31.0, 1.0) * 365.25   # 26 values
-
-    n_dep = len(earth_svs)
-    n_tof = len(tof_array)
-
-    c3_grid    = np.full((n_dep, n_tof), np.nan)
-    v_arr_grid = np.full((n_dep, n_tof), np.nan)
-    dep_jds    = np.array([sv.epoch_tdb_jd for sv in earth_svs])
-
-    for i, earth_sv in enumerate(earth_svs):
-        for j, tof in enumerate(tof_array):
-            arrival_jd = earth_sv.epoch_tdb_jd + tof
-            idx = int(np.argmin(np.abs(oumu_jds - arrival_jd)))
-            if abs(oumu_jds[idx] - arrival_jd) > 8.0:
-                continue  # no state within half the 14-day step
-            target_sv = oumu_arrival[idx]
-            try:
-                result = _solve(earth_sv, target_sv, float(tof))
-                c3_grid[i, j]    = result.c3_km2_s2
-                v_arr_grid[i, j] = result.v_arr_km_s
-            except Exception:
-                pass
-
-    return GridResult(
-        c3_grid=c3_grid,
-        v_arr_grid=v_arr_grid,
-        departure_jds=dep_jds,
-        tof_days=tof_array,
-    )
+    return build_c3_grid(svs["earth_c3_grid"], svs["oumuamua_c3_grid"])
 
 
 # ---------------------------------------------------------------------------
@@ -171,16 +110,16 @@ def test_c3_2027(svs, c3_grid_result, frame_gate_result):
     result = validate_c3(
         c3_grid_result,
         c3_2027_published=LYRA["c3_2027_km2_s2"]["value"],
-        c3_2027_tolerance_frac=LYRA["c3_2027_km2_s2"]["tol_frac"],
+        c3_2027_tolerance_frac=LYRA["c3_2027_km2_s2"]["tolerance_frac"],
         c3_2027_citation=LYRA["c3_2027_km2_s2"]["citation"],
         c3_floor_published=LYRA["c3_floor_km2_s2"]["value"],
-        c3_floor_tolerance_frac=LYRA["c3_floor_km2_s2"]["tol_frac"],
+        c3_floor_tolerance_frac=LYRA["c3_floor_km2_s2"]["tolerance_frac"],
         c3_floor_citation=LYRA["c3_floor_km2_s2"]["citation"],
         retrieval_date=svs["earth_c3_grid"][0].retrieved_utc,
     )
     print_c3_result(result)
 
-    tol = LYRA["c3_2027_km2_s2"]["tol_frac"] * LYRA["c3_2027_km2_s2"]["value"]
+    tol = LYRA["c3_2027_km2_s2"]["tolerance_frac"] * LYRA["c3_2027_km2_s2"]["value"]
     print(f"\n  MEASURED C3 2027 gap from 1400: {result.c3_2027_abs_diff:.2f} km^2/s^2")
     print(f"  (Once measured, tighten tolerance to gap + 5% margin)")
 
@@ -217,7 +156,7 @@ def test_c3_floor(svs, c3_grid_result, frame_gate_result):
         c3_grid_result,
         c3_2027_published=LYRA["c3_2027_km2_s2"]["value"],
         c3_floor_published=LYRA["c3_floor_km2_s2"]["value"],
-        c3_floor_tolerance_frac=LYRA["c3_floor_km2_s2"]["tol_frac"],
+        c3_floor_tolerance_frac=LYRA["c3_floor_km2_s2"]["tolerance_frac"],
         c3_floor_citation=LYRA["c3_floor_km2_s2"]["citation"],
         retrieval_date=svs["earth_c3_grid"][0].retrieved_utc,
     )
@@ -237,7 +176,7 @@ def test_c3_floor(svs, c3_grid_result, frame_gate_result):
     # The floor is on the duration-boundary edge in the 30-yr grid, but the
     # oumuamua_c3_grid extension to 44 yr shows C3 drops only 3.39 km^2/s^2
     # further; the tolerance band (20% of 703 = 140.6 km^2/s^2) is satisfied.
-    tol = LYRA["c3_floor_km2_s2"]["tol_frac"] * LYRA["c3_floor_km2_s2"]["value"]
+    tol = LYRA["c3_floor_km2_s2"]["tolerance_frac"] * LYRA["c3_floor_km2_s2"]["value"]
     assert result.c3_floor_passed, (
         f"C3 floor: computed {result.c3_floor_computed_km2_s2:.2f} km^2/s^2, "
         f"published {result.c3_floor_published_km2_s2} km^2/s^2, "
@@ -270,7 +209,7 @@ def test_arrival_sample_a(svs, frame_gate_result):
     result = validate_arrival(
         earth_sv, target_sv, tof_days,
         published_km_s=LYRA["v_arr_sample_a_km_s"]["value"],
-        tolerance_km_s=LYRA["v_arr_sample_a_km_s"]["tol_km_s"],
+        tolerance_km_s=LYRA["v_arr_sample_a_km_s"]["tolerance_km_s"],
         sample_label="Sample A (launch 2017-06-07, ToF 1.0 yr, ~5.85 AU)",
         citation=LYRA["v_arr_sample_a_km_s"]["citation"],
     )
@@ -304,7 +243,7 @@ def test_arrival_sample_b(svs, frame_gate_result):
     result = validate_arrival(
         earth_sv, target_sv, tof_days,
         published_km_s=LYRA["v_arr_sample_b_km_s"]["value"],
-        tolerance_km_s=LYRA["v_arr_sample_b_km_s"]["tol_km_s"],
+        tolerance_km_s=LYRA["v_arr_sample_b_km_s"]["tolerance_km_s"],
         sample_label="Sample B (launch 2017-06-07, ToF 20.0 yr, ~115 AU)",
         citation=LYRA["v_arr_sample_b_km_s"]["citation"],
     )

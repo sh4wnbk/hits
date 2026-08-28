@@ -33,7 +33,7 @@ import numpy as np
 
 from solver.constants import MU_SUN
 from solver.fetch import StateVector
-from solver.grid import grid as _grid
+from solver.grid import grid as _grid, GridResult
 from solver.solve import solve
 
 
@@ -417,31 +417,208 @@ def print_arrival_result(result: "ArrivalResult") -> None:
 
 
 # ---------------------------------------------------------------------------
-# Top-level validate() — calls all three in order
+# C3 grid construction — Fig. 1 axes
 # ---------------------------------------------------------------------------
 
-def validate(state_vectors: dict, lyra_constants: dict) -> dict:
-    """
-    Run the full Phase 1 validation suite.
+# Fig. 1 duration axis: 5 to 30 years, 1-year step.
+C3_GRID_TOF_YEARS_START = 5.0
+C3_GRID_TOF_YEARS_STOP = 31.0     # exclusive; yields 5..30
+C3_GRID_TOF_YEARS_STEP = 1.0
+# Arrival-state lookup tolerance: half the committed 14-day window step.
+C3_GRID_ARRIVAL_MATCH_TOL_DAYS = 8.0
 
-    Returns dict with keys 'frame_gate', 'c3', 'arrival_a', 'arrival_b'.
-    Skips c3 and arrival if frame gate fails.
-    """
-    results = {}
 
-    # 1. Frame gate (must pass first)
-    sv_perihelion = state_vectors["oumuamua_perihelion"]
+def build_c3_grid(earth_svs, oumuamua_svs) -> GridResult:
+    """
+    Build the C3 porkchop grid over Fig. 1 axes.
+
+    Launch: earth_c3_grid, 2018-2032, 14-day step (391 epochs).
+    Duration: 5 to 30 years, 1-year step (26 TOF values).
+    Roughly 391 x 26 = 10,166 Lambert solves.
+
+    Arrival lookup: nearest committed 'Oumuamua state (14-day step). A cell is
+    left NaN if the nearest state is more than half a step away, so no cell is
+    ever solved against an arrival epoch it does not actually have a state for.
+
+    This lived in tests/test_validation.py as a fixture during Phase 1. It moves
+    here because the manifest emitter and the judges endpoint need the same grid
+    the test suite asserts against, and CLAUDE.md requires that code to exist
+    once. The logic is unchanged: the grid it returns is bit-identical to the
+    Phase 1 fixture's.
+    """
+    oumu_jds = np.array([sv.epoch_tdb_jd for sv in oumuamua_svs])
+
+    tof_array = np.arange(
+        C3_GRID_TOF_YEARS_START,
+        C3_GRID_TOF_YEARS_STOP,
+        C3_GRID_TOF_YEARS_STEP,
+    ) * 365.25
+
+    n_dep = len(earth_svs)
+    n_tof = len(tof_array)
+
+    c3_grid = np.full((n_dep, n_tof), np.nan)
+    v_arr_grid = np.full((n_dep, n_tof), np.nan)
+    dep_jds = np.array([sv.epoch_tdb_jd for sv in earth_svs])
+
+    for i, earth_sv in enumerate(earth_svs):
+        for j, tof in enumerate(tof_array):
+            arrival_jd = earth_sv.epoch_tdb_jd + tof
+            idx = int(np.argmin(np.abs(oumu_jds - arrival_jd)))
+            if abs(oumu_jds[idx] - arrival_jd) > C3_GRID_ARRIVAL_MATCH_TOL_DAYS:
+                continue  # no committed state within half the 14-day step
+            target_sv = oumuamua_svs[idx]
+            try:
+                result = solve(earth_sv, target_sv, float(tof))
+                c3_grid[i, j] = result.c3_km2_s2
+                v_arr_grid[i, j] = result.v_arr_km_s
+            except Exception:
+                # Collinear or non-convergent: leave as NaN
+                pass
+
+    return GridResult(
+        c3_grid=c3_grid,
+        v_arr_grid=v_arr_grid,
+        departure_jds=dep_jds,
+        tof_days=tof_array,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Top-level validate() — all five quantities, frame gate first
+# ---------------------------------------------------------------------------
+
+@dataclass
+class ValidationResults:
+    """
+    Every result the Phase 1 validation produces, in one object.
+
+    The manifest emitter reads this and nothing deeper. It never reaches past
+    the public surface into Lambert (CONVENTIONS.md, Public surface).
+
+    c3, arrival_a and arrival_b are None if the frame gate failed, because the
+    frame gate is a prerequisite: a wrong frame makes every downstream
+    comparison meaningless rather than merely inaccurate.
+    """
+    frame_gate: FrameGateResult
+    c3: Optional[C3Result] = None
+    arrival_a: Optional[ArrivalResult] = None
+    arrival_b: Optional[ArrivalResult] = None
+    grid_result: Optional[GridResult] = None
+    retrieval_date: str = ""
+
+    @property
+    def all_passed(self) -> bool:
+        if not self.frame_gate.passed:
+            return False
+        if self.c3 is None or self.arrival_a is None or self.arrival_b is None:
+            return False
+        return (
+            self.c3.c3_2027_passed
+            and self.c3.c3_floor_passed
+            and self.arrival_a.passed
+            and self.arrival_b.passed
+        )
+
+
+def validate(state_vectors: dict, lyra_constants: Optional[dict] = None,
+             verbose: bool = True) -> ValidationResults:
+    """
+    Run the full Phase 1 validation suite: all five Lyra comparisons.
+
+    Offline and deterministic. Reads committed state vectors only; makes no
+    Horizons call.
+
+    Ordering is a guarantee, not a convenience. The frame gate runs first and
+    is pass/fail. If it fails, C3 and both arrival samples are skipped and left
+    None, because a frame error invalidates them rather than perturbing them.
+
+    Parameters
+    ----------
+    state_vectors : dict
+        Loaded data/state_vectors.json (solver.fetch.load_state_vectors).
+    lyra_constants : dict, optional
+        Published targets. Defaults to solver.lyra.LYRA_CONSTANTS.
+    verbose : bool
+        Print the comparison rows. The printed rows are themselves grounded
+        against the manifest by tests/test_groundedness.py.
+
+    Returns
+    -------
+    ValidationResults
+    """
+    from solver.lyra import LYRA_CONSTANTS
+
+    if lyra_constants is None:
+        lyra_constants = LYRA_CONSTANTS
+
+    # 1. Frame gate (heliocentric) — must pass first
     fg = validate_frame_gate(
-        sv_perihelion,
+        state_vectors["oumuamua_perihelion"],
         published_km_s=lyra_constants["v_inf_helio_km_s"]["value"],
         tolerance_km_s=lyra_constants["v_inf_helio_km_s"]["tolerance_km_s"],
         citation=lyra_constants["v_inf_helio_km_s"]["citation"],
     )
-    print_frame_gate(fg)
-    results["frame_gate"] = fg
+    if verbose:
+        print_frame_gate(fg)
 
     if not fg.passed:
-        print("\nFRAME GATE FAILED — skipping all other validation.")
-        return results
+        if verbose:
+            print("\nFRAME GATE FAILED. C3 and arrival validation skipped.")
+        return ValidationResults(frame_gate=fg)
 
-    return results
+    retrieval_date = state_vectors["earth_c3_grid"][0].retrieved_utc
+
+    # 2. Departure C3 (Earth-relative)
+    grid_result = build_c3_grid(
+        state_vectors["earth_c3_grid"],
+        state_vectors["oumuamua_c3_grid"],
+    )
+    c3 = validate_c3(
+        grid_result,
+        c3_2027_published=lyra_constants["c3_2027_km2_s2"]["value"],
+        c3_2027_tolerance_frac=lyra_constants["c3_2027_km2_s2"]["tolerance_frac"],
+        c3_2027_citation=lyra_constants["c3_2027_km2_s2"]["citation"],
+        c3_floor_published=lyra_constants["c3_floor_km2_s2"]["value"],
+        c3_floor_tolerance_frac=lyra_constants["c3_floor_km2_s2"]["tolerance_frac"],
+        c3_floor_citation=lyra_constants["c3_floor_km2_s2"]["citation"],
+        retrieval_date=retrieval_date,
+    )
+    if verbose:
+        print_c3_result(c3)
+
+    # 3. Arrival relative velocity (target-relative), both pinned samples
+    sample_a_cfg = lyra_constants["v_arr_sample_a_km_s"]
+    arrival_a = validate_arrival(
+        state_vectors["earth_sample_ab_launch"],
+        state_vectors["oumuamua_sample_a_arrival"],
+        float(sample_a_cfg["tof_days"]),
+        published_km_s=sample_a_cfg["value"],
+        tolerance_km_s=sample_a_cfg["tolerance_km_s"],
+        sample_label="Sample A (launch 2017-06-07, ToF 1.0 yr, ~5.85 AU)",
+        citation=sample_a_cfg["citation"],
+    )
+    if verbose:
+        print_arrival_result(arrival_a)
+
+    sample_b_cfg = lyra_constants["v_arr_sample_b_km_s"]
+    arrival_b = validate_arrival(
+        state_vectors["earth_sample_ab_launch"],
+        state_vectors["oumuamua_sample_b_arrival"],
+        float(sample_b_cfg["tof_days"]),
+        published_km_s=sample_b_cfg["value"],
+        tolerance_km_s=sample_b_cfg["tolerance_km_s"],
+        sample_label="Sample B (launch 2017-06-07, ToF 20.0 yr, ~115 AU)",
+        citation=sample_b_cfg["citation"],
+    )
+    if verbose:
+        print_arrival_result(arrival_b)
+
+    return ValidationResults(
+        frame_gate=fg,
+        c3=c3,
+        arrival_a=arrival_a,
+        arrival_b=arrival_b,
+        grid_result=grid_result,
+        retrieval_date=retrieval_date,
+    )

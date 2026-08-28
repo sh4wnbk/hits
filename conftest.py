@@ -62,52 +62,14 @@ def oumuamua_c3_grid(state_vectors):
 
 
 # ---------------------------------------------------------------------------
-# Lyra validation constants — all citations filled from Hein et al. 2019
+# Lyra validation constants
 # ---------------------------------------------------------------------------
+# These moved to solver/lyra.py in Phase 2. The manifest emitter and the judges
+# endpoints need them, and they cannot live in a test-only module if the same
+# code is to prove the claim in CI and in a browser (CLAUDE.md, "Write the
+# validation once"). Re-exported here so existing fixtures keep working.
 
-LYRA_CONSTANTS = {
-    "v_inf_helio_km_s": {
-        "value": 26.33,
-        "units": "km/s",
-        "frame": "heliocentric",
-        "tolerance_km_s": 0.5,
-        "citation": "Hein et al. 2019, p.553 col 1 / abstract",
-    },
-    "c3_2027_km2_s2": {
-        "value": 1400.0,
-        "units": "km^2/s^2",
-        "frame": "Earth-relative",
-        "tolerance_frac": 0.20,
-        "citation": "Hein et al. 2019, p.554 col 1 (37.4 km/s, ~15-yr duration)",
-    },
-    "c3_floor_km2_s2": {
-        "value": 703.0,
-        "units": "km^2/s^2",
-        "frame": "Earth-relative",
-        "tolerance_frac": 0.20,
-        "citation": "Hein et al. 2019, p.553 col 2 / Fig.1",
-    },
-    "v_arr_sample_a_km_s": {
-        "value": 13.6,
-        "units": "km/s",
-        "frame": "target-relative (asymptotic eq.4)",
-        "tolerance_km_s": 2.0,
-        "citation": "Hein et al. 2019, p.554 col 2 / Fig.5 (eq.4, launch 2017-06-07, ToF 1.0 yr, 5.8 AU)",
-        "launch_epoch_tdb": "2017-06-07 12:00:00",
-        "arrival_epoch_tdb": "2018-06-07 12:00:00",
-        "tof_days": 365.0,
-    },
-    "v_arr_sample_b_km_s": {
-        "value": 0.6,
-        "units": "km/s",
-        "frame": "target-relative (asymptotic eq.4)",
-        "tolerance_km_s": 0.3,
-        "citation": "Hein et al. 2019, p.554 col 2 / Fig.6 (eq.4, launch 2017-06-07, ToF 20.0 yr, 111.4 AU)",
-        "launch_epoch_tdb": "2017-06-07 12:00:00",
-        "arrival_epoch_tdb": "2037-06-07 12:00:00",
-        "tof_days": 7305.0,
-    },
-}
+from solver.lyra import LYRA_CONSTANTS  # noqa: E402
 
 
 @pytest.fixture(scope="session")
