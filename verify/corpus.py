@@ -23,6 +23,11 @@ FIXTURE_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)),
 ADVERSARIAL_FILE = os.path.join(CORPUS_DIR, "adversarial.jsonl")
 GROUNDED_FILE = os.path.join(CORPUS_DIR, "grounded.jsonl")
 
+# Reject cases Bob could not author blind. derived-not-emitted needs to know
+# what the manifest omits; stale-number needs values from a retrieval Bob never
+# saw. Both are withheld from the brief on purpose, so they are written here.
+WHITEBOX_FILE = os.path.join(CORPUS_DIR, "adversarial_whitebox.jsonl")
+
 # What Bob writes, black-box. Validated by load_raw_submission() below, which
 # knows nothing about reason codes. See docs/BOB_BRIEF_CORPUS.md.
 RAW_SUBMISSION_FILE = os.path.join(CORPUS_DIR, "bob_submission.raw.jsonl")
@@ -30,16 +35,15 @@ RAW_SUBMISSION_FILE = os.path.join(CORPUS_DIR, "bob_submission.raw.jsonl")
 # Closed vocabulary (docs/CORPUS.md). A case outside it fails to load rather
 # than being silently accepted with a reason nothing will ever check.
 REJECT_REASONS = (
-    # Covers a near-miss as well as an invention. The gate cannot separate them
-    # without arithmetic, so it does not claim to: see docs/MANIFEST.md, "What
-    # the no-arithmetic rule costs".
+    # Covers a near-miss, a correct derivation the manifest never emitted, a
+    # value from an earlier retrieval, and an outright invention. All four
+    # reach the gate as a string the index does not hold, and separating them
+    # needs arithmetic the gate is forbidden. See docs/MANIFEST.md, "What the
+    # no-arithmetic rule costs".
     "fabricated-number",
-    "derived-not-emitted",
     "wrong-unit",
     "frame-mismatch",
     "label-disguise",
-    "cross-call-number",
-    "stale-number",
     "precision-inflation",
     "spelled-out-quantity",
     "unparseable",
@@ -162,7 +166,8 @@ def load_cases(path: str) -> List[Case]:
 
 
 def load_all() -> List[Case]:
-    cases = load_cases(ADVERSARIAL_FILE) + load_cases(GROUNDED_FILE)
+    cases = (load_cases(ADVERSARIAL_FILE) + load_cases(WHITEBOX_FILE)
+             + load_cases(GROUNDED_FILE))
     seen = {}
     for c in cases:
         if c.case_id in seen:

@@ -40,6 +40,28 @@ character is not lost: the corpus records it in `attack_shape`, which is the
 author's description of what they were attempting, kept separate from the
 verdict the gate reached.
 
+The same collapse takes two more codes with it, and for the same reason.
+
+A number correctly derived from solver outputs that the manifest never emits,
+such as the ratio of the computed C3 floor to the published one, reaches the
+gate as a string absent from the index. So does an outright invention. Telling
+them apart would mean performing the derivation, which is the arithmetic the
+rule forbids, so `derived-not-emitted` is not a verdict either. It is worth
+being explicit about what this means, because it sounds like a weakness and is
+the opposite: a correctly derived figure is ungrounded, and the gate rejects it
+exactly as firmly as a fabricated one. Arithmetic being right is not the same
+as a number being one the solver produced.
+
+A value from an earlier retrieval is the third. It was correct once, which is
+precisely why it is dangerous, and it too arrives as a string this manifest
+does not render. `stale-number` needs no verdict of its own: grounding against
+one manifest, whose header carries its own `call_id` and retrieval date, is
+already what makes a number from another run fail.
+
+All three are covered by cases in `tests/corpus/adversarial_whitebox.jsonl`,
+which prove the gate rejects them. What the corpus does not claim is that the
+gate can say which kind of wrong they are.
+
 ## Structure
 
 One manifest per solver call, serialized as JSON. A header, then a flat entry

@@ -74,13 +74,10 @@ Closed. A case whose reason is outside this list fails to load.
 
 | Code | The attack |
 |---|---|
-| `fabricated-number` | A quantity the solver never produced, including a near-miss of a real one: the gate cannot separate the two without arithmetic |
-| `derived-not-emitted` | A correctly-derived figure the solver did not emit |
+| `fabricated-number` | A quantity the solver never produced. Also covers a near-miss, a correct derivation the manifest never emitted, and a value from an earlier retrieval: all four reach the gate as a string the index does not hold, and separating them needs arithmetic it is forbidden |
 | `wrong-unit` | A real number carrying a unit that is not its own |
 | `frame-mismatch` | A real number attributed to the wrong frame |
 | `label-disguise` | A fabricated quantity dressed as a reference, an object designation, or a count |
-| `cross-call-number` | A real number, from a different solver call |
-| `stale-number` | A real number from an earlier retrieval or an earlier revision |
 | `precision-inflation` | More digits than the solver computed |
 | `spelled-out-quantity` | A quantity written in words to evade digit extraction |
 | `unparseable` | A numeric construct the extractor cannot resolve, which must fail closed |
