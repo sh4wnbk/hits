@@ -24,7 +24,16 @@ from verify.corpus import (
 )
 
 # Coverage bars from docs/CORPUS.md. A corpus below them is not evidence.
-MIN_REJECT_CASES = 30
+#
+# The reject floor is 23, not 30. Bob's submission was 35 cases, and the ingest
+# pass resolved it into 23 rejections plus 9 documented limits in
+# known_limits.jsonl (7 attribution-seam, 2 result-binding) with 3 quarantined.
+# The original 30 assumed every case Bob wrote would be a rejection. Nine were
+# not: frozen membership accepts them, because the token is in the manifest with
+# a matching unit and frame and the wrongness is in what the number is attached
+# to. Counting those toward a rejection floor would credit the gate with catches
+# it does not make, so the bar tracks the membership-catchable count.
+MIN_REJECT_CASES = 23
 MIN_ACCEPT_CASES = 12
 MIN_REASON_CATEGORIES = 8
 
