@@ -84,6 +84,29 @@ def attached_unit(text: str, end: int) -> Optional[str]:
     return None
 
 
+UNIT_CHARS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ^/²0123456789%")
+
+
+def raw_unit_text(text: str, end: int) -> str:
+    """
+    The unit exactly as the explanation wrote it.
+
+    The canonical form is what the manifest declares; this is what the reader
+    sees. A finding has to name the written form, because "km/s^2" and "km/s"
+    are different mistakes and reporting the canonical one would describe an
+    error the author did not make.
+    """
+    tail = text[end:]
+    stripped = tail.lstrip()
+    run = ""
+    for ch in stripped:
+        if ch in UNIT_CHARS:
+            run = run + ch
+        else:
+            break
+    return run
+
+
 def _preceding_word(text: str, start: int) -> str:
     words = text[:start].split()
     return words[-1].lower() if words else ""

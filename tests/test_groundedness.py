@@ -141,9 +141,18 @@ def test_case(case):
             f"{case.case_id} was ACCEPTED but must be rejected "
             f"({case.expect_reason}). {case.notes}\n"
             f"  explanation: {case.explanation!r}")
-        flagged = {f.text for f in verdict.findings}
-        expected = {s.text for s in case.offending_spans}
-        assert expected & flagged, (
+        # Matched by containment, either direction, case-insensitively. Bob's
+        # spans and the gate's findings name the same mistake at different
+        # widths: a span may read "0.167 km/s" where the finding names the
+        # "km/s" that is wrong, or "Fig. 3" where the gate names the reference
+        # it could not find. Requiring equality would fail the gate for
+        # describing the error more precisely than the case did. Containment
+        # still fails a gate that tripped over an unrelated token, which is
+        # what this assertion is for.
+        flagged = {f.text.lower() for f in verdict.findings}
+        expected = {s.text.lower() for s in case.offending_spans}
+        overlap = any(f in e or e in f for f in flagged for e in expected)
+        assert overlap, (
             f"{case.case_id} was rejected, but not for the right token. "
             f"expected one of {sorted(expected)}, gate flagged {sorted(flagged)}")
         reasons = {f.reason for f in verdict.findings}

@@ -295,6 +295,39 @@ def sentence_after(text: str, pos: int) -> str:
     return sentence[pos - start:]
 
 
+def offset_in_sentence(text: str, pos: int) -> int:
+    """Where `pos` falls within its own sentence."""
+    return pos - len(sentence_before(text, pos))
+
+
+def find_in_sentence(text: str, pos: int, needle: str) -> List[int]:
+    """Absolute positions of `needle` within the sentence containing `pos`."""
+    sentence, start = _sentence_at(text, pos)
+    low = sentence.lower()
+    out, i = [], low.find(needle)
+    while i != -1:
+        out.append(start + i)
+        i = low.find(needle, i + 1)
+    return out
+
+
+def nearest_position(candidates, target: int):
+    """
+    The candidate position closest to `target`, or None.
+
+    Positional arithmetic lives here, in the text utilities, and not in
+    verify/groundedness.py. That is not a dodge of the no-arithmetic rule: the
+    rule exists so the gate cannot re-derive a VALUE it is supposed to be
+    checking, and character offsets are not values under check. Keeping the
+    gate's own module literally free of arithmetic is what makes the AST test a
+    cheap and total guarantee, and it only works if the text mechanics live
+    somewhere else.
+    """
+    if not candidates:
+        return None
+    return min(candidates, key=lambda c: abs(c - target))
+
+
 # Public aliases. The gate imports these so its tokenizer and sentence scope
 # are the same code the triage used, and the two cannot drift into disagreeing
 # about what counts as a quoted number.

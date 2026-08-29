@@ -1,13 +1,21 @@
 """
 verify/groundedness.py — the deterministic groundedness gate.
 
-Built in pieces, against the corpus, in the order the corpus proves each piece
-is needed. This file currently holds ONE check, and `Verdict.checks_run` says
-so on every verdict it returns. A grounded verdict from this module today means
-"the attribution check found nothing", NOT "every number is grounded". The
-membership test and the extraction rule are not written yet, and until they
-are, the 23 membership cases in the corpus fail as accepted-but-should-reject.
-That red is the honest report of what is missing.
+Two checks, and `Verdict.checks_run` records which ran.
+
+The membership test is the dispositive one. Every citable token in an
+explanation must appear in the manifest for the call that produced it, matched
+as a string against the renderings the solver emitted in advance. The gate does
+not round, does not convert, and does not compute: if it could re-derive 1.62%
+from 714.36 and 703, what it would certify is that it can do arithmetic, not
+that the explanation is grounded. tests/test_groundedness.py walks this file's
+AST and reds the build if a numeric conversion, rounding, absolute value, or
+arithmetic operator ever appears here.
+
+Unit and frame are dispositive too, and for the same reason they are separate
+fields in the solver: 714.36 km^2/s^2 and 714.36 km/s are different claims, and
+an Earth-relative C3 called heliocentric is a different quantity that happens
+to share a number. Matching digits is not enough.
 
 The attribution check: published versus computed.
 
@@ -40,7 +48,12 @@ from typing import List
 # and the ingest triage cannot disagree about what counts as a quoted number.
 from verify.corpus_ingest import (
     tokens_in_manifest, sentence_before, sentence_after,
+    nearest_position, find_in_sentence,
 )
+from verify.extract import (
+    extract, raw_unit_text, CITABLE, REFERENCE, SPELLED_OUT, MALFORMED,
+)
+from verify.exemptions import REFERENCE_WORDS
 
 # ---------------------------------------------------------------------------
 # The lexicon, held as data
@@ -181,10 +194,182 @@ class Verdict:
         return not self.findings
 
 
+# Words that name a frame, and the frame each names.
+FRAME_WORDS = {
+    "heliocentric": "heliocentric",
+    "earth-relative": "earth_relative",
+    "earth-departure": "earth_relative",
+    "earth relative": "earth_relative",
+    "target-relative": "target_relative",
+    "target relative": "target_relative",
+    "relative to the sun": "heliocentric",
+}
+
+# How far a frame word reaches. A frame word in the same sentence qualifies the
+# quantity that sentence is about; one in the next sentence does not.
+FRAME_SCOPE = "sentence"
+
+
+def _citation_index(manifest) -> set:
+    """
+    The reference tokens the source citations actually contain.
+
+    A reference number is grounded against this, not against the renderings.
+    "Fig. 5" and "eq. 4" appear in the manifest's citation strings; "Fig. 3" and
+    "equation 7" do not, and a fabricated reference beside a real value is the
+    disguise the mandate names.
+    """
+    out = set()
+    for entry in manifest.entries:
+        if not entry.citation:
+            continue
+        for word in REFERENCE_WORDS:
+            for piece in entry.citation.lower().split(word):
+                stripped = piece.lstrip(". ")
+                digits = ""
+                for ch in stripped:
+                    if ch.isdigit():
+                        digits = digits + ch
+                    else:
+                        break
+                if digits:
+                    out.add(digits)
+    return out
+
+
+def _framed_positions(text: str, manifest) -> List[int]:
+    """Positions of tokens that carry a real frame, in order."""
+    index = manifest.index()
+    out = []
+    for token in extract(text):
+        if token.classification != CITABLE:
+            continue
+        entries = index.get(token.text)
+        if entries and "n_a" not in {e.frame for e in entries}:
+            out.append(token.start)
+    return out
+
+
+def _frame_conflict(text: str, pos: int, entries, manifest) -> str:
+    """
+    The frame word that qualifies THIS token and contradicts it.
+
+    A frame word attaches to the nearest quantity that has a frame at all, not
+    to every number in its sentence. Scanning the whole sentence flags the
+    wrong quantity as soon as a sentence names two frames, and correct prose
+    does that constantly: "the C3 floor sits near 714 km^2/s^2 ... and the
+    heliocentric check comes in at 26.3 km/s" describes both correctly, and a
+    sentence-wide scan rejects it. cc-002 is that sentence.
+
+    Tokens whose frame is n_a are not candidates, so a calendar year standing
+    between a frame word and the quantity it describes does not absorb it.
+    """
+    frames = {e.frame for e in entries}
+    if "n_a" in frames:
+        return ""
+
+    framed = _framed_positions(text, manifest)
+    for word, frame in FRAME_WORDS.items():
+        if frame in frames:
+            continue
+        for word_pos in find_in_sentence(text, pos, word):
+            if nearest_position(framed, word_pos) == pos:
+                return text[word_pos:word_pos + len(word)]
+    return ""
+
+
+def _reference_phrase(text: str, start: int, end: int) -> str:
+    """The reference word and its number, as the explanation wrote them."""
+    head = text[:start].rstrip()
+    for word in REFERENCE_WORDS:
+        if head.lower().endswith(word):
+            return text[head.lower().rfind(word):end].strip()
+    return text[start:end]
+
+
+def check_membership(text: str, manifest) -> List[Finding]:
+    """
+    Every citable token must be a rendering the solver emitted.
+
+    A string lookup, and nothing else. The renderings were enumerated at emit
+    time precisely so this step never has to round.
+    """
+    findings: List[Finding] = []
+    index = manifest.index()
+    citations = _citation_index(manifest)
+
+    for token in extract(text):
+        if token.classification == SPELLED_OUT:
+            findings.append(Finding(
+                token.text, "spelled-out-quantity", token.start,
+                "a quantity written as words cannot be matched against a "
+                "manifest rendering"))
+            continue
+
+        if token.classification == MALFORMED:
+            findings.append(Finding(
+                token.text, "unparseable", token.start,
+                "not a number any reader or manifest can resolve"))
+            continue
+
+        if token.classification == REFERENCE:
+            if token.text not in citations:
+                # Name the whole reference. "3" is not the mistake; "Fig. 3" is.
+                phrase = _reference_phrase(text, token.start, token.end)
+                findings.append(Finding(
+                    phrase, "label-disguise", token.start,
+                    f"no manifest citation refers to {phrase}; a fabricated "
+                    "reference standing beside a real value"))
+            continue
+
+        if token.classification != CITABLE:
+            continue
+
+        entries = index.get(token.text)
+        if not entries:
+            # One extra trailing digit is distinguishable from an invented
+            # number by string alone: strip the trailing zeros and see whether
+            # what remains is a rendering. No arithmetic, no comparison of
+            # magnitudes, just characters.
+            trimmed = token.text.rstrip("0") if "." in token.text else token.text
+            if trimmed != token.text and trimmed.rstrip(".") in index:
+                findings.append(Finding(
+                    token.text, "precision-inflation", token.start,
+                    f"the manifest renders this as {trimmed.rstrip('.')}, "
+                    "claiming a digit the solver did not compute"))
+            else:
+                findings.append(Finding(
+                    token.text, "fabricated-number", token.start,
+                    "no manifest entry renders this value"))
+            continue
+
+        if token.unit:
+            units = {e.unit for e in entries}
+            if token.unit not in units:
+                # The finding names the unit, because the unit is what is
+                # wrong. The value is correct and reporting it as the offending
+                # token would describe a mistake nobody made.
+                written = raw_unit_text(text, token.end) or token.unit
+                findings.append(Finding(
+                    written, "wrong-unit", token.start,
+                    f"{token.text} carries {written}, the manifest declares "
+                    f"{sorted(units)}"))
+                continue
+
+        conflict = _frame_conflict(text, token.start, entries, manifest)
+        if conflict:
+            findings.append(Finding(
+                conflict, "frame-mismatch", token.start,
+                f"{token.text} is described as {conflict}, the manifest "
+                f"declares {sorted({e.frame for e in entries})}"))
+
+    return findings
+
+
 # Every check the gate runs, in order. A check is added here only once it has
 # a corpus case proving it rejects something and the accept suite proving it
 # does not reject correct prose.
-CHECKS = ("attribution",)
+CHECKS = ("membership", "attribution")
 
 
 def check(text: str, manifest) -> Verdict:
@@ -192,8 +377,10 @@ def check(text: str, manifest) -> Verdict:
     Run the gate over one explanation against one manifest.
 
     One manifest, one call. A number that is real but belongs to a different
-    solve is not grounded here, and that is deliberate.
+    solve is not grounded here, and that is deliberate: `call_id` is what stops
+    an explanation borrowing a plausible figure from a neighbouring run.
     """
     findings: List[Finding] = []
+    findings.extend(check_membership(text, manifest))
     findings.extend(check_attribution(text, manifest))
     return Verdict(findings=findings, checks_run=CHECKS)
