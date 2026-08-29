@@ -75,6 +75,32 @@ HELD_OUT: Dict[str, str] = {
 
 
 # ---------------------------------------------------------------------------
+# Span corrections, recorded rather than applied silently
+# ---------------------------------------------------------------------------
+#
+# A declared input to the generator, like HELD_OUT. Bob's explanation text is
+# never touched: only the span, and only where the span names a phrase the
+# sentence gets right. Each correction states what was wrong with the original.
+
+SPAN_CORRECTIONS = {
+    "bob-034": {
+        "text": "target-relative",
+        "reason": (
+            "The sentence is 'a target-relative encounter at 115.079 AU, which "
+            "the solver reports in the heliocentric frame'. 115.079 AU is a "
+            "heliocentric distance, so 'heliocentric frame' is the half the "
+            "sentence gets RIGHT, and the original span pointed at it. The "
+            "error is 'target-relative' applied to a heliocentric quantity, "
+            "which is what the gate names. Bob's own why field says the same "
+            "thing: the distance is heliocentric and the velocity is not. The "
+            "reason code was already frame-mismatch and needed no change; only "
+            "the location was wrong."
+        ),
+    },
+}
+
+
+# ---------------------------------------------------------------------------
 # Shape to reason code
 # ---------------------------------------------------------------------------
 
@@ -515,6 +541,14 @@ def ingest(raw_path: str = RAW_SUBMISSION_FILE, write: bool = True) -> Dict[str,
         outcomes.append(outcome)
 
         spans = repaired_raw["offending_spans"]
+        if cid in SPAN_CORRECTIONS:
+            want = SPAN_CORRECTIONS[cid]["text"]
+            at = repaired_raw["explanation"].find(want)
+            if at < 0:
+                raise ValueError(
+                    f"{cid}: corrected span {want!r} is not in the explanation. "
+                    "A correction may relocate a span, never invent one")
+            spans = [{"text": want, "start": at, "end": at + len(want)}]
         if outcome.token:
             # The span moves to the token the attribution check will cite. Bob
             # often flagged the attributing phrase ("as computed by HITS"),
