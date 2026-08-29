@@ -36,15 +36,23 @@ headline claim of the submission.
 **This is the highest-value Bob spend.** Correctness matters most here, and a
 Bob review pass over the solver earns a concrete line in `BOB_USAGE.md`.
 
-## Phase 2 — Grid and visualization
+**Absorbed from the old Phase 2**, and delivered here: gridding the solver over
+departure dates and flight times, and porkchop rendering. `solver/grid.py` and
+`plots/c3_floor_slice.html` are the result. A trajectory plot for a selected
+solution was in that phase and is not built.
 
-- Grid the solver over departure dates and flight times
-- Porkchop plot rendering
-- Trajectory plot for a selected solution
+## Phase 2 — Granite layer and the groundedness gate
 
-**Exit:** a judge can see the feasible region rather than read about it.
+The numbering originally put grid and visualization at Phase 2 and the Granite
+layer at Phase 3. The work did not run that way. Gridding and the C3 porkchop
+landed inside Phase 1 alongside the solver, and the phase every commit, every
+BOB_USAGE.md entry and CLAUDE.md itself calls Phase 2 is the gate. There is
+therefore no Phase 3: the old Phase 3 is this one, and the old Phase 2 is
+folded into Phase 1 below. Phases 4 and 5 keep their numbers, because
+renumbering them would break references for the sake of tidiness.
 
-## Phase 3 — Granite layer
+The headings now match what was built. A roadmap that disagrees with the commit
+log is not a plan, it is a second version of events.
 
 - Solver exposed as a tool the agent calls
 - Explanations generated from solver output only
@@ -56,6 +64,10 @@ Bob review pass over the solver earns a concrete line in `BOB_USAGE.md`.
 
 **Exit:** the agent explains a real result, and the groundedness gate blocks a
 deliberately ungrounded one.
+
+**Built so far:** the manifest, the extraction rule, and the gate's membership
+and attribution checks, against a 33-case reject corpus and a 14-case accept
+corpus. The Granite agent layer, Guardian, and the degrade path are not built.
 
 ## Phase 4 — Proof surface
 

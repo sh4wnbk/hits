@@ -8,18 +8,27 @@ rather than asserted.
 Each row pairs a claim with the minimal command or check that decides it. A
 claim without a verification step is not a claim, it is a hope.
 
-| Claim | Verification step |
-|---|---|
-| Solver reproduces published intercept figures | `pytest tests/test_validation.py::test_lyra_oumuamua -v` — prints computed vs published delta-v and the difference |
-| Energy is conserved along computed arcs | `pytest tests/test_physics.py::test_energy_conservation` |
-| Hyperbolic excess velocity matches target eccentricity | `pytest tests/test_physics.py::test_vinf_consistency` |
-| Lambert solutions satisfy their boundary conditions | `pytest tests/test_physics.py::test_lambert_boundary` |
-| Explanations contain no number the solver did not produce | `pytest tests/test_groundedness.py` — includes a deliberately ungrounded fixture that must be rejected |
-| Validation runs without credentials | CI job `validate` runs with no secrets configured; a leaked credential requirement turns it red |
-| Numbers still render when watsonx is down | `pytest tests/test_degrade.py::test_explain_without_watsonx` |
-| Cached ephemerides match Horizons | `python -m verify.ephemeris_drift` — reports difference and cache date |
-| Docs describe only shipped behaviour | CI job `docs-honesty` compares CLAUDE.md's unbuilt list against the module tree |
-| Deployed URL is reachable | keepalive workflow pings `/health` every ten minutes and fails loudly |
+| Claim | Verification step | Status |
+|---|---|---|
+| Solver reproduces published intercept figures | `pytest tests/test_validation.py -v` — prints computed against published and the difference for all five Lyra quantities | Built |
+| Energy is conserved along computed arcs | `pytest tests/test_lambert.py::test_energy_conservation` | Built |
+| Lambert solutions satisfy their boundary conditions | `pytest tests/test_lambert.py::test_boundary_conditions` | Built |
+| The manifest carries every number an explanation may quote | `pytest tests/test_manifest.py` — reflection over every public result dataclass | Built |
+| The rendering ladder is pinned, not incidental | `pytest tests/test_manifest.py::test_pinned_ladders` | Built |
+| Explanations contain no number the solver did not produce | `pytest tests/test_groundedness.py` — 33 reject cases, 14 accept cases | Built |
+| The gate does no arithmetic | `pytest tests/test_groundedness.py::test_gate_does_no_arithmetic` — walks the gate's AST | Built |
+| A quantity is told from an incidental numeral by a stated rule | `pytest tests/test_extract.py` | Built |
+| Validation runs without credentials | the whole suite runs offline against committed state vectors; no secret is read anywhere in `solver/` or `verify/` | Built, though no CI job enforces it yet |
+| Hyperbolic excess velocity matches target eccentricity | `tests/test_physics.py::test_vinf_consistency` | **Unbuilt.** The frame gate in `test_validation.py` checks v_inf against the published figure; a separate eccentricity-consistency check is not written |
+| Numbers still render when watsonx is down | `tests/test_degrade.py::test_explain_without_watsonx` | **Unbuilt.** No agent layer exists yet, so there is nothing to degrade from |
+| Cached ephemerides match Horizons | `python -m verify.ephemeris_drift` | **Unbuilt.** Committed states carry their retrieval date; nothing re-checks them against live Horizons |
+| Docs describe only shipped behaviour | CI job `docs-honesty` comparing CLAUDE.md's unbuilt list against the module tree | **Unbuilt.** There is no CI in this repository at all; this document is maintained by hand, which is why the rows above carry an explicit status |
+| Deployed URL is reachable | keepalive workflow pinging `/health` | **Unbuilt.** No deployment |
+
+Rows marked unbuilt name a check that does not exist. They are kept rather than
+deleted because each is a claim the project intends to support, and a
+verification document that quietly drops the checks it has not written reads
+exactly like one that passed them.
 
 ## What is verified
 
@@ -61,7 +70,30 @@ marketing.
   today may differ from numbers computed later for the same target, which is a
   property of the data rather than an error.
 
-See `docs/UNCERTAINTY.md` for magnitudes.
+**Groundedness has three standing limits**, stated here because a gate whose
+limits are not written down invites the belief that it has none.
+
+The gate cannot see misattribution within a single manifest. A real number
+attached to the wrong result, in the right unit and the right frame, passes:
+"the C3 floor departure date is 2018-01-01" quotes a real date that belongs to
+the grid window rather than the floor. Two cases record this, bob-027 and
+bob-033 in `tests/corpus/known_limits.jsonl`, and they are held as accepted
+limits rather than counted as catches. The published-versus-computed half of
+this problem IS caught, because provenance is manifest metadata; which result a
+number describes is not.
+
+The gate cannot say what kind of wrong a number is. A plausible rounding, a
+correct derivation the manifest never emitted, a value from an earlier
+retrieval, and an outright invention all reach it as a string the index does
+not hold, and telling them apart means arithmetic it is forbidden. All four are
+rejected, all four as `fabricated-number`. See docs/MANIFEST.md, "What the
+no-arithmetic rule costs".
+
+Granite Guardian is not wired in. Every verdict reports its advisory field as
+`unavailable`. The deterministic comparison is dispositive and is running; the
+advisory second opinion is not.
+
+`docs/UNCERTAINTY.md` is referenced by this project's plans and does not exist.
 
 ## Reproducing it
 
