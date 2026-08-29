@@ -1,0 +1,279 @@
+"""
+agent/explain.py — generate, gate, regenerate, and fall to the floor.
+
+The fallible path, built on top of a floor that was proven first. The order
+matters and it is the same discipline the gate itself was built under: the
+thing that catches the failure exists and is watched working before the thing
+that fails is wired in.
+
+## The invariant
+
+The system never serves an ungrounded explanation. There is one exit from this
+module and everything leaves through it holding a grounded verdict:
+
+  1. Granite generates. verify.groundedness.check runs. If it is grounded, it
+     is served as `granite_first_pass`.
+  2. If not, regenerate, with the rejected tokens and the quote-only rule fed
+     back in. Capped at MAX_RETRIES, which is small on purpose: a model that
+     fabricates a number once tends to fabricate it again, and a long retry
+     budget mostly buys latency. If a retry comes back grounded it is served as
+     `granite_after_regen`.
+  3. After the retries are spent, the deterministic floor is served as
+     `deterministic_floor`.
+
+`served_by` carries which of those three happened, in separate values, because
+CLAUDE.md requires that an offline or fallback result is never mis-credited to
+the credentialed system. A judges page reading only the text could not tell a
+Granite answer from the template; reading `served_by` it cannot fail to.
+
+## Credentials
+
+They come from the environment, through agent/granite.py, and nowhere else.
+Absent credentials are not an error: the path is `deterministic_floor`, and the
+whole loop is exercised in tests by a stub that never touches watsonx. The
+no-key path is the one a user without an account gets, so it is the one that
+must not be an afterthought.
+
+## What a transport failure does
+
+It is recorded and the floor is served, without consuming the retry budget on
+further calls. The budget exists to correct a fabrication given specific
+feedback about it, and there is no feedback to give a connection error. This is
+the degrade path in docs/ARCHITECTURE.md: the explanation degrades, the numbers
+do not.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Optional, Sequence, Tuple
+
+from agent import granite, template
+from verify.groundedness import Finding, Verdict, check
+
+# The three ways a response can have been produced. Separate values, never
+# collapsed into a boolean: "was a model involved" is not the question a reader
+# of a validation surface is asking.
+GRANITE_FIRST_PASS = "granite_first_pass"
+GRANITE_AFTER_REGEN = "granite_after_regen"
+DETERMINISTIC_FLOOR = "deterministic_floor"
+
+SERVED_BY_VALUES = (GRANITE_FIRST_PASS, GRANITE_AFTER_REGEN, DETERMINISTIC_FLOOR)
+
+# Regenerations after the first pass. Small deliberately: a model that
+# fabricates a number once tends to repeat it, so the third and fourth attempt
+# mostly buy latency, and the floor is already a correct answer.
+MAX_RETRIES = 2
+
+NO_CREDENTIALS = "no watsonx credentials in the environment"
+RETRIES_EXHAUSTED = "every Granite attempt quoted a number the manifest does not render"
+
+
+class FloorUngrounded(RuntimeError):
+    """
+    The deterministic floor failed its own gate.
+
+    Raised rather than served, because at this point there is nothing left that
+    is safe to return, and returning ungrounded prose is the single failure
+    this whole layer exists to prevent. It can only happen if the template and
+    the manifest have drifted apart, which tests/test_template.py exists to
+    catch at build time.
+    """
+
+
+@dataclass(frozen=True)
+class Attempt:
+    """One generation, and what the gate made of it."""
+    index: int
+    text: str
+    findings: Tuple[Finding, ...] = ()
+    error: str = ""
+
+    @property
+    def grounded(self) -> bool:
+        return not self.findings and not self.error
+
+
+@dataclass(frozen=True)
+class Explanation:
+    """
+    What the loop serves, and the record of how it got there.
+
+    `verdict` is the gate's verdict on `text` and is always grounded. The
+    attempts are kept, rejected ones included, because a response that says it
+    fell to the floor should be able to show what it rejected on the way.
+    """
+    text: str
+    served_by: str
+    verdict: Verdict
+    attempts: Tuple[Attempt, ...] = ()
+    floor_reason: str = ""
+    model_id: str = ""
+
+    @property
+    def regenerations(self) -> int:
+        """Generation calls made after the first pass."""
+        return len(self.attempts[1:])
+
+    @property
+    def grounded(self) -> bool:
+        return self.verdict.grounded
+
+
+# ---------------------------------------------------------------------------
+# The prompt
+# ---------------------------------------------------------------------------
+
+QUOTE_ONLY_RULE = """\
+QUOTE-ONLY RULE. Write no number that does not appear verbatim in the list of
+permitted numbers above. Not a rounding of one, not a total of two of them, not
+a number you are confident is correct. A number this solver did not emit is
+rejected whether it happens to be right or not, so if a quantity you want is
+not on the list, say it in words or leave it out.
+
+Write units exactly as they are shown. A correct value with the wrong unit is a
+different claim and is rejected.
+
+If you name a frame (heliocentric, Earth-relative, target-relative), name the
+one listed for that number.
+
+Numbers marked `published` are the source paper's, not this system's. Introduce
+them as published, or with "against" or "versus". Numbers marked `computed` or
+`derived` are this system's own: never describe one as published or as a
+benchmark figure.
+
+Do not cite a figure, equation, table or page number. Reference numbers are
+checked against the source citations and a wrong one is treated as a fabricated
+number wearing a label.
+
+Write connected prose. State that the model is patched-conic and two-body, with
+no n-body integration and no non-gravitational forces."""
+
+
+def permitted_numbers(manifest) -> str:
+    """
+    Every number the explanation is allowed to write, with what it is.
+
+    The kind, unit and frame travel with each line because they are what the
+    gate checks besides the digits, and a model that is not told them cannot
+    satisfy them.
+    """
+    lines = []
+    for entry in manifest.entries:
+        alternates = entry.renderings[1:]
+        line = (f"- {entry.canonical}  [{entry.kind}, unit {entry.unit}, "
+                f"frame {entry.frame}]  {entry.label}")
+        if alternates:
+            line = f"{line}  (may also be written {', '.join(alternates)})"
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def _rejection_block(rejected: Sequence[Finding], previous: str) -> str:
+    named = "\n".join(
+        f'  - "{f.text}"  ({f.reason}): {f.note}' for f in rejected)
+    return (
+        "YOUR PREVIOUS ANSWER WAS REJECTED by the groundedness gate.\n\n"
+        "It said:\n"
+        f"{previous}\n\n"
+        "These are what it was rejected for:\n"
+        f"{named}\n\n"
+        "Rewrite it. Replace every token above with a number from the "
+        "permitted list, or drop the sentence that carried it. The quote-only "
+        "rule still applies in full.")
+
+
+def build_prompt(manifest, question: str = "",
+                 rejected: Sequence[Finding] = (),
+                 previous: str = "") -> str:
+    """The prompt for one attempt. Regeneration differs only by the feedback block."""
+    asked = question or (
+        "Explain this result in plain language to someone with no "
+        "mission-design training.")
+    parts = [
+        "You are explaining the output of a deterministic orbital-mechanics "
+        "solver to a general reader. The solver has already run and finished. "
+        "You interpret its output; you do not produce figures of your own.",
+        f"THE QUESTION: {asked}",
+        f"SOLVER CALL: {manifest.producer}, call_id {manifest.call_id}",
+        f"FIDELITY: {manifest.fidelity_note}",
+        f"PERMITTED NUMBERS:\n{permitted_numbers(manifest)}",
+        QUOTE_ONLY_RULE,
+    ]
+    if rejected:
+        parts.append(_rejection_block(rejected, previous))
+    parts.append("EXPLANATION:")
+    return "\n\n".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# The loop
+# ---------------------------------------------------------------------------
+
+def _serve_floor(floor_text: str, manifest, attempts: Tuple[Attempt, ...],
+                 reason: str, model_id: str) -> Explanation:
+    """
+    Serve the deterministic template, having gated it like anything else.
+
+    The floor is not trusted because it is the floor. It goes through the same
+    check every Granite candidate goes through, so the invariant is enforced at
+    the point of serving rather than assumed at the point of writing.
+    """
+    verdict = check(floor_text, manifest)
+    if not verdict.grounded:
+        raise FloorUngrounded(
+            "the deterministic template failed its own gate, so there is "
+            "nothing safe left to serve: "
+            + "; ".join(f"{f.reason} {f.text!r}" for f in verdict.findings))
+    return Explanation(text=floor_text, served_by=DETERMINISTIC_FLOOR,
+                       verdict=verdict, attempts=attempts,
+                       floor_reason=reason, model_id=model_id)
+
+
+def explain(manifest, client=None, *, question: str = "",
+            max_retries: int = MAX_RETRIES) -> Explanation:
+    """
+    Explain one solver call, and never return an ungrounded explanation.
+
+    `client` is any object with `generate(prompt) -> str`. Left None, the
+    environment decides: credentials present means Granite, credentials absent
+    means the floor. Nothing about a credential ever reaches this function's
+    arguments.
+    """
+    # Built before the fallible path runs, not after it fails. A fallback
+    # constructed only on the failure branch is a fallback nobody has watched.
+    floor_text = template.explain(manifest)
+
+    if client is None:
+        client = granite.from_env()
+    if client is None:
+        return _serve_floor(floor_text, manifest, (), NO_CREDENTIALS, "")
+
+    model_id = getattr(client, "model_id", "")
+    attempts: list = []
+    prompt = build_prompt(manifest, question=question)
+
+    for index in range(max_retries + 1):
+        try:
+            candidate = client.generate(prompt)
+        except Exception as exc:                      # noqa: BLE001
+            attempts.append(Attempt(index=index, text="",
+                                    error=f"{type(exc).__name__}: {exc}"))
+            return _serve_floor(floor_text, manifest, tuple(attempts),
+                                f"Granite was unreachable: {exc}", model_id)
+
+        verdict = check(candidate, manifest)
+        if verdict.grounded:
+            attempts.append(Attempt(index=index, text=candidate))
+            served = GRANITE_FIRST_PASS if index == 0 else GRANITE_AFTER_REGEN
+            return Explanation(text=candidate, served_by=served,
+                               verdict=verdict, attempts=tuple(attempts),
+                               model_id=model_id)
+
+        attempts.append(Attempt(index=index, text=candidate,
+                                findings=tuple(verdict.findings)))
+        prompt = build_prompt(manifest, question=question,
+                              rejected=verdict.findings, previous=candidate)
+
+    return _serve_floor(floor_text, manifest, tuple(attempts),
+                        RETRIES_EXHAUSTED, model_id)
