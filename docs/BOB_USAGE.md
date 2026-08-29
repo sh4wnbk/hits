@@ -112,3 +112,14 @@ logged as its own row when it happens.
 | Sub-task 3 | Claude Code | Manifest emitter, 80 entries for a full validate() call. Printed validation rows rebound to the manifest's canonical renderings so output and grounding cannot drift. Frozen fixture committed | solver/manifest.py, tests/test_manifest.py, tests/fixtures/manifests/validate_full.json |
 | Sub-task 4 | Claude Code | Corpus format, loader, and runner built BEFORE the gate. 14 white-box accept cases written. Runner red as designed: 16 failed, 3 passed | docs/CORPUS.md, verify/corpus.py, tests/test_groundedness.py, tests/corpus/grounded.jsonl |
 | Sub-task 4 (Bob) | IBM Bob | PENDING: adversarial reject corpus, 30 to 45 cases, authored black-box from the redacted manifest view and the printed validation rows. Brief prepared | docs/BOB_BRIEF_CORPUS.md |
+| Agent layer, task 1 | Claude Code | Deterministic explanation floor built and gated BEFORE the fallible path that leans on it, same failing-case-first order the gate was built in. Two shapes: intercept feasibility from a solve manifest, validation summary from a validate manifest. Takes the manifest and never the result object, so the floor sees exactly the universe the gate sees. Proven twice: the gate returns grounded on each shape's output, and an AST walk rejects any format specifier, rounding call, arithmetic operator, or numeric literal in the module | agent/template.py, tests/test_template.py |
+| Agent layer, task 2 | Claude Code | Generate-and-gate loop: Granite generates, the gate runs, a rejected candidate is regenerated twice with the specific rejected tokens fed back, then the floor is served. One exit, and the floor is gated like any candidate. served_by emitted per response as granite_first_pass, granite_after_regen or deterministic_floor. Credentials read from the environment only, in an isolated client module the test suite never touches | agent/explain.py, agent/granite.py, tests/test_explain.py |
+| Agent layer, task 3 | Claude Code | The invariant demonstrated rather than argued, in its own file: a stub fabricating a different number on every call is watched being caught three times and never reaching the output; a stub grounded on the first try is credited to granite_first_pass; one grounded only on the second regeneration is credited to granite_after_regen. Suite 186 passed, 1 skipped, 1 xfailed | tests/test_explain_proof.py |
+
+**Phase 2 agent-layer exit condition:** met for the loop, not for the endpoint.
+Every path is exercised by a stub, so what is proven is that no ungrounded
+explanation can be served, whatever the model returns. No live watsonx call has
+been made from this machine, which has no credentials, and the model id and
+region host in `agent/granite.py` are therefore configurable defaults rather
+than observed facts. The first credentialed run is its own entry when it
+happens.

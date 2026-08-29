@@ -67,7 +67,13 @@ deliberately ungrounded one.
 
 **Built so far:** the manifest, the extraction rule, and the gate's membership
 and attribution checks, against a 33-case reject corpus and a 14-case accept
-corpus. The Granite agent layer, Guardian, and the degrade path are not built.
+corpus. Above them the agent layer: a deterministic explanation floor whose
+every number is a manifest rendering, and a generate-and-gate loop that
+regenerates twice against the specific rejected tokens before serving the
+floor. The degrade path is built and is the path this machine runs on, since
+no credentials exist here. Guardian is not built, and no live watsonx call has
+been made, so what is proven is the loop's behaviour rather than the
+endpoint's.
 
 ## Phase 4 — Proof surface
 

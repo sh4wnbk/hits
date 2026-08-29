@@ -103,8 +103,9 @@ read by judges.
 
 **Record each tool session as it happens** in `docs/BOB_USAGE.md`, since it
 cannot be reconstructed later. Bob drove Phase 1 and authored the Phase 2
-adversarial corpus black-box; Claude Code authored the Phase 2 gate. Which tool
-did what is a claim judges can check only if it was written down at the time.
+adversarial corpus black-box; Claude Code authored the Phase 2 gate and the
+agent layer above it. Which tool did what is a claim judges can check only if
+it was written down at the time.
 
 ## Accuracy guardrails
 
@@ -143,6 +144,11 @@ or assistant, should treat this list as authoritative over their own recall.
 - **The first clustering run failed and its output is not a result.** HDBSCAN
   directly on 384-dimensional embeddings collapsed to one cluster of 2,276
   questions. UMAP before clustering fixed it. Never cite the collapsed run.
+- **The watsonx model id and region host in `agent/granite.py` are unverified
+  defaults, not facts.** No credentials exist on this machine, so neither has
+  been confirmed against the live catalogue. They are overridden by
+  `WATSONX_MODEL_ID` and `WATSONX_URL`. Do not state which Granite model HITS
+  calls as though it had been observed answering.
 
 ### Plan versus shipped
 
@@ -187,8 +193,30 @@ Phase 2 built and validated (2026-08-29):
 - Suite: 156 passed, 1 skipped, 1 xfailed, 0 failed.
 - Granite Guardian is not wired in; every verdict reports advisory unavailable.
 
-Currently unbuilt, and therefore not to be described as working: the Granite
-agent layer, every judges endpoint, the frontend, and the deployment.
+Phase 2 agent layer built and validated (2026-08-29):
+- agent/template.py: the deterministic floor. Two shapes, intercept
+  feasibility from a solve manifest and the validation summary from a validate
+  manifest. Takes the manifest and never the result object, so the floor sees
+  exactly the universe the gate sees. Every number is a manifest rendering
+  pulled by entry id; an AST test rejects any format specifier, rounding call,
+  arithmetic operator, or numeric literal in the module.
+- agent/explain.py: generate, gate, regenerate at most twice with the rejected
+  tokens fed back, then serve the floor. One exit, and the floor is gated like
+  any candidate. `served_by` is `granite_first_pass`, `granite_after_regen` or
+  `deterministic_floor`, never collapsed.
+- agent/granite.py: the watsonx client, the only place a credential is read,
+  from the environment alone. Absent credentials are an ordinary outcome and
+  give `deterministic_floor`. Never called by the test suite.
+- The intercept template states no feasibility verdict. HITS computes what a
+  transfer costs and does not model launch-vehicle capability, so it reports
+  the cost and says the cost is the input to a judgement rather than the
+  judgement.
+- Suite: 186 passed, 1 skipped, 1 xfailed, 0 failed.
+- No live watsonx call has been made. Every Granite path is exercised by a
+  stub, so what is proven is the loop's behaviour, not the endpoint's.
+
+Currently unbuilt, and therefore not to be described as working: Granite
+Guardian, every judges endpoint, the frontend, and the deployment.
 
 ## Provenance and reproducibility
 

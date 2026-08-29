@@ -7,7 +7,7 @@ was left out is in `specs/tech-stack.md`.
 | Component | Role | Location | Verify |
 |---|---|---|---|
 | IBM Bob | Primary development tool | `docs/BOB_USAGE.md` | Session records with dates and what changed |
-| Granite (watsonx) | Reasoning layer: calls the solver as a tool, interprets output | `agent/` | `/explain` returns a generated explanation with `model` field populated |
+| Granite (watsonx) | Reasoning layer: interprets solver output under the groundedness gate | `agent/explain.py`, `agent/granite.py` | `tests/test_explain_proof.py` drives every path with a stub; a served response carries `served_by` and, when Granite produced it, `model_id`. No live call has been made yet |
 | Granite Guardian | Advisory groundedness check on explanations | `agent/guardian.py` | `/faithfulness` reports the advisory verdict alongside the deterministic one |
 | Granite embeddings | Sentence embeddings in the evidence pipeline | `data/cluster_questions.py` | `/evidence` reports which embedding model produced the cluster report |
 
@@ -28,6 +28,8 @@ than no answer.
 
 ## Degrade
 
-If watsonx is unavailable, the solver still runs and results still render with
-a templated explanation. The IBM layer improves the experience; it does not
-gate the answer.
+If watsonx is unavailable, or no credentials are present at all, the solver
+still runs and the result renders with the deterministic template in
+`agent/template.py`. That response reports `served_by: deterministic_floor`, so
+a floor answer is never mis-credited to Granite. The IBM layer improves the
+experience; it does not gate the answer.
