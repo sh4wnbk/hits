@@ -2,7 +2,7 @@
 
 Records each Bob session as it happens. Cannot be reconstructed after the fact.
 Each entry states the date, Bob mode, task performed, and what Bob produced or
-reviewed. Coin expenditure is recorded per session.
+reviewed.
 
 ---
 

@@ -119,5 +119,3 @@ and none is load-bearing.
 
 - Small branches with conventional prefixes, one concern each
 - No aspirational entries in the README. If it is not built, it is not listed
-- Bob spent on correctness-critical work and review passes, not scaffolding.
-  40 Bobcoins per trial account is a budget
