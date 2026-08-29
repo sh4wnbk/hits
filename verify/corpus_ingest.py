@@ -225,24 +225,33 @@ def _mask_units(text: str) -> str:
     return masked
 
 
-def _tokens_in_manifest(text: str, index) -> List[Tuple[str, int, list]]:
+def all_tokens(text: str) -> List[Tuple[str, int, int]]:
     """
-    The manifest renderings actually quoted in the explanation.
+    Every numeric or date token in the text, as (token, start, end).
 
-    Tokenised, not substring-matched. A rendering that only appears inside a
-    longer number, a unit, or an identifier is not a quotation of it.
+    The single tokenizer. The extraction rule and the manifest lookup both use
+    it, so they cannot disagree about what counts as a number.
+
+    Three traps it closes. Units are masked first, so the digits inside
+    km^2/s^2 are not numbers. An ISO date is one token, so 2018-06-04 does not
+    also yield a bare 06 that no explanation wrote. And a digit fused to a word
+    character is part of an identifier, not a quantity, which is what keeps C3,
+    1I, J2000 and v_inf2 out.
     """
     masked = _mask_units(text)
-    found = []
-    seen = set()
-    for m in list(ISO_DATE.finditer(masked)) + list(NUMBER.finditer(masked)):
-        tok = m.group().replace(",", "")
-        if (tok, m.start()) in seen:
+    iso = [(m.start(), m.end()) for m in ISO_DATE.finditer(masked)]
+    out = [(m.group(), m.start(), m.end()) for m in ISO_DATE.finditer(masked)]
+    for m in NUMBER.finditer(masked):
+        if any(a <= m.start() < b for a, b in iso):
             continue
-        seen.add((tok, m.start()))
-        if tok in index:
-            found.append((tok, m.start(), index[tok]))
-    return found
+        out.append((m.group().replace(",", ""), m.start(), m.end()))
+    return sorted(out, key=lambda t: t[1])
+
+
+def _tokens_in_manifest(text: str, index) -> List[Tuple[str, int, list]]:
+    """The manifest renderings actually quoted in the explanation."""
+    return [(tok, start, index[tok])
+            for tok, start, _ in all_tokens(text) if tok in index]
 
 
 def _unit_after(text: str, end: int) -> Optional[str]:
