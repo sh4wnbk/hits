@@ -25,7 +25,10 @@ Then stop. Do not load the file, do not count how many of each kind you wrote, d
 not verify offsets and report them as checked, do not run the loader, and do not
 touch any other corpus file. Every one of those checks belongs to the corpus
 owner, who re-runs all of them; a self-reported pass is worth nothing here and
-will be redone from scratch.
+will be redone from scratch. The file must validate on its own against the schema
+below, and if you cannot make it load without reading anything else in the
+repository, stop and report that as a bug rather than going to find what will
+parse.
 
 Each line:
 {"case_id": "bob-001", "author": "bob", "created": "<today, YYYY-MM-DD>",
