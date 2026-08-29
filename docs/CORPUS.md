@@ -5,16 +5,27 @@ exists before the gate does, and the gate is not trusted until a test shows it
 rejecting a fabricated number. A passing log written after the fact proves
 nothing; watching a red run go green is the evidence.
 
-## Two files, two authors
+## Three files, two authors
 
 The split is deliberate and is visible in the tree rather than only in a plan.
 
-`tests/corpus/adversarial.jsonl` holds the reject cases. They are authored
-black-box by IBM Bob, which sees the solver's public outputs and this format
-and nothing else. It never sees the gate's source, the exemption table, the
-rendering ladder, or the normalization rules. That independence is what makes a
-rejection worth something: the attacks are shaped by how fabrication actually
-looks, not by a known answer key.
+`tests/corpus/bob_submission.raw.jsonl` is what IBM Bob writes, black-box, and
+it is committed verbatim and never hand-edited. Bob sees the solver's public
+outputs through the redacted manifest view and the printed validation rows, and
+nothing else. It never sees the gate's source, the exemption table, the
+rendering ladder, or the normalization rules, and it does not assign a reason
+code: it records the shape of the attack and why the token is wrong, in its own
+words. That independence is what makes a rejection worth something, because the
+attacks are then shaped by how fabrication actually looks rather than by a known
+answer key.
+
+`tests/corpus/adversarial.jsonl` holds the canonical reject cases and is
+generated from the raw submission by the ingest pass, which assigns each case
+its reason code, verifies the spans, and triages the shapes the gate cannot
+resolve. It is never authored by hand, by Bob or by anyone. Keeping the two
+apart matters for a plain reason: the canonical file is the one the tests read,
+so an author who writes it directly is writing the answer sheet as well as the
+exam.
 
 `tests/corpus/grounded.jsonl` holds the accept cases. They are authored
 white-box in Claude Code, because a case whose job is to exercise exemption row
@@ -24,7 +35,8 @@ the rule or getting cases that pass by luck.
 
 Accept cases are not optional. A gate that rejects every input satisfies every
 reject case in the corpus, so without them the suite would certify a gate that
-is uselessly strict. The two files together are the test; either alone is not.
+is uselessly strict. The reject and accept corpora together are the test;
+either alone is not.
 
 ## Case format
 
