@@ -32,8 +32,16 @@ from verify.corpus import (
 # not: frozen membership accepts them, because the token is in the manifest with
 # a matching unit and frame and the wrongness is in what the number is attached
 # to. Counting those toward a rejection floor would credit the gate with catches
-# it does not make, so the bar tracks the membership-catchable count.
-MIN_REJECT_CASES = 23
+# it does not make, so the bar tracks what the gate can actually catch.
+#
+# It moved back to 30 when the attribution check landed. Seven of the nine
+# limits were the published/computed seam, which IS decidable from entry.kind
+# plus a phrase list, and verify.groundedness.check_attribution now decides it,
+# so they are rejections again. The remaining two, bob-027 and bob-033, stay in
+# known_limits.jsonl: they turn on which result a number is attached to, which
+# no manifest metadata encodes, and they are the honest record of what this
+# gate still cannot see.
+MIN_REJECT_CASES = 30
 MIN_ACCEPT_CASES = 12
 MIN_REASON_CATEGORIES = 8
 

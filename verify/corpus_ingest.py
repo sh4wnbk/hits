@@ -99,7 +99,28 @@ PUBLISHED_MARKERS = (
     "published", "hein", "lyra", "the paper", "et al", "reported", "reports",
     "fig.", "figure", "p.55", "the source", "benchmark",
 )
-SENTENCE_SPLIT = re.compile(r"(?<=[.;:])\s+|\n")
+SENTENCE_SPLIT = re.compile(r"[.;:]\s+|\n")
+
+# A period inside one of these does not end a sentence. Without this the
+# splitter cuts "Hein et al. report 703" and "the paper's Fig. 6 has 111.4 AU"
+# in half and strands the provenance marker in the previous fragment, which
+# makes a correctly attributed figure look unattributed. The accept corpus
+# caught exactly that.
+NON_TERMINAL_ABBREVIATIONS = (
+    "et al.", "fig.", "eq.", "p.", "pp.", "col.", "sec.", "no.", "vol.",
+    "cf.", "e.g.", "i.e.", "approx.", "ref.",
+)
+
+
+def _sentence_boundaries(text: str) -> List[int]:
+    """Where sentences actually start, abbreviations not counted as endings."""
+    out = [0]
+    for m in SENTENCE_SPLIT.finditer(text):
+        prefix = text[:m.start() + 1].lower()
+        if any(prefix.endswith(a) for a in NON_TERMINAL_ABBREVIATIONS):
+            continue
+        out.append(m.end())
+    return out
 
 UNIT_PATTERNS = (
     ("km^2/s^2", ("km^2/s^2", "km2/s2", "km²/s²")),
@@ -126,6 +147,8 @@ class Outcome:
     note: str = ""
     offset_repaired: bool = False
     known_limit: str = ""
+    token: str = ""          # the token the triage cites, when it names one
+    token_pos: int = -1
 
 
 # ---------------------------------------------------------------------------
@@ -244,11 +267,30 @@ def _unit_after(text: str, end: int) -> Optional[str]:
 
 def _sentence_at(text: str, pos: int) -> Tuple[str, int]:
     """The sentence containing `pos`, and where it starts."""
-    starts = [0] + [m.end() for m in SENTENCE_SPLIT.finditer(text)]
+    starts = _sentence_boundaries(text)
     start = max(s for s in starts if s <= pos)
-    ends = [m.start() for m in SENTENCE_SPLIT.finditer(text) if m.start() > pos]
-    end = ends[0] + 1 if ends else len(text)
+    later = [s for s in starts if s > pos]
+    end = later[0] if later else len(text)
     return text[start:end], start
+
+
+def sentence_before(text: str, pos: int) -> str:
+    """The part of the token's sentence that precedes it."""
+    sentence, start = _sentence_at(text, pos)
+    return sentence[:pos - start]
+
+
+def sentence_after(text: str, pos: int) -> str:
+    """The part of the token's sentence from the token onward."""
+    sentence, start = _sentence_at(text, pos)
+    return sentence[pos - start:]
+
+
+# Public aliases. The gate imports these so its tokenizer and sentence scope
+# are the same code the triage used, and the two cannot drift into disagreeing
+# about what counts as a quoted number.
+tokens_in_manifest = _tokens_in_manifest
+sentence_at = _sentence_at
 
 
 def _nearby(text: str, pos: int, markers) -> bool:
@@ -275,9 +317,7 @@ def _marker_before(text: str, pos: int, markers) -> bool:
     the marker is real but it attaches to the result at the end, not to the 0.6
     being passed off as the computed v_inf2.
     """
-    sentence, start = _sentence_at(text, pos)
-    low = sentence[:pos - start].lower()
-    return any(mk in low for mk in markers)
+    return any(mk in sentence_before(text, pos).lower() for mk in markers)
 
 
 def _marker_after(text: str, pos: int, markers) -> bool:
@@ -289,9 +329,7 @@ def _marker_after(text: str, pos: int, markers) -> bool:
     whether the other side is merely present would find both and decide
     nothing; what matters is that the label is being applied to this token.
     """
-    sentence, start = _sentence_at(text, pos)
-    low = sentence[pos - start:].lower()
-    return any(mk in low for mk in markers)
+    return any(mk in sentence_after(text, pos).lower() for mk in markers)
 
 
 def triage_misattribute(raw: Dict[str, Any], manifest) -> Outcome:
@@ -320,8 +358,9 @@ def triage_misattribute(raw: Dict[str, Any], manifest) -> Outcome:
     #    these: the token is in the manifest with a matching unit and frame, so
     #    nothing the gate does today rejects them. They are limits, not
     #    rejections, and they are tagged separately from rule 4 because the
-    #    seam IS decidable from entry.kind plus an attribution phrase, so a
-    #    later check can catch them. Rule 4's cases cannot be reached that way.
+    #    seam IS decidable from entry.kind plus an attribution phrase, and
+    #    verify.groundedness.check_attribution now decides it, so these are
+    #    rejections. Rule 4's cases cannot be reached that way and stay limits.
     #
     #    Which token to cite, when a sentence mixes sides: prefer the
     #    published-only one, because that is the value being passed off as the
@@ -332,21 +371,23 @@ def triage_misattribute(raw: Dict[str, Any], manifest) -> Outcome:
     for rendering, pos, entries in published_only:
         if not _marker_before(text, pos, PUBLISHED_MARKERS):
             return Outcome(
-                cid, "", "2: published value presented as the solver's own",
-                known_limit="attribution-seam",
+                cid, "attribution-mismatch",
+                "2: published value presented as the solver's own",
+                token=rendering, token_pos=pos,
                 note=f"{rendering!r} is published-only "
-                     f"({[e.id for e in entries][0]}); frozen membership "
-                     "accepts it, since the token, unit and frame all match")
+                     f"({[e.id for e in entries][0]}); membership alone accepts "
+                     "it, since the token, unit and frame all match")
 
     for rendering, pos, entries in present:
         kinds = {e.kind for e in entries}
         if kinds and kinds <= {"computed", "derived"}:
             if _marker_after(text, pos, PUBLISHED_MARKERS):
                 return Outcome(
-                    cid, "", "2: computed value presented as published",
-                    known_limit="attribution-seam",
+                    cid, "attribution-mismatch",
+                    "2: computed value presented as published",
+                    token=rendering, token_pos=pos,
                     note=f"{rendering!r} is computed "
-                         f"({[e.id for e in entries][0]}); frozen membership "
+                         f"({[e.id for e in entries][0]}); membership alone "
                          "accepts it, since the token, unit and frame all match")
 
     # 3. Separable on unit or frame, so an existing code already covers it.
@@ -428,13 +469,21 @@ def ingest(raw_path: str = RAW_SUBMISSION_FILE, write: bool = True) -> Dict[str,
         outcome.offset_repaired = was_repaired
         outcomes.append(outcome)
 
+        spans = repaired_raw["offending_spans"]
+        if outcome.token:
+            # The span moves to the token the attribution check will cite. Bob
+            # often flagged the attributing phrase ("as computed by HITS"),
+            # which reads correctly but is not the thing the gate rejects.
+            spans = [{"text": outcome.token, "start": outcome.token_pos,
+                      "end": outcome.token_pos + len(outcome.token)}]
+
         record = {
             "case_id": cid,
             "author": repaired_raw["author"],
             "created": repaired_raw["created"],
             "manifest_ref": ref,
             "explanation": repaired_raw["explanation"],
-            "offending_spans": repaired_raw["offending_spans"],
+            "offending_spans": spans,
             "attack_shape": shape,
             "why": repaired_raw["why"],
             "offset_repaired": was_repaired,

@@ -41,6 +41,9 @@ REJECT_REASONS = (
     "precision-inflation",
     "spelled-out-quantity",
     "unparseable",
+    # A value from this manifest attributed to the wrong side of the
+    # published/computed seam. Produced by verify.groundedness.check_attribution.
+    "attribution-mismatch",
 )
 
 AUTHORS = ("bob", "claude-code")
