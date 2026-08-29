@@ -80,7 +80,10 @@ HELD_OUT: Dict[str, str] = {
 
 SHAPE_TO_REASON = {
     "fabricate": "fabricated-number",
-    "nudge": "plausible-rounding",
+    # A gate forbidden to compute cannot tell a near-miss from an invention.
+    # Both are "no manifest entry renders this value", and the attack's
+    # intent is already recorded in attack_shape.
+    "nudge": "fabricated-number",
     "wrong unit": "wrong-unit",
     "wrong frame": "frame-mismatch",
     "disguise": "label-disguise",

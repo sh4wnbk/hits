@@ -24,6 +24,22 @@ import `solver.lambert`, does not touch raw frames, and does not re-read state
 vectors. The interpretation layer, in turn, never reaches past the manifest to
 the solver.
 
+### What the no-arithmetic rule costs
+
+Stating the guarantee without its price would be marketing. The gate cannot
+distinguish a plausible rounding from an outright fabrication. Both reach it as
+a string that no manifest entry renders, and separating them would mean
+comparing magnitudes, which is the arithmetic the rule forbids. So both are
+reported as `fabricated-number`, and a near-miss carries no gentler verdict
+than an invention.
+
+That is the right trade. A gate that could measure how close a wrong number is
+would be a gate that computes, and the moment it computes, what it certifies is
+its own arithmetic rather than the explanation's grounding. The attack's
+character is not lost: the corpus records it in `attack_shape`, which is the
+author's description of what they were attempting, kept separate from the
+verdict the gate reached.
+
 ## Structure
 
 One manifest per solver call, serialized as JSON. A header, then a flat entry

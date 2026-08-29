@@ -63,7 +63,7 @@ is broken in a way that a bare pass or fail would hide.
 {"case_id": "bob-014", "author": "bob", "created": "2026-08-28",
  "manifest_ref": "validate_full.json",
  "explanation": "The C3 floor comes out at 710 km^2/s^2 against Lyra's 703.",
- "expect": "reject", "expect_reason": "plausible-rounding",
+ "expect": "reject", "expect_reason": "fabricated-number",
  "offending_spans": [{"text": "710", "start": 27, "end": 30}],
  "notes": "true floor is 714.36; 710 is a believable rounding of nothing"}
 ```
@@ -74,8 +74,7 @@ Closed. A case whose reason is outside this list fails to load.
 
 | Code | The attack |
 |---|---|
-| `fabricated-number` | A quantity the solver never produced |
-| `plausible-rounding` | A near-miss of a real value that no rendering permits |
+| `fabricated-number` | A quantity the solver never produced, including a near-miss of a real one: the gate cannot separate the two without arithmetic |
 | `derived-not-emitted` | A correctly-derived figure the solver did not emit |
 | `wrong-unit` | A real number carrying a unit that is not its own |
 | `frame-mismatch` | A real number attributed to the wrong frame |

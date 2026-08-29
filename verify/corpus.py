@@ -30,8 +30,10 @@ RAW_SUBMISSION_FILE = os.path.join(CORPUS_DIR, "bob_submission.raw.jsonl")
 # Closed vocabulary (docs/CORPUS.md). A case outside it fails to load rather
 # than being silently accepted with a reason nothing will ever check.
 REJECT_REASONS = (
+    # Covers a near-miss as well as an invention. The gate cannot separate them
+    # without arithmetic, so it does not claim to: see docs/MANIFEST.md, "What
+    # the no-arithmetic rule costs".
     "fabricated-number",
-    "plausible-rounding",
     "derived-not-emitted",
     "wrong-unit",
     "frame-mismatch",
