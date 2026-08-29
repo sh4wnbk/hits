@@ -483,11 +483,26 @@ def _c3_branch_entries(c3, branch: str, computed: float, published: float,
 
 
 def _c3_entries(c3) -> List[ManifestEntry]:
+    from solver.lyra import LYRA_CONSTANTS
+
     out = _c3_branch_entries(
         c3, "y2027", c3.c3_2027_computed_km2_s2, c3.c3_2027_published_km2_s2,
         c3.c3_2027_abs_diff, c3.c3_2027_rel_diff_pct, c3.c3_2027_tolerance_frac,
         c3.c3_2027_departure_jd, c3.c3_2027_tof_days, c3.c3_2027_citation,
         "2027 launch")
+
+    # The paper gives the 2027 result as a departure velocity as well as an
+    # energy. Both forms are the same published result, so both are quotable.
+    _cfg_2027 = LYRA_CONSTANTS["c3_2027_km2_s2"]
+    out.append(entry(
+        "validate.c3.y2027.published_vinf",
+        "2027 launch Earth-departure hyperbolic excess velocity, published",
+        _cfg_2027["published_departure_vinf_km_s"], "km/s", "published",
+        precision=1, frame="earth_relative", citation=_cfg_2027["citation"],
+        provenance="solver.lyra.LYRA_CONSTANTS[c3_2027_km2_s2]"
+                   "[published_departure_vinf_km_s]",
+        renderings=[f'{_cfg_2027["published_departure_vinf_km_s"]:g}']))
+
     out += _c3_branch_entries(
         c3, "floor", c3.c3_floor_computed_km2_s2, c3.c3_floor_published_km2_s2,
         c3.c3_floor_abs_diff, c3.c3_floor_rel_diff_pct, c3.c3_floor_tolerance_frac,

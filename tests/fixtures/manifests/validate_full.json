@@ -346,6 +346,22 @@
       "value_type": "number"
     },
     {
+      "id": "validate.c3.y2027.published_vinf",
+      "label": "2027 launch Earth-departure hyperbolic excess velocity, published",
+      "value": 37.4,
+      "precision": 1,
+      "unit": "km/s",
+      "frame": "earth_relative",
+      "kind": "published",
+      "renderings": [
+        "37.4"
+      ],
+      "citation": "Hein et al. 2019, p.554 col 1 (37.4 km/s, ~15-yr duration)",
+      "provenance": "solver.lyra.LYRA_CONSTANTS[c3_2027_km2_s2][published_departure_vinf_km_s]",
+      "text_value": "",
+      "value_type": "number"
+    },
+    {
       "id": "validate.c3.floor.computed",
       "label": "C3 floor departure C3, computed",
       "value": 714.36,

@@ -45,6 +45,16 @@ LYRA_CONSTANTS = {
         "frame": "Earth-relative",
         "tolerance_frac": 0.20,
         "citation": "Hein et al. 2019, p.554 col 1 (37.4 km/s, ~15-yr duration)",
+        # The paper states this same result as a departure velocity as well as
+        # an energy. 37.4 km/s is the velocity form of the 1400 km^2/s^2 figure,
+        # not a separate quantity, and PROVENANCE.md quotes it. It is emitted so
+        # an explanation may state either form; without it, quoting the paper
+        # accurately would be rejected.
+        #
+        # Earth-relative, like the C3 it restates. It sits inside the 33 to 76
+        # km/s family recorded in EXCLUDED_NOT_TARGETS below, which is Earth-
+        # departure and must never be labelled heliocentric.
+        "published_departure_vinf_km_s": 37.4,
     },
     "c3_floor_km2_s2": {
         "value": 703.0,
