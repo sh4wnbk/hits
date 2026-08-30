@@ -2,33 +2,84 @@
 
 *Can we catch it? Expert-level intercept analysis, open to everyone.*
 
-HITS is an accessibility layer over NASA data services that answers one
-question about an interstellar object: could we send a probe to it?
-Deterministic orbital mechanics computes the answer, an IBM Granite agent
-interprets it, and a deterministic gate checks every number in that
-interpretation against solver output before a reader sees it.
+Someone watches a JPL video about an interstellar object passing through the
+solar system, and asks the obvious question: could we send something after it?
+The answer is a real calculation that professionals run every day, and there is
+nowhere for that person to get it. They are not going to install GMAT.
+
+HITS is an accessibility layer over NASA data services that answers that one
+question, and refuses to answer it with a number it did not compute.
 
 **Status.** The solver, the groundedness gate, and the agent layer are built
-and tested (191 passed, 1 skipped, 1 xfailed). The API, the web frontend, the
+and tested (192 passed, 1 skipped, 1 xfailed). The API, the web frontend, the
 judges endpoints, and the deployment are not built yet, and nothing below
 describes them as though they were.
 
 ---
 
+## The exchange
+
+> **You ask:** Can we catch 'Oumuamua?
+>
+> **HITS answers:**
+>
+> A transfer to the target exists for the departure asked about. Leaving Earth
+> on 2017-06-07 and arriving on 2018-06-07, the flight time is 365 days, or 1
+> year.
+>
+> Reaching it from an Earth-relative departure costs 393.34 km^2/s^2 of
+> characteristic energy, which is a hyperbolic excess speed of 19.8328 km/s once
+> clear of Earth.
+>
+> The probe would meet the target at 13.71605 km/s in the target-relative frame,
+> which is the speed it passes at. Its asymptotic arrival relative velocity, the
+> quantity the mission-design literature compares against, is 13.96737 km/s.
+>
+> What HITS settles here is the trajectory, not the launch vehicle. It computes
+> what the transfer costs and does not model launcher capability, so the
+> departure energy above is the input to a feasibility judgement rather than the
+> judgement itself.
+>
+> All figures are patched-conic, two-body. HITS does not perform n-body
+> integration and does not model non-gravitational forces, so a figure is a
+> faithful record of what the solver computed rather than a claim that it is
+> right to the precision it is quoted at.
+
+Verbatim from a live run on 2026-08-30, `served_by: deterministic_floor`. That
+label is the interesting part. Granite was called three times and rejected three
+times, because it kept rewriting the date `2017-06-07` as "June 7, 2017", and a
+`7` that the solver never emitted is a number the gate will not pass. So the
+system served its deterministic floor instead: correct, grounded, and visibly
+credited to the template rather than to the model. Nothing in this repository
+serves an ungrounded number, including when the model is the thing at fault.
+
+## The demand
+
+![Questions asked, by theme](plots/demand_clusters.png)
+
+3,171 questions pulled out of 19,122 comments on six NASA JPL videos and
+clustered. Travel time and intercept are the two largest technical themes, and
+they are the two HITS answers. The largest clusters in the corpus overall are
+not technical at all, and the chart shows those too.
+
+<p align="center">
+  <img src="docs/img/3I_ATLAS.PNG" width="15%" alt="3I/ATLAS approaching Mars">
+  <img src="docs/img/3I.ATLAS.PNG" width="15%" alt="What we know about 3I/ATLAS">
+  <img src="docs/img/Oumuamua.PNG" width="15%" alt="First interstellar asteroid">
+  <img src="docs/img/TRAPPIST-1.PNG" width="15%" alt="TRAPPIST-1">
+  <img src="docs/img/curiosity_rover_animation.PNG" width="15%" alt="Curiosity rover animation">
+  <img src="docs/img/7_minutes_of_terror.PNG" width="15%" alt="Seven minutes of terror">
+</p>
+
+The six NASA JPL videos the demand was read from.
+
+---
+
 ## Problem statement
 
-The demand was measured rather than assumed. In July 2026 we collected 14,293
-top-level YouTube comments from six NASA Jet Propulsion Laboratory videos,
-extracted the questions, reduced the sentence embeddings with UMAP, and
-clustered them with HDBSCAN. Of 3,171 extracted questions in 59 clusters, the
-two largest technical themes were travel time and mission windows (~170
-questions) and interstellar characterization and intercept (~85). View counts
-point the same way: across 30 sampled recent JPL uploads views ran from 4,000
-to 60,000, while the 3I/ATLAS explainer posted in the same period recorded
-511,000.
-
-Software that computes intercept trajectories exists and has since 1964. None
-of it is usable by the people asking.
+The capability to compute these trajectories has existed at NASA and in
+aerospace tools since 1964. It has simply never been reachable by the students,
+teachers, and journalists asking the questions.
 
 | Tool | Status | Barrier |
 |---|---|---|
@@ -38,17 +89,17 @@ of it is usable by the people asking.
 | TRACE (The Aerospace Corporation) | Internal | Never publicly released |
 
 The claim is not that no software exists. It is the narrower and defensible
-one: no *accessible* tool exists. Full method, raw corpora, cluster report and
-stated limits are in `docs/EVIDENCE.md` and `/data`.
+one: no *accessible* tool exists. How the demand above was measured, with the
+extraction rule, the clustering parameters, and the stated limits, is in
+`docs/EVIDENCE.md`; the corpora and the cluster report are in `/data`.
 
 ## Solution description
 
-HITS takes an interstellar target from NASA's small-body catalogs, pulls state
-vectors from JPL Horizons through astroquery (`solver/fetch.py`), solves Lambert transfers over the hyperbolic orbit
-across a grid of departure dates and flight times, and reports what the
-intercept costs in C3 and arrival velocity. A Granite agent turns that output
-into plain language, and every numeric token it writes is checked against the
-solver's own manifest before the explanation is returned.
+HITS takes an interstellar target from NASA's small-body catalogs, computes
+real intercept trajectories over its hyperbolic orbit, and says in plain
+language what such a mission would cost. One URL, no clone, no orbital
+mechanics, and every number in the answer is checked against solver output
+before it is shown.
 
 What it is not is load-bearing, because it is what keeps the claim narrow.
 HITS is not a replacement for GMAT and answers one question rather than many.
@@ -90,35 +141,31 @@ other candidate. Every response carries `served_by`, one of
 templated answer is never mis-credited to Granite. If watsonx is unreachable
 or no credentials are present, the numbers still compute and still render.
 
-The gate certifies grounding, not truth. This is stated in full, with the
-first live run that demonstrated it, under Limits.
+That loop is what the exchange at the top of this page is showing: three
+Granite attempts rejected, the floor served, the label saying so. The gate
+certifies grounding, not truth, which is a different and sharper limit, stated
+in full under Limits.
 
 ## Selected challenge theme
 
 August Space Exploration Challenge, solution area: mission planning and
-optimization. The measured demand in the corpus is specifically about mission
-feasibility, travel time and intercept windows, which is a trajectory
-optimization question being asked by people who cannot run a trajectory
-optimizer. HITS puts the optimization behind an interface that does not
-require mission-design training, which is the same solution area approached
-from the accessibility side rather than the capability side.
+optimization. The demand measured above is a trajectory optimization question
+being asked by people who cannot run a trajectory optimizer, so HITS approaches
+that solution area from the accessibility side rather than the capability side.
 
 ## How IBM Bob was used
 
-IBM Bob was the primary development tool for Phase 1: the Lambert solver core
-over hyperbolic targets, the Horizons fetch and committed state vectors, the
-grid, the C3 porkchop plot, and the validation suite against Hein et al. 2019.
-Bob then authored the Phase 2 adversarial corpus black-box, working from a
-redacted manifest view without sight of the gate, and that submission is
-committed as `tests/corpus/bob_submission.raw.jsonl`. Claude Code took over at
-the Phase 1/2 boundary and built the groundedness gate and the agent layer on
-top of Bob's solver.
+IBM Bob was the primary development tool for Phase 1, the part that computes:
+the Lambert solver over hyperbolic targets, the Horizons fetch and committed
+state vectors, the grid, the C3 plot, and the validation suite against Hein et
+al. 2019. Bob then authored the 35-case adversarial corpus black-box, without
+sight of the gate it attacks. Claude Code took over at the Phase 1/2 boundary
+for the groundedness gate and the agent layer.
 
-Every commit in this repository is authored by one human committer, so git
-carries no tool authorship. The record of which tool did what is
-`docs/BOB_USAGE.md`, written session by session as the work happened, and it
-is the only evidence for the split. `docs/HARNESS.md` describes the process
-discipline the two tools worked under.
+Every commit here is authored by one human committer, so git carries no tool
+authorship and the record of which tool did what is `docs/BOB_USAGE.md`,
+written session by session as the work happened. `docs/HARNESS.md` describes
+the process discipline both tools worked under.
 
 ## Verification
 
