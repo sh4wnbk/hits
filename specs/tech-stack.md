@@ -15,14 +15,21 @@ job is listed under Rejected rather than kept for appearances.
 Note: poliastro 0.12 pulls astropy 3.x and fails to build on Python 3.12.
 hapsira is a drop-in replacement with the same API.
 
-## Data sources
+## Space data services
 
-| Source | Role |
-|---|---|
-| JPL Horizons | Ephemerides and state vectors for target objects and departure bodies |
-| JPL Small-Body Database | Object catalog and orbital elements |
+The layer HITS is built on. Both are NASA services, and HITS extends them
+rather than duplicating them: the ephemerides are theirs, the trajectory
+analysis over those ephemerides is what HITS adds.
 
-Both are NASA services. HITS extends them rather than duplicating them.
+| Source | Role | Where it enters the code |
+|---|---|---|
+| JPL Horizons | Ephemerides and state vectors for target objects and departure bodies, heliocentric ECLIPJ2000, queried through astroquery | `solver/fetch.py` (`_query_horizons`, `fetch_state_vector`, `fetch_window`) |
+| JPL Small-Body Database | The catalog the target designation is taken from. 1I/'Oumuamua resolves to the Horizons id `1I`, which pins the orbit solution | Not called programmatically. The designation is a constant in `solver/fetch.py` (`OUMUAMUA_ID`) |
+
+Retrieved states are committed to `data/state_vectors.json` with their
+retrieval date, so validation runs offline and does not depend on Horizons
+being reachable. Every fetch converts AU and AU/day to km and km/s at the
+boundary, per `docs/CONVENTIONS.md`.
 
 ## IBM components
 

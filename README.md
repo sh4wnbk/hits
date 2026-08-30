@@ -44,7 +44,7 @@ stated limits are in `docs/EVIDENCE.md` and `/data`.
 ## Solution description
 
 HITS takes an interstellar target from NASA's small-body catalogs, pulls state
-vectors from JPL Horizons, solves Lambert transfers over the hyperbolic orbit
+vectors from JPL Horizons through astroquery (`solver/fetch.py`), solves Lambert transfers over the hyperbolic orbit
 across a grid of departure dates and flight times, and reports what the
 intercept costs in C3 and arrival velocity. A Granite agent turns that output
 into plain language, and every numeric token it writes is checked against the
@@ -62,8 +62,8 @@ n-body integration, and does not model non-gravitational forces.
 
 ```mermaid
 flowchart LR
-  H[JPL Horizons] --> S
-  SBDB[JPL Small-Body Database] --> S
+  H[JPL Horizons<br/>via astroquery] --> S
+  SBDB[Small-Body Database<br/>designation only] -.-> S
   S[solver/<br/>hapsira Lambert, grids] --> M[solver/manifest.py<br/>every citable number]
   M --> A[agent/<br/>Granite explains]
   M --> V[verify/<br/>groundedness gate]

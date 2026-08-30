@@ -5,22 +5,24 @@
 ```
   NASA data services            HITS                      User
   ─────────────────────         ────────────────────      ──────────
-  JPL Horizons        ──┐
-  Small-Body Database ──┴──▶  solver/      ──┐
-                              (hapsira)      │
-                                             ├──▶  api/    ──▶  web
-                              agent/       ──┘   (FastAPI)      (one URL)
-                              (Granite)
-                                  ▲
-                                  │
-                              verify/  ──▶  judges endpoints
+  JPL Horizons        ──────▶  solver/     ──┐
+  Small-Body Database          (hapsira)     │
+  (designation only)                         ├──▶  api/    ──▶  web
+                               agent/      ──┘   (FastAPI)      (one URL)
+                               (Granite)
+                                   ▲
+                                   │
+                               verify/  ──▶  judges endpoints
 ```
 
 Four layers, each with a single responsibility.
 
-**solver/** — orbital mechanics. Pulls ephemerides, runs Lambert solves over
-hyperbolic targets, grids over departure dates and flight times. Deterministic
-and credential-free. Every number the system reports originates here.
+**solver/** — orbital mechanics. Pulls ephemerides from JPL Horizons through
+astroquery (`solver/fetch.py`), runs Lambert solves over hyperbolic targets,
+grids over departure dates and flight times. The Small-Body Database is the
+catalog the target designation comes from; it is not queried programmatically.
+Deterministic and credential-free. Every number the system reports originates
+here.
 
 **agent/** — Granite. Calls the solver as a tool, interprets its output,
 explains in plain language. Produces no figures of its own.
