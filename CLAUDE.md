@@ -137,10 +137,15 @@ or assistant, should treat this list as authoritative over their own recall.
   "Expert-level intercept analysis, open to everyone." If the phrase
   "JPL-grade" is ever used, a validation comparison against published figures
   must be shown alongside it.
-- **The evidence corpus is 14,293 comments from six videos**, not five, and
-  not a random sample of public interest. Limits are stated in
-  `docs/EVIDENCE.md` and should not be dropped when the number is quoted
-  elsewhere.
+- **The evidence corpus is 19,122 comments from six videos**, not five, and
+  not a random sample of public interest. The figure was 14,293 until
+  2026-08-30, when counting the committed files showed `trappist1.txt` holds
+  5,902 comments rather than the 1,073 the table recorded. Re-running the
+  extraction rule over the six files reproduces the 3,171 questions in
+  `clusters.txt` exactly, which is what establishes that the larger corpus is
+  the one that was clustered. Counts per file are in `docs/EVIDENCE.md` with
+  the command that checks them, and the limits stated there should not be
+  dropped when the number is quoted elsewhere.
 - **The first clustering run failed and its output is not a result.** HDBSCAN
   directly on 384-dimensional embeddings collapsed to one cluster of 2,276
   questions. UMAP before clustering fixed it. Never cite the collapsed run.

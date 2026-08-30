@@ -23,7 +23,7 @@ mission-design expertise can perform it.
 
 ## Why this problem
 
-Measured, not assumed. In July 2026 we collected 14,293 YouTube comments from
+Measured, not assumed. In July 2026 we collected 19,122 YouTube comments from
 six NASA Jet Propulsion Laboratory videos, extracted the questions, and grouped
 them with density-based clustering. Two technical themes dominated:
 

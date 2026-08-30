@@ -9,17 +9,27 @@ assertion can be checked rather than taken on trust.
 YouTube Data API v3, July 2026. Six NASA Jet Propulsion Laboratory videos,
 selected by view count from the channel's popular and recent feeds.
 
-| Video | Comments |
-|---|---|
-| Curiosity Rover Animation | 8,824 |
-| 7 Minutes of Terror | 2,161 |
-| 'Oumuamua (first interstellar asteroid) | 1,562 |
-| TRAPPIST-1 | 1,073 |
-| 3I/ATLAS explainers (two videos) | 673 |
-| **Total** | **14,293** |
+| Video | Comments | File |
+|---|---|---|
+| Curiosity Rover Animation | 8,824 | `data/curiosity_animation.txt` |
+| TRAPPIST-1 | 5,902 | `data/trappist1.txt` |
+| 7 Minutes of Terror | 2,161 | `data/7min_terror.txt` |
+| 'Oumuamua (first interstellar asteroid) | 1,562 | `data/oumuamua.txt` |
+| 3I/ATLAS, what we know | 370 | `data/3iatlas_known.txt` |
+| 3I/ATLAS, approaching Mars | 303 | `data/3iatlas_mars.txt` |
+| **Total** | **19,122** | |
 
 Top-level comments only; replies are not included. Raw files are in `/data`.
-The collection script is `data/yt_comments.py`.
+The collection script is `data/yt_comments.py`. One numbered comment per line,
+so each row is `grep -cE '^[0-9]+\. ' <file>`.
+
+**These counts supersede an earlier figure of 14,293**, which this document
+carried with TRAPPIST-1 at 1,073. The committed `trappist1.txt` holds 5,902,
+and the earlier total was never updated to match it. The corrected total is the
+one the analysis rests on: re-running the extraction rule of
+`data/cluster_questions.py` over these six files reproduces the 3,171 questions
+in `data/clusters.txt` exactly, so these files, at these sizes, are what was
+clustered. Corrected 2026-08-30.
 
 ## Method
 

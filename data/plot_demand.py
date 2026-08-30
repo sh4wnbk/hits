@@ -39,6 +39,17 @@ from PIL import Image, ImageDraw, ImageFont
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CLUSTERS_FILE = os.path.join(REPO, "data", "clusters.txt")
+
+# The comment corpora the questions were extracted from. Counted at run time
+# rather than quoted, because the quoted figure went stale: docs/EVIDENCE.md
+# recorded 14,293 comments with TRAPPIST-1 at 1,073, and the committed
+# trappist1.txt holds 5,902. Re-running the extraction rule over these six
+# files reproduces the 3,171 questions in clusters.txt exactly, so these are
+# the files the analysis actually used.
+CORPUS_FILES = [
+    "curiosity_animation.txt", "trappist1.txt", "7min_terror.txt",
+    "oumuamua.txt", "3iatlas_known.txt", "3iatlas_mars.txt",
+]
 OUTPUT_PATH = os.path.join(REPO, "plots", "demand_clusters.png")
 
 # Theme -> cluster ids. See the module docstring: declared, not parsed.
@@ -123,6 +134,22 @@ def parse_clusters(path: str = CLUSTERS_FILE):
     return header, sizes
 
 
+def count_comments(files=None) -> int:
+    """
+    Total comments across the committed corpora.
+
+    yt_comments.py writes one numbered comment per line, so the count is the
+    number of lines opening with "N. ". Counted rather than quoted so the
+    chart's denominator cannot drift from the files in the repository.
+    """
+    total = 0
+    for name in (files or CORPUS_FILES):
+        path = os.path.join(REPO, "data", name)
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            total += sum(1 for line in fh if re.match(r"^\d+\.\s", line))
+    return total
+
+
 def theme_totals(sizes):
     """Sum each declared theme, failing loudly on an id the report does not hold."""
     rows = []
@@ -180,7 +207,7 @@ def _font(paths, size):
     return ImageFont.load_default(size)
 
 
-def draw(header, sizes, rows, context, output_path: str = OUTPUT_PATH) -> str:
+def draw(header, sizes, rows, context, comments, output_path: str = OUTPUT_PATH) -> str:
     """
     Two panels, one scale.
 
@@ -231,7 +258,7 @@ def draw(header, sizes, rows, context, output_path: str = OUTPUT_PATH) -> str:
 
     d.text((left * S, 44 * S), "What people actually asked", font=f_title, fill=INK)
     d.text((left * S, 84 * S),
-           f"{header['questions']:,} questions extracted from 14,293 YouTube comments on six NASA JPL "
+           f"{header['questions']:,} questions extracted from {comments:,} YouTube comments on six NASA JPL "
            f"videos, clustered into {header['clusters']} groups.",
            font=f_sub, fill=MUTED)
 
@@ -306,10 +333,12 @@ def main() -> int:
     header, sizes = parse_clusters()
     rows = theme_totals(sizes)
     context = context_rows(sizes)
-    path = draw(header, sizes, rows, context)
+    comments = count_comments()
+    path = draw(header, sizes, rows, context, comments)
 
-    print(f"corpus: {header['questions']} questions, {header['clusters']} clusters, "
-          f"{header['noise']} noise, {sum(sizes.values())} clustered")
+    print(f"corpus: {comments} comments, {header['questions']} questions, "
+          f"{header['clusters']} clusters, {header['noise']} noise, "
+          f"{sum(sizes.values())} clustered")
     for r in rows:
         ids = ", ".join(str(c) for c in r["ids"])
         parts = " + ".join(str(sizes[c]) for c in r["ids"])

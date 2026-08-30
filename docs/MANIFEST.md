@@ -292,7 +292,7 @@ One manifest grounds one call. A real number from a different solve is
 ungrounded, which is deliberate: `call_id` is what stops an explanation
 borrowing a plausible figure from a neighbouring run.
 
-Evidence-corpus figures, such as the 14,293 comments in `docs/EVIDENCE.md`, are
+Evidence-corpus figures, such as the 19,122 comments in `docs/EVIDENCE.md`, are
 not solver output and appear in no solve manifest. If an explanation surface
 ever needs to quote them they require their own manifest with its own
 provenance. That is not built and is not in scope here.
