@@ -36,9 +36,11 @@ boundary, per `docs/CONVENTIONS.md`.
 | Component | Role | Verifiable at |
 |---|---|---|
 | IBM Bob | Primary development tool | `docs/BOB_USAGE.md` |
-| Granite (via watsonx) | Reasoning layer: orchestrates the solver as a tool, interprets results | `/explain` |
-| Granite Guardian | Advisory groundedness check on generated explanations | `/faithfulness` |
-| Granite embeddings | Sentence embeddings in the evidence pipeline, replacing MiniLM | `/evidence` |
+| Granite (via watsonx) | Reasoning layer: interprets solver output under the groundedness gate | `agent/granite.py`, live 2026-08-30 |
+
+Granite Guardian and Granite embeddings were both planned and neither is
+built. What that means in detail, and what the shipped evidence pipeline
+actually embeds with, is in `docs/IBM_STACK.md` under Not wired.
 
 Granite is not literally required by the rules, which mandate only Bob plus AI
 as a core component. It is here because judging scores effective use of IBM
@@ -49,7 +51,7 @@ technologies, and because the reasoning layer needs a model regardless.
 | Component | Role |
 |---|---|
 | FastAPI | Solver API and judges endpoints |
-| Python 3.11 | Runtime. 3.12 causes dependency friction with the scientific stack |
+| Python 3.12 | Runtime. 3.12.3 on the development host. poliastro is what fails on 3.12, and hapsira replaced it |
 | Docker | Reproducible environment, so a judge re-running validation gets identical numbers |
 | GitHub Actions | CI gates plus a keepalive cron against the host's sleep timer |
 

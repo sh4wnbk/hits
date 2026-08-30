@@ -36,8 +36,9 @@ estimation degrades in high dimensions. Adding UMAP before clustering resolved
 it. Both the failure and the fix are in the commit history; the failed
 configuration is not presented as a result.
 
-Embeddings were originally all-MiniLM-L6-v2 and were re-run with Granite
-embeddings. Both cluster reports are retained so the difference is inspectable.
+Embeddings are all-MiniLM-L6-v2, in `data/cluster_questions.py`. A re-run with
+Granite embeddings was planned and has not been done, so there is one cluster
+report rather than two, and no comparison between embedding models is claimed.
 
 ## Results
 
@@ -60,7 +61,11 @@ Full report: `/data/clusters.txt`.
 
 ## View counts
 
-Recorded from public channel pages, July 2026, in `/data/channel_views.csv`.
+Read by hand from public channel pages in July 2026 and recorded in this
+document. There is no committed data file behind them: `channel_views.csv` was
+planned and never written, so unlike the comment corpora these figures cannot
+be re-derived from the repository. They are reproducible only in the weak sense
+that anyone can visit the same pages, where the counts will since have moved.
 
 Across 30 sampled recent NASA JPL uploads, views ranged from 4,000 to 60,000.
 The 3I/ATLAS explainer, posted in the same period, recorded 511,000. The
@@ -86,6 +91,9 @@ reported here because it is a case where the pattern did not appear.
   `min_samples` are recorded in the script; different values produce different
   counts.
 - View counts were read at one point in time and will have changed.
+- View counts are transcribed figures, not a committed dataset. The comment
+  corpora and the cluster report are in `/data` and can be re-run; the view
+  counts cannot.
 
 The claim these support is narrow: a large and repeated volume of people are
 asking about interstellar intercepts, and interstellar-object content

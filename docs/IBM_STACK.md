@@ -7,9 +7,23 @@ was left out is in `specs/tech-stack.md`.
 | Component | Role | Location | Verify |
 |---|---|---|---|
 | IBM Bob | Primary development tool | `docs/BOB_USAGE.md` | Session records with dates and what changed |
-| Granite (watsonx) | Reasoning layer: interprets solver output under the groundedness gate | `agent/explain.py`, `agent/granite.py` | `tests/test_explain_proof.py` drives every path with a stub; a served response carries `served_by` and, when Granite produced it, `model_id`. No live call has been made yet |
-| Granite Guardian | Advisory groundedness check on explanations | `agent/guardian.py` | `/faithfulness` reports the advisory verdict alongside the deterministic one |
-| Granite embeddings | Sentence embeddings in the evidence pipeline | `data/cluster_questions.py` | `/evidence` reports which embedding model produced the cluster report |
+| Granite (watsonx) | Reasoning layer: interprets solver output under the groundedness gate | `agent/explain.py`, `agent/granite.py` | `tests/test_explain_proof.py` drives every path with a stub; a served response carries `served_by` and, when Granite produced it, `model_id`. Live on 2026-08-30 against `ibm/granite-4-h-small` on us-south, logged in `docs/BOB_USAGE.md` |
+
+## Not wired
+
+Listed because leaving them out of a document that judges read as an
+inventory would let a plan be mistaken for a build.
+
+**Granite Guardian.** Intended as an advisory second opinion on top of the
+deterministic gate. No module exists. Earlier drafts of this document named
+`agent/guardian.py`, which was never written. Every verdict the gate returns
+reports its advisory field as `unavailable`, and the deterministic comparison
+is what decides.
+
+**Granite embeddings.** The committed evidence pipeline,
+`data/cluster_questions.py`, embeds with `all-MiniLM-L6-v2`. A Granite
+embedding re-run was planned and has not happened, so `data/clusters.txt` is a
+MiniLM result and is the only cluster report in the repository.
 
 ## Why Granite
 
