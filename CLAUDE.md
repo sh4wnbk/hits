@@ -226,6 +226,16 @@ Phase 2 agent layer built and validated (2026-08-29):
   regenerations. The test suite still drives every path by stub, so what CI
   proves is the loop's behaviour and the live run is what proves the
   endpoint's.
+- **That first pass has not reproduced.** Later the same day, six live
+  attempts across two manifest shapes were all rejected and all served
+  `deterministic_floor`. On a solve manifest Granite rewrites `2017-06-07` as
+  "June 7, 2017", so the gate rejects `7`; on the validate manifest it computes
+  differences the manifest never emitted (0.11605, 0.04351, 7.252) and
+  misattributes a published figure. Every attempt in a run came back
+  byte-identical, so feeding the rejected tokens back changed nothing. Do not
+  describe the Granite path as working: what is demonstrably working is the
+  gate refusing it and the floor serving correct grounded prose. Runs recorded
+  in `docs/BOB_USAGE.md`.
 - The gate certifies grounding, not truth. The first live explanation carried
   only manifest renderings and still said the 2027 C3 comparison "exceeds the
   solver's tolerance of 20%" when 4.92% is inside 20%. Every number was

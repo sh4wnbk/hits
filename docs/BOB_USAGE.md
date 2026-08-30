@@ -120,13 +120,25 @@ logged as its own row when it happens.
 | First live watsonx call | Claude Code | Credentials supplied by the operator in a gitignored `.env`. Direct call on a simple prompt returned incoherent token spam: `/ml/v1/text/generation` hands an instruct model a raw prompt with no chat template. Switched `generate()` to `/ml/v1/text/chat` with a messages array so the template is applied server-side, and moved the default model to `ibm/granite-4-h-small` after `ibm/granite-4-1-8b-instruct` 404'd on this account. Stage 1 re-run: coherent. Five new tests intercept `requests.post` and pin the wire shape, which no test could see before because they all stub `generate()` | agent/granite.py, agent/explain.py, tests/test_explain.py, .env.example |
 | First live end-to-end explain | Claude Code | Fixture validate manifest through the full loop. First live attempt was rejected on `21` and `13`, from Granite rewriting the ISO dates `2027-06-21` and `2032-12-13` as "June 21, 2027" and "December 13, 2032": the manifest declares that a date renders as itself and nothing else, so a reformatting is a number the solver never emitted and the gate was right to reject it. Two prompt rules added, one on date form and one forbidding the model to assert orderings or verdicts it was not given. Re-run: `served_by=granite_first_pass`, grounded, zero regenerations | agent/explain.py |
 
+| Live re-run for the README | Claude Code | Three live calls while sourcing a real answer for the README. A solve manifest for the Sample A transfer, asked "Can we catch 'Oumuamua?", fell to `deterministic_floor`: all three attempts rewrote `2017-06-07` as "June 7, 2017" and called the eq. 4 quantity "equation 4 asymptotic", so the gate rejected `7` twice as fabricated-number and the phrase as label-disguise. The fixture validate manifest, the same input that returned `granite_first_pass` earlier the same day, also fell to the floor: this time Granite computed rather than quoted, emitting 0.11605, 0.852, 0.04351 and 7.252, none of which the manifest renders, plus 5.8 misattributed. Every one of the six attempts across the two shapes was byte-identical to its predecessors, so the rejection feedback changed nothing about what came back | (runs only; no code changed) |
+
 **Phase 2 agent-layer exit condition:** met for the loop, not for the endpoint.
 Every path is exercised by a stub, so what CI proves is that no ungrounded
 explanation can be served, whatever the model returns. The live run of
 2026-08-30 is what proves the endpoint, and it is logged in the two rows above
 rather than folded into the stub result.
 
-What the live run also showed, and what no row above should be read as denying:
+What the later re-runs showed is that the first pass was not reproducible.
+Six attempts across two manifest shapes were all rejected and all served the
+floor. The invariant held perfectly, and a judge running the demo today gets
+correct grounded prose with `served_by: deterministic_floor` rather than
+Granite. Two separate problems sit behind that: the model reformats ISO dates
+however firmly the prompt forbids it, and on the validation shape it does
+arithmetic instead of quoting. Neither is a gate failure. Both are why the
+project cannot presently claim a working Granite path on the strength of one
+successful run.
+
+What the first live run also showed, and what no row above should be read as denying:
 the first grounded explanation contained a false claim. It said the 2027 C3
 comparison "exceeds the solver's tolerance of 0.2 (or 20%)" when the difference
 is 4.92% and therefore inside it. Every number in that sentence was a manifest
