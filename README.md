@@ -174,12 +174,17 @@ offline against committed state vectors with no credentials and no network.
 
 ```
 python -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt
+pip install --no-deps -r requirements.txt
 pytest                              # full suite
 pytest tests/test_validation.py -v  # the five Lyra comparisons, printed
 ```
 
-Python 3.12. The explanation layer is the only part that reads a credential;
+Python 3.12. `--no-deps` is deliberate and `docs/VERIFICATION.md` explains it:
+requirements.txt is a complete pinned set, and resolving hapsira's matplotlib
+bound would downgrade NumPy, which would change computed numbers. The same
+install and suite run in CI on every push (`.github/workflows/ci.yml`).
+
+The explanation layer is the only part that reads a credential;
 copy `.env.example` to `.env` to supply watsonx settings. Without it, the
 solver runs unchanged and explanations are served by the deterministic floor.
 

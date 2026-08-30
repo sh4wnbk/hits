@@ -1,0 +1,51 @@
+name: ci
+
+# What this gates, and what it cannot.
+#
+# Everything credential-free: the solver's five Lyra comparisons, the physical
+# sanity checks, the manifest completeness reflection, the groundedness gate
+# against the adversarial corpus, and the AST walks that keep the gate and the
+# floor from computing. All of it runs offline against committed state vectors,
+# so no Horizons call and no watsonx call happens here.
+#
+# What it cannot gate is the credentialed half: the live Granite endpoint and
+# the quality of what it returns. Those are reported with their date in
+# docs/BOB_USAGE.md and are never mixed into a CI result.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  suite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # --no-deps is deliberate. requirements.txt is a complete pinned set, and
+      # hapsira 0.18.0 declares matplotlib < 3.8, which no CPython 3.12 wheel
+      # satisfies alongside NumPy 2. HITS never imports matplotlib; plotting is
+      # plotly. Resolving dependencies here would either fail or silently
+      # downgrade NumPy, and a downgraded NumPy changes computed numbers.
+      - name: Install pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --no-deps -r requirements.txt
+
+      - name: No credential file is tracked
+        run: |
+          if git ls-files | grep -q '\.env$'; then
+            echo "A .env file is tracked. Credentials are read from the"
+            echo "environment only and must never enter the repository."
+            git ls-files | grep '\.env$'
+            exit 1
+          fi
+
+      - name: Full suite
+        run: pytest -q

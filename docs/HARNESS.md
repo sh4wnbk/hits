@@ -132,14 +132,30 @@ correct, and nothing here does; that is what the corpus is for.
 
 ## Where the enforcement actually is
 
-There is no CI in this repository. Every guardrail above runs when someone
-runs `pytest`, which means the enforcement is a person choosing to run the
-suite and read the result. The invariants are mechanical; the trigger is not.
+`.github/workflows/ci.yml` runs the full suite on every push to main and every
+pull request, so the guardrails above have a trigger that is not a person
+remembering. It installs the pinned set, refuses a tracked `.env`, and runs
+`pytest` with no secrets configured, which is also what proves the
+credential-free claim: if anything in `solver/` or `verify/` reached for a
+secret, the run would fail rather than quietly pass on a developer's machine
+that happens to have one.
 
-This is stated rather than glossed because the whole argument of this document
-is that a checked claim beats an asserted one, and "the build goes red" reads
-like a robot is watching when at present it is Shawn and the assistant in
-front of him.
+The workflow was verified before it was described here, by installing into a
+clean virtual environment exactly as the workflow does and running the suite
+there: 192 passed, 1 skipped, 1 xfailed. That check earned its keep
+immediately. `pip install -r requirements.txt` could not succeed on a clean
+Python 3.12 at all, because the freeze pinned `matplotlib==3.7.2`, which has
+no CPython 3.12 wheel, while hapsira caps matplotlib below 3.8 and every
+installable version under that cap requires NumPy 1. The pin came from a
+development host where matplotlib had been built by other means. HITS never
+imports it, so it is out of the file and the install is `--no-deps`.
+
+What CI still does not gate is the credentialed half. No watsonx call and no
+Horizons call happens in a CI run, so the live Granite path is proven by dated
+runs in `docs/BOB_USAGE.md` and never by a green build. Nor does anything
+check documents against the module tree: this file, and every other, is
+maintained by hand, which is why they carry explicit unbuilt markers rather
+than relying on a reader to notice.
 
 ## What the harness does not catch
 

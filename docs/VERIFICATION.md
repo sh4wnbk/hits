@@ -18,11 +18,12 @@ claim without a verification step is not a claim, it is a hope.
 | Explanations contain no number the solver did not produce | `pytest tests/test_groundedness.py` — 33 reject cases, 14 accept cases | Built |
 | The gate does no arithmetic | `pytest tests/test_groundedness.py::test_gate_does_no_arithmetic` — walks the gate's AST | Built |
 | A quantity is told from an incidental numeral by a stated rule | `pytest tests/test_extract.py` | Built |
-| Validation runs without credentials | the whole suite runs offline against committed state vectors; no secret is read anywhere in `solver/` or `verify/` | Built, though no CI job enforces it yet |
+| The printed validation rows quote only manifest renderings | `pytest tests/test_groundedness.py::test_the_printed_validation_rows_are_grounded` | Built. Red on its first run: the C3 gap-attribution row was printing a full retrieval timestamp |
+| Validation runs without credentials | the whole suite runs offline against committed state vectors; no secret is read anywhere in `solver/` or `verify/` | Built. The CI workflow installs, runs the suite with no secrets configured, and fails if a `.env` is ever tracked |
 | Hyperbolic excess velocity matches target eccentricity | `tests/test_physics.py::test_vinf_consistency` | **Unbuilt.** The frame gate in `test_validation.py` checks v_inf against the published figure; a separate eccentricity-consistency check is not written |
-| Numbers still render when watsonx is down | `tests/test_degrade.py::test_explain_without_watsonx` | **Unbuilt.** No agent layer exists yet, so there is nothing to degrade from |
+| Numbers still render when watsonx is down | `pytest tests/test_explain_proof.py::test_the_offline_path_holds_the_invariant_too` | Built. The agent layer landed after this row was written; the check lives in the proof file rather than the `tests/test_degrade.py` this row anticipated |
 | Cached ephemerides match Horizons | `python -m verify.ephemeris_drift` | **Unbuilt.** Committed states carry their retrieval date; nothing re-checks them against live Horizons |
-| Docs describe only shipped behaviour | CI job `docs-honesty` comparing CLAUDE.md's unbuilt list against the module tree | **Unbuilt.** There is no CI in this repository at all; this document is maintained by hand, which is why the rows above carry an explicit status |
+| Docs describe only shipped behaviour | CI job `docs-honesty` comparing CLAUDE.md's unbuilt list against the module tree | **Unbuilt.** CI now exists and runs the suite, but nothing checks documents against the tree. This document is maintained by hand, which is why the rows above carry an explicit status |
 | Deployed URL is reachable | keepalive workflow pinging `/health` | **Unbuilt.** No deployment |
 
 Rows marked unbuilt name a check that does not exist. They are kept rather than
@@ -50,8 +51,9 @@ correctness. Where HITS disagrees, the disagreement is reported.
 
 **Groundedness.** Every numeric token in a generated explanation must appear
 in the solver output that produced it. Deterministic set comparison,
-dispositive. Granite Guardian runs as an advisory second layer; its verdict is
-reported but does not override the deterministic check.
+dispositive. Granite Guardian was intended as an advisory second layer and is
+not wired in, so every verdict reports its advisory field as `unavailable`;
+the deterministic check is what decides, and it is running.
 
 ## What is not verified
 
@@ -102,12 +104,21 @@ requires none. Cached ephemerides are committed so the run does not depend on
 Horizons being reachable.
 
 ```
-docker build -t hits .
-docker run hits pytest tests/test_validation.py -v
+python -m venv .venv && . .venv/bin/activate
+pip install --no-deps -r requirements.txt
+pytest tests/test_validation.py -v
 ```
 
-The same code is exposed at `/validation`, so a judge can see the result
-without cloning anything. Both paths run the identical module.
+`--no-deps` is not a shortcut. requirements.txt is a complete pinned set, and
+hapsira declares a matplotlib bound that no CPython 3.12 wheel satisfies
+alongside NumPy 2. Resolving it would downgrade NumPy, and a downgraded NumPy
+changes computed numbers. HITS never imports matplotlib.
+
+There is no Dockerfile in this repository. Docker is the intended
+reproducibility boundary and `specs/tech-stack.md` still names it, but the
+image does not exist, so the command above is the only reproduction path that
+works today. The `/validation` endpoint that would let a judge see the result
+without cloning is also unbuilt.
 
 ## Credentialed versus offline
 
@@ -122,5 +133,12 @@ floor is never mis-credited to the credentialed system.
 | Groundedness (Guardian) | watsonx | No — reported from last successful run |
 | Explanation quality | watsonx | No |
 
-CI gates on everything in the credential-free rows. The remainder is reported
-with its timestamp.
+CI gates on everything in the credential-free rows: `.github/workflows/ci.yml`
+installs the pinned set, refuses a tracked `.env`, and runs the full suite with
+no secrets configured. The remainder is reported with its timestamp and is
+never mixed into a CI result.
+
+The workflow was verified before it was claimed, by installing into a clean
+virtual environment exactly as the workflow does and running the suite there:
+192 passed, 1 skipped, 1 xfailed. That check is what turned up the matplotlib
+pin, which made requirements.txt uninstallable on a clean Python 3.12.

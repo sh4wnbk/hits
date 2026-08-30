@@ -54,10 +54,13 @@ def test_plotly_imports():
 
 @pytest.mark.xfail(
     reason=(
-        "PRE-EXISTING: matplotlib 3.7.2 was compiled against NumPy 1.x. "
-        "It cannot be imported under NumPy 2.4.6. This blocks astropy's own "
-        "test suite (astropy/conftest.py imports matplotlib). HITS does not "
-        "use matplotlib; plotting is plotly. Not caused by HITS."
+        "PRE-EXISTING and expected to fail two different ways. On the "
+        "development host, matplotlib 3.7.2 was compiled against NumPy 1.x "
+        "and cannot be imported under NumPy 2.4.6. On a clean install it is "
+        "absent entirely: hapsira caps matplotlib below 3.8, no such version "
+        "ships a CPython 3.12 wheel that permits NumPy 2, so requirements.txt "
+        "omits it and installs with --no-deps. Either way HITS does not use "
+        "matplotlib; plotting is plotly. Not caused by HITS."
     ),
     strict=False,
 )

@@ -20,7 +20,12 @@ jplephem==2.24
 keyring==25.7.0
 kiwisolver==1.5.0
 llvmlite==0.48.0
-matplotlib==3.7.2
+# matplotlib is intentionally absent. hapsira 0.18.0 declares it as a
+# dependency and caps it below 3.8, but no matplotlib < 3.8 both ships a
+# CPython 3.12 wheel and permits NumPy 2, so pinning it makes this file
+# uninstallable on a clean 3.12. HITS never imports it: plotting is plotly
+# (docs/CONVENTIONS.md), and the hapsira paths the solver uses do not pull
+# it in. Install with --no-deps, which is what the CI workflow does.
 more-itertools==11.1.0
 narwhals==2.23.0
 numba==0.66.0
@@ -44,3 +49,6 @@ soupsieve==2.8.4
 typing_extensions==4.16.0
 urllib3==2.7.0
 webencodings==0.5.1
+iniconfig==2.3.0
+pluggy==1.6.0
+Pygments==2.21.0
