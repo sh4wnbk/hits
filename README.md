@@ -134,6 +134,9 @@ largest disagreement is 4.92%.
 | Sample A arrival v_inf2 | 13.967 km/s | 13.6 km/s | 0.367 km/s |
 | Sample B arrival v_inf2 | 0.642 km/s | 0.6 km/s | 0.042 km/s |
 
+One image carries all five: `plots/validation_comparison.html`, every quantity
+on a unit-free axis against the tolerance declared for it.
+
 The remaining gaps are attributed to orbit-solution epoch drift between Lyra's
 2019 ephemeris and the 2026-08-27 retrieval, and that attribution is argued
 rather than asserted in `docs/PROVENANCE.md`. Full claim-and-step table, with
