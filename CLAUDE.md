@@ -144,11 +144,15 @@ or assistant, should treat this list as authoritative over their own recall.
 - **The first clustering run failed and its output is not a result.** HDBSCAN
   directly on 384-dimensional embeddings collapsed to one cluster of 2,276
   questions. UMAP before clustering fixed it. Never cite the collapsed run.
-- **The watsonx model id and region host in `agent/granite.py` are unverified
-  defaults, not facts.** No credentials exist on this machine, so neither has
-  been confirmed against the live catalogue. They are overridden by
-  `WATSONX_MODEL_ID` and `WATSONX_URL`. Do not state which Granite model HITS
-  calls as though it had been observed answering.
+- **The Granite model is `ibm/granite-4-h-small` on us-south, confirmed by a
+  live call on 2026-08-30.** `ibm/granite-4-1-8b-instruct`, the earlier
+  default, 404s on this account and was never servable here. Both are still
+  overridden by `WATSONX_MODEL_ID` and `WATSONX_URL`.
+- **An instruct model must be called through the chat endpoint.**
+  `/ml/v1/text/generation` hands the prompt over raw, with no chat template,
+  and Granite returned incoherent token spam on a prompt that reads perfectly
+  well to a person. `agent/granite.py` uses `/ml/v1/text/chat` with a messages
+  array so the template is applied server-side. Do not "simplify" it back.
 
 ### Plan versus shipped
 
@@ -211,9 +215,19 @@ Phase 2 agent layer built and validated (2026-08-29):
   transfer costs and does not model launch-vehicle capability, so it reports
   the cost and says the cost is the input to a judgement rather than the
   judgement.
-- Suite: 186 passed, 1 skipped, 1 xfailed, 0 failed.
-- No live watsonx call has been made. Every Granite path is exercised by a
-  stub, so what is proven is the loop's behaviour, not the endpoint's.
+- Suite: 191 passed, 1 skipped, 1 xfailed, 0 failed.
+- Live run 2026-08-30, `ibm/granite-4-h-small` on us-south: the fixture
+  validate manifest returned `granite_first_pass`, grounded, zero
+  regenerations. The test suite still drives every path by stub, so what CI
+  proves is the loop's behaviour and the live run is what proves the
+  endpoint's.
+- The gate certifies grounding, not truth. The first live explanation carried
+  only manifest renderings and still said the 2027 C3 comparison "exceeds the
+  solver's tolerance of 20%" when 4.92% is inside 20%. Every number was
+  grounded; the claim about them was false. Membership and attribution do not
+  check a comparative assertion, and nothing in the manifest encodes a
+  pass/fail verdict for the model to quote. Do not describe a grounded
+  explanation as a correct one.
 
 Currently unbuilt, and therefore not to be described as working: Granite
 Guardian, every judges endpoint, the frontend, and the deployment.

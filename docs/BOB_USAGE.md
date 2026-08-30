@@ -116,10 +116,21 @@ logged as its own row when it happens.
 | Agent layer, task 2 | Claude Code | Generate-and-gate loop: Granite generates, the gate runs, a rejected candidate is regenerated twice with the specific rejected tokens fed back, then the floor is served. One exit, and the floor is gated like any candidate. served_by emitted per response as granite_first_pass, granite_after_regen or deterministic_floor. Credentials read from the environment only, in an isolated client module the test suite never touches | agent/explain.py, agent/granite.py, tests/test_explain.py |
 | Agent layer, task 3 | Claude Code | The invariant demonstrated rather than argued, in its own file: a stub fabricating a different number on every call is watched being caught three times and never reaching the output; a stub grounded on the first try is credited to granite_first_pass; one grounded only on the second regeneration is credited to granite_after_regen. Suite 186 passed, 1 skipped, 1 xfailed | tests/test_explain_proof.py |
 
+| First live watsonx call | Claude Code | Credentials supplied by the operator in a gitignored `.env`. Direct call on a simple prompt returned incoherent token spam: `/ml/v1/text/generation` hands an instruct model a raw prompt with no chat template. Switched `generate()` to `/ml/v1/text/chat` with a messages array so the template is applied server-side, and moved the default model to `ibm/granite-4-h-small` after `ibm/granite-4-1-8b-instruct` 404'd on this account. Stage 1 re-run: coherent. Five new tests intercept `requests.post` and pin the wire shape, which no test could see before because they all stub `generate()` | agent/granite.py, agent/explain.py, tests/test_explain.py, .env.example |
+| First live end-to-end explain | Claude Code | Fixture validate manifest through the full loop. First live attempt was rejected on `21` and `13`, from Granite rewriting the ISO dates `2027-06-21` and `2032-12-13` as "June 21, 2027" and "December 13, 2032": the manifest declares that a date renders as itself and nothing else, so a reformatting is a number the solver never emitted and the gate was right to reject it. Two prompt rules added, one on date form and one forbidding the model to assert orderings or verdicts it was not given. Re-run: `served_by=granite_first_pass`, grounded, zero regenerations | agent/explain.py |
+
 **Phase 2 agent-layer exit condition:** met for the loop, not for the endpoint.
-Every path is exercised by a stub, so what is proven is that no ungrounded
-explanation can be served, whatever the model returns. No live watsonx call has
-been made from this machine, which has no credentials, and the model id and
-region host in `agent/granite.py` are therefore configurable defaults rather
-than observed facts. The first credentialed run is its own entry when it
-happens.
+Every path is exercised by a stub, so what CI proves is that no ungrounded
+explanation can be served, whatever the model returns. The live run of
+2026-08-30 is what proves the endpoint, and it is logged in the two rows above
+rather than folded into the stub result.
+
+What the live run also showed, and what no row above should be read as denying:
+the first grounded explanation contained a false claim. It said the 2027 C3
+comparison "exceeds the solver's tolerance of 0.2 (or 20%)" when the difference
+is 4.92% and therefore inside it. Every number in that sentence was a manifest
+rendering. The gate is a groundedness gate and it did its job; a comparative
+assertion about grounded numbers is not something membership or attribution
+can see, and the manifest carries no pass/fail entry for the model to quote
+instead of reasoning its way to one. This is a real limit and belongs beside
+the result, not after it.

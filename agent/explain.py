@@ -146,6 +146,17 @@ Do not cite a figure, equation, table or page number. Reference numbers are
 checked against the source citations and a wrong one is treated as a fabricated
 number wearing a label.
 
+Write a date exactly as it appears in the list, in the form it is given. Do
+not reformat one into month-name form: "2027-06-21" written as "June 21, 2027"
+puts a 21 into the text that the solver never emitted, and it is rejected like
+any other number that is not on the list.
+
+Do not say which of two values is larger, and do not say whether a check
+passed, failed, or exceeded its tolerance. You were given numbers, not their
+ordering, and working out the ordering is arithmetic you are not doing here.
+Say what each value is and what the difference between them is, both of which
+are on the list, and stop there.
+
 Write connected prose. State that the model is patched-conic and two-body, with
 no n-body integration and no non-gravitational forces."""
 
@@ -202,7 +213,10 @@ def build_prompt(manifest, question: str = "",
     ]
     if rejected:
         parts.append(_rejection_block(rejected, previous))
-    parts.append("EXPLANATION:")
+    # An instruction, not a completion stub. "EXPLANATION:" is the shape a raw
+    # text-generation prompt ends in, and this goes to a chat endpoint as a
+    # user turn, where a trailing label reads as something to echo.
+    parts.append("Write the explanation now, and write nothing else.")
     return "\n\n".join(parts)
 
 

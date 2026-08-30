@@ -262,3 +262,105 @@ def test_the_prompt_states_the_rules_the_gate_enforces(manifest):
 def test_the_question_reaches_the_prompt(manifest):
     prompt = agent_explain.build_prompt(manifest, question="Can we catch it?")
     assert "Can we catch it?" in prompt
+
+
+# ---------------------------------------------------------------------------
+# The wire shape
+# ---------------------------------------------------------------------------
+#
+# The client is not exercised anywhere else in this suite, on purpose: the loop
+# must be provably independent of it. But the failure that produced this
+# section was a wire-shape failure, not a logic one. Granite returned
+# incoherent token spam because /ml/v1/text/generation hands an instruct model
+# a raw prompt with no chat template, and nothing in a test that stubs
+# generate() could ever have seen it. So the request itself is asserted, with
+# requests.post intercepted and no credential and no network involved.
+
+class _CapturedPost:
+    """Stands in for requests.post, recording the call and replying to script."""
+
+    def __init__(self, status=200, payload=None, text=""):
+        self.status, self.payload, self.text = status, payload or {}, text
+        self.calls = []
+
+    def __call__(self, url, **kwargs):
+        self.calls.append({"url": url, **kwargs})
+        return self
+
+    # The bits of a requests.Response the client touches.
+    @property
+    def status_code(self):
+        return 200 if self.calls[-1]["url"] == granite.IAM_URL else self.status
+
+    def json(self):
+        if self.calls[-1]["url"] == granite.IAM_URL:
+            return {"access_token": "token-from-iam", "expires_in": 3600}
+        return self.payload
+
+
+CHAT_REPLY = {"choices": [{"message": {"role": "assistant",
+                                       "content": "  a coherent sentence.  "}}]}
+
+
+@pytest.fixture
+def client():
+    return granite.GraniteClient(api_key="sk-do-not-leak-me",
+                                 project_id="project-1")
+
+
+def test_the_client_posts_a_messages_array_to_the_chat_endpoint(client,
+                                                               monkeypatch):
+    post = _CapturedPost(payload=CHAT_REPLY)
+    monkeypatch.setattr("requests.post", post)
+
+    assert client.generate("PROMPT BODY") == "a coherent sentence."
+
+    chat = post.calls[-1]
+    assert chat["url"].endswith(granite.CHAT_PATH)
+    assert "text/generation" not in chat["url"], (
+        "an instruct model on the raw generation endpoint is the bug this "
+        "endpoint choice exists to prevent")
+    body = chat["json"]
+    assert [m["role"] for m in body["messages"]] == ["system", "user"]
+    assert body["messages"][1]["content"] == "PROMPT BODY"
+    assert "input" not in body, "text/generation's field, not the chat one"
+    assert body["model_id"] == granite.DEFAULT_MODEL_ID
+    assert body["temperature"] == 0, "a sampled explanation makes served_by noise"
+
+
+def test_the_default_model_is_the_one_confirmed_on_this_account():
+    assert granite.DEFAULT_MODEL_ID == "ibm/granite-4-h-small"
+
+
+def test_the_credential_travels_in_a_header_and_never_in_a_body(client,
+                                                                monkeypatch):
+    post = _CapturedPost(payload=CHAT_REPLY)
+    monkeypatch.setattr("requests.post", post)
+    client.generate("PROMPT BODY")
+
+    iam, chat = post.calls[0], post.calls[1]
+    assert iam["data"]["apikey"] == "sk-do-not-leak-me"
+    assert "sk-do-not-leak-me" not in str(chat["json"])
+    assert chat["headers"]["Authorization"] == "Bearer token-from-iam"
+
+
+def test_a_refused_call_raises_rather_than_returning_prose(client, monkeypatch):
+    """
+    A 404 on a model id, which is how the previous default failed, has to reach
+    the loop as an error so the attempt is recorded and the floor is served.
+    Returning an error body as text would put watsonx's prose into a response
+    labelled as an explanation.
+    """
+    monkeypatch.setattr("requests.post",
+                        _CapturedPost(status=404, payload={},
+                                      text="model_not_supported"))
+    with pytest.raises(granite.GraniteError, match="404"):
+        client.generate("PROMPT BODY")
+
+
+def test_an_empty_completion_is_an_error_not_an_explanation(client, monkeypatch):
+    monkeypatch.setattr(
+        "requests.post",
+        _CapturedPost(payload={"choices": [{"message": {"content": "   "}}]}))
+    with pytest.raises(granite.GraniteError, match="empty"):
+        client.generate("PROMPT BODY")
