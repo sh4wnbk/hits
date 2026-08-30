@@ -149,6 +149,81 @@ def plot_c3_slice(
     return output_path
 
 
+def _comparison_rows(results):
+    """
+    The five Lyra comparisons as plain rows, read once and rendered twice.
+
+    Both the interactive HTML and the static PNG call this, so the two files
+    cannot disagree about a number. Each row carries the relative difference,
+    the tolerance as a percentage, and a label whose figures are canonical
+    manifest renderings pulled by entry id.
+
+    The tolerance percentages for the frame gate and the two arrival samples
+    are derived here for display, because those tolerances are declared in km/s
+    rather than as fractions. That derivation is a plotting convenience and is
+    not a claim about solver output.
+    """
+    if results.manifest is None:
+        raise ValueError(
+            "the comparison plots need the manifest that validate() attaches; "
+            "the labels are manifest renderings, not format specifiers")
+    if results.c3 is None or results.arrival_a is None or results.arrival_b is None:
+        raise ValueError(
+            "incomplete validation results: the frame gate failed, so the "
+            "downstream comparisons were skipped and there is nothing to plot")
+
+    c = results.manifest.canonical
+    fg, c3, a, b = results.frame_gate, results.c3, results.arrival_a, results.arrival_b
+
+    return [
+        dict(
+            name="Perihelion v∞<br>(frame gate)",
+            short_name="Perihelion v∞ (frame gate)",
+            rel=abs(fg.rel_diff_pct),
+            tol_pct=100.0 * fg.tolerance_km_s / fg.published_km_s,
+            label=(f"HITS {c('validate.frame_gate.computed')} vs Lyra "
+                   f"{c('validate.frame_gate.published')} km/s"),
+            citation=fg.citation,
+        ),
+        dict(
+            name="C3, 2027 launch",
+            short_name="C3, 2027 launch",
+            rel=abs(c3.c3_2027_rel_diff_pct),
+            tol_pct=100.0 * c3.c3_2027_tolerance_frac,
+            label=(f"HITS {c('validate.c3.y2027.computed')} vs Lyra "
+                   f"{c('validate.c3.y2027.published')} km²/s²"),
+            citation=c3.c3_2027_citation,
+        ),
+        dict(
+            name="C3 floor",
+            short_name="C3 floor",
+            rel=abs(c3.c3_floor_rel_diff_pct),
+            tol_pct=100.0 * c3.c3_floor_tolerance_frac,
+            label=(f"HITS {c('validate.c3.floor.computed')} vs Lyra "
+                   f"{c('validate.c3.floor.published')} km²/s²"),
+            citation=c3.c3_floor_citation,
+        ),
+        dict(
+            name="Sample A arrival v∞2",
+            short_name="Sample A arrival v∞2",
+            rel=abs(a.rel_diff_pct),
+            tol_pct=100.0 * a.tolerance_km_s / a.published_km_s,
+            label=(f"HITS {c('validate.arrival_a.v_inf2')} vs Lyra "
+                   f"{c('validate.arrival_a.published')} km/s"),
+            citation=a.citation,
+        ),
+        dict(
+            name="Sample B arrival v∞2",
+            short_name="Sample B arrival v∞2",
+            rel=abs(b.rel_diff_pct),
+            tol_pct=100.0 * b.tolerance_km_s / b.published_km_s,
+            label=(f"HITS {c('validate.arrival_b.v_inf2')} vs Lyra "
+                   f"{c('validate.arrival_b.published')} km/s"),
+            citation=b.citation,
+        ),
+    ]
+
+
 def plot_validation_comparison(
     results,
     output_path: str = "plots/validation_comparison.html",
@@ -181,60 +256,7 @@ def plot_validation_comparison(
     -------
     The path written.
     """
-    if results.manifest is None:
-        raise ValueError(
-            "plot_validation_comparison needs the manifest that validate() "
-            "attaches; the labels are manifest renderings, not format specifiers")
-    if results.c3 is None or results.arrival_a is None or results.arrival_b is None:
-        raise ValueError(
-            "incomplete validation results: the frame gate failed, so the "
-            "downstream comparisons were skipped and there is nothing to plot")
-
-    c = results.manifest.canonical
-    fg, c3, a, b = results.frame_gate, results.c3, results.arrival_a, results.arrival_b
-
-    rows = [
-        dict(
-            name="Perihelion v∞<br>(frame gate)",
-            rel=abs(fg.rel_diff_pct),
-            tol_pct=100.0 * fg.tolerance_km_s / fg.published_km_s,
-            label=(f"HITS {c('validate.frame_gate.computed')} vs Lyra "
-                   f"{c('validate.frame_gate.published')} km/s"),
-            citation=fg.citation,
-        ),
-        dict(
-            name="C3, 2027 launch",
-            rel=abs(c3.c3_2027_rel_diff_pct),
-            tol_pct=100.0 * c3.c3_2027_tolerance_frac,
-            label=(f"HITS {c('validate.c3.y2027.computed')} vs Lyra "
-                   f"{c('validate.c3.y2027.published')} km²/s²"),
-            citation=c3.c3_2027_citation,
-        ),
-        dict(
-            name="C3 floor",
-            rel=abs(c3.c3_floor_rel_diff_pct),
-            tol_pct=100.0 * c3.c3_floor_tolerance_frac,
-            label=(f"HITS {c('validate.c3.floor.computed')} vs Lyra "
-                   f"{c('validate.c3.floor.published')} km²/s²"),
-            citation=c3.c3_floor_citation,
-        ),
-        dict(
-            name="Sample A arrival v∞2",
-            rel=abs(a.rel_diff_pct),
-            tol_pct=100.0 * a.tolerance_km_s / a.published_km_s,
-            label=(f"HITS {c('validate.arrival_a.v_inf2')} vs Lyra "
-                   f"{c('validate.arrival_a.published')} km/s"),
-            citation=a.citation,
-        ),
-        dict(
-            name="Sample B arrival v∞2",
-            rel=abs(b.rel_diff_pct),
-            tol_pct=100.0 * b.tolerance_km_s / b.published_km_s,
-            label=(f"HITS {c('validate.arrival_b.v_inf2')} vs Lyra "
-                   f"{c('validate.arrival_b.published')} km/s"),
-            citation=b.citation,
-        ),
-    ]
+    rows = _comparison_rows(results)
     rows.reverse()   # plotly draws the first category at the bottom
 
     names = [r["name"] for r in rows]
@@ -292,4 +314,169 @@ def plot_validation_comparison(
     for r in reversed(rows):
         print(f"  {r['name'].replace('<br>', ' '):28s} "
               f"diff {r['rel']:6.2f}%  tolerance {r['tol_pct']:6.2f}%  {r['label']}")
+    return output_path
+
+
+# ---------------------------------------------------------------------------
+# Static render of the same comparison, for the repository and the README
+# ---------------------------------------------------------------------------
+#
+# The plotly file is 4.6 MB of embedded javascript and GitHub will not display
+# it, so the figure a reader meets first is this one. Pillow, already pinned,
+# in the same visual language as data/plot_demand.py, so the project's two
+# charts do not look like they came from different projects.
+
+_PNG_INK     = (34, 34, 34)
+_PNG_MUTED   = (102, 102, 102)
+_PNG_RULE    = (216, 216, 216)
+_PNG_GRID    = (238, 238, 238)
+_PNG_BAR     = (27, 108, 168)
+_PNG_TRACK   = (223, 231, 237)
+_PNG_TICK    = (150, 173, 190)
+_PNG_PAPER   = (255, 255, 255)
+
+_PNG_FONTS = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    "/usr/share/fonts/TTF/DejaVuSans.ttf",
+    "/System/Library/Fonts/Helvetica.ttc",
+]
+_PNG_FONTS_BOLD = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/usr/share/fonts/TTF/DejaVuSans-Bold.ttf",
+]
+
+
+def _png_font(paths, size):
+    from PIL import ImageFont
+    for p in paths:
+        if os.path.exists(p):
+            return ImageFont.truetype(p, size)
+    return ImageFont.load_default(size)
+
+
+def plot_validation_comparison_png(
+    results,
+    output_path: str = "plots/validation_comparison.png",
+) -> str:
+    """
+    The five Lyra comparisons as a static image that renders in a browser tab,
+    a README, and a GitHub file view.
+
+    Same rows as the interactive version, from the same `_comparison_rows`, so
+    the two cannot drift. Same encoding too: one shared axis in percent, each
+    quantity's difference from the published figure drawn against the tolerance
+    declared for it. The tolerance is a track rather than a tick because a
+    difference of 0.17% on an axis that must reach 50% is two pixels wide, and
+    a bar that short reads as a rendering fault rather than as agreement. Drawn
+    against its own tolerance track, the same two pixels read as what they are.
+
+    Returns the path written.
+    """
+    from PIL import Image, ImageDraw
+
+    rows = _comparison_rows(results)
+
+    S = 2                      # drawn at 2x and reduced; ImageDraw has no AA
+    W, H = 1320, 706
+    left, bar_x0, bar_x1 = 56, 468, 1092
+    span = bar_x1 - bar_x0
+    axis_max = 55.0
+    top, row_h, row_gap, bar_h = 196, 30, 46, 30
+
+    img = Image.new("RGB", (W * S, H * S), _PNG_PAPER)
+    d = ImageDraw.Draw(img)
+
+    f_title = _png_font(_PNG_FONTS_BOLD, 27 * S)
+    f_sub   = _png_font(_PNG_FONTS, 15 * S)
+    f_panel = _png_font(_PNG_FONTS_BOLD, 15 * S)
+    f_label = _png_font(_PNG_FONTS, 17 * S)
+    f_small = _png_font(_PNG_FONTS, 13 * S)
+    f_value = _png_font(_PNG_FONTS_BOLD, 17 * S)
+    f_tol   = _png_font(_PNG_FONTS, 14 * S)
+    f_foot  = _png_font(_PNG_FONTS, 14 * S)
+
+    def x_of(pct):
+        return bar_x0 + span * min(pct, axis_max) / axis_max
+
+    # A label under the bars is a chart that misreads at a glance. Measured,
+    # not eyeballed, the same guard the demand chart carries.
+    gutter = (bar_x0 - left - 16) * S
+    for r in rows:
+        for text, font in ((r["short_name"], f_label), (r["label"], f_small)):
+            w = d.textlength(text, font=font)
+            if w > gutter:
+                raise ValueError(
+                    f"label {text!r} needs {w / S:.0f}px but the label gutter "
+                    f"is {gutter / S:.0f}px")
+
+    d.text((left * S, 44 * S),
+           "HITS against published Project Lyra figures", font=f_title, fill=_PNG_INK)
+    d.text((left * S, 84 * S),
+           "Hein et al. 2019, Acta Astronautica 161, 552-561. Ephemerides retrieved "
+           f"{results.retrieval_date[:10]}. Patched-conic, 2-body: no n-body integration, "
+           "no non-gravitational forces.",
+           font=f_sub, fill=_PNG_MUTED)
+
+    heading = "DIFFERENCE FROM THE PUBLISHED FIGURE"
+    d.text((left * S, 132 * S), heading, font=f_panel, fill=_PNG_INK)
+    d.text(((left + d.textlength(heading, font=f_panel) / S + 18) * S, 133 * S),
+           "solid bar, against the pale track of the tolerance declared for it",
+           font=f_sub, fill=_PNG_MUTED)
+
+    # Gridlines behind the rows, so a shared axis can actually be read
+    bottom = top + len(rows) * (row_h + row_gap) - row_gap + 16
+    for pct in range(0, int(axis_max) + 1, 10):
+        gx = x_of(pct)
+        d.line([gx * S, (top - 16) * S, gx * S, bottom * S], fill=_PNG_GRID, width=S)
+        tick = f"{pct}%"
+        d.text((gx * S - d.textlength(tick, font=f_small) / 2,
+                (bottom + 8) * S), tick, font=f_small, fill=_PNG_MUTED)
+
+    for i, r in enumerate(rows):
+        y = top + i * (row_h + row_gap)
+        tol_x, rel_x = x_of(r["tol_pct"]), x_of(r["rel"])
+
+        d.text((left * S, y * S), r["short_name"], font=f_label, fill=_PNG_INK)
+        d.text((left * S, (y + 22) * S), r["label"], font=f_small, fill=_PNG_MUTED)
+
+        # tolerance track, then the difference on top of it
+        d.rectangle([bar_x0 * S, y * S, tol_x * S, (y + bar_h) * S], fill=_PNG_TRACK)
+        d.line([tol_x * S, (y - 4) * S, tol_x * S, (y + bar_h + 4) * S],
+               fill=_PNG_TICK, width=S)
+        width = max(rel_x - bar_x0, 3.0)   # never render agreement as nothing
+        d.rectangle([bar_x0 * S, y * S, (bar_x0 + width) * S, (y + bar_h) * S],
+                    fill=_PNG_BAR)
+
+        value = f"{r['rel']:.2f}%"
+        d.text(((bar_x1 + 24) * S, y * S), value, font=f_value, fill=_PNG_BAR)
+        d.text(((bar_x1 + 24) * S, (y + 22) * S),
+               f"of {r['tol_pct']:.2f}% allowed", font=f_tol, fill=_PNG_MUTED)
+
+    d.line([left * S, (bottom + 34) * S, bar_x1 * S, (bottom + 34) * S],
+           fill=_PNG_RULE, width=S)
+
+    fy = bottom + 52
+    for line in [
+        "Every quantity agrees with the published figure well inside the tolerance declared for it "
+        "before the comparison ran.",
+        "Agreement inside a tolerance is not proof of correctness. The remaining gaps are attributed to "
+        "orbit-solution epoch drift and to the definitional",
+        "difference between the asymptotic v∞2 of Hein eq. 4 and the local encounter velocity, both argued "
+        "in docs/PROVENANCE.md and docs/VERIFICATION.md.",
+        "Figures in the labels are canonical manifest renderings. Regenerate with "
+        "solver.plot.plot_validation_comparison_png from a completed validate() run.",
+    ]:
+        d.text((left * S, fy * S), line, font=f_foot, fill=_PNG_MUTED)
+        fy += 21
+
+    img = img.resize((W, H), Image.LANCZOS)
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    img.save(output_path, format="PNG", optimize=True)
+
+    print(f"\nComparison PNG written to {output_path}")
+    for r in rows:
+        print(f"  {r['short_name']:28s} diff {r['rel']:6.2f}%  "
+              f"tolerance {r['tol_pct']:6.2f}%  {r['label']}")
     return output_path
