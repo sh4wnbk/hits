@@ -255,8 +255,13 @@ def validate_c3(
     # Edge-type classification per PROVENANCE.md
     edge_type = _classify_floor_edge(floor_dep_jd, floor_tof, dep_jds, tof_days)
 
+    # Date only, not the full retrieved_utc timestamp. The manifest declares
+    # the retrieval date as retrieval_date[:10] and renders it as itself, so a
+    # printed time-of-day is a number no manifest entry carries. The dogfood
+    # test in tests/test_groundedness.py caught exactly that.
     gap_attr = (
-        f"orbit-solution epoch ({retrieval_date}) + patched-conic method. Not tuned away."
+        f"orbit-solution epoch ({retrieval_date[:10]}) + patched-conic method. "
+        f"Not tuned away."
     )
 
     return C3Result(

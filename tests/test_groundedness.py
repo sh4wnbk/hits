@@ -205,3 +205,36 @@ def test_gate_does_no_arithmetic():
 
     assert not offences, (
         "the gate must not compute. Offences:\n  " + "\n  ".join(offences))
+
+
+# ---------------------------------------------------------------------------
+# Dogfood: the solver's own printed rows, through the gate.
+# ---------------------------------------------------------------------------
+
+def test_the_printed_validation_rows_are_grounded(state_vectors, capsys):
+    """
+    Run the gate over the solver's own validation output.
+
+    docs/MANIFEST.md, "The printed rows are bound to the manifest", says the
+    print functions quote canonical renderings rather than carrying their own
+    format specifiers, and that this test is what enforces it. Both
+    print_frame_gate's docstring and validate()'s pointed here before the test
+    existed, which is the drift this file is supposed to catch.
+
+    What it buys: the rows a judge reads and the set of numbers an explanation
+    may quote are the same strings. A format specifier reintroduced into a
+    print function emits a token the manifest does not carry, and this goes
+    red rather than the two quietly diverging.
+    """
+    check = _gate()
+    from solver.validate import validate
+
+    results = validate(state_vectors, verbose=True)
+    printed = capsys.readouterr().out
+    assert printed.strip(), "validate(verbose=True) printed nothing to gate"
+
+    verdict = check(printed, results.manifest)
+    assert verdict.grounded, (
+        "the solver's own printed validation rows are not grounded against "
+        "the manifest they were rendered from:\n  "
+        + "\n  ".join(str(f) for f in verdict.findings))
