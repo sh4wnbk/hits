@@ -1,0 +1,72 @@
+name: keepalive
+
+# Why this exists.
+#
+# The deployment is a free Render instance, and a free instance is spun down
+# after inactivity. The next request then pays a cold start of roughly a
+# minute, which is a long time to look at a blank tab and a poor first
+# impression for someone who followed a link expecting a page. So this pings
+# /health often enough that the service stays awake.
+#
+# /health is the cheap route on purpose: it returns a constant and loads no
+# manifest, so keeping the instance warm costs a json read rather than a
+# manifest parse.
+#
+# ## Why it fails loudly
+#
+# A keepalive that swallows a bad response is worse than none, because it
+# reports success while the site is down. Anything other than 200 fails the
+# job, which puts a red mark on the Actions tab where it will be seen.
+#
+# ## What it is not
+#
+# It is not a health monitor with alerting, and GitHub's scheduler is
+# best-effort: a run can be late or skipped under load, and scheduled
+# workflows are disabled automatically after 60 days without repository
+# activity. Treat a missing run as the scheduler, and a failing run as the
+# service.
+
+on:
+  schedule:
+    # Every ten minutes. Render's free tier sleeps after fifteen.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+# A late run has nothing to add to a run already in flight.
+concurrency:
+  group: keepalive
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping /health
+        env:
+          URL: https://hits-f3s4.onrender.com/health
+        run: |
+          set -euo pipefail
+
+          # Up to three attempts, because a cold start can outrun a single
+          # request's patience and a wakeup is not a failure. --max-time covers
+          # the whole request, which is what a spun-down instance exhausts.
+          for attempt in 1 2 3; do
+            code=$(curl -sS -o /tmp/body -w '%{http_code}' --max-time 90 "$URL" || echo 000)
+            echo "attempt $attempt: HTTP $code"
+            if [ "$code" = "200" ]; then
+              cat /tmp/body
+              echo
+              # The route returns a constant, so a 200 carrying anything else
+              # is a different service answering, or a proxy error page.
+              grep -q '"status":"ok"' /tmp/body || {
+                echo "::error::200 from $URL but the body is not the health payload"
+                exit 1
+              }
+              exit 0
+            fi
+            sleep 20
+          done
+
+          echo "::error::$URL did not return 200 in three attempts (last: $code)"
+          cat /tmp/body || true
+          exit 1
