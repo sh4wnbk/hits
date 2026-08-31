@@ -28,8 +28,10 @@ that was evaluated.
 
 /ml/v1/text/chat takes a messages array and applies the model's own chat
 template server-side, so the template can never drift from what the model
-expects. The loop's surface is unchanged: generate(prompt) still takes one
-string, and this module turns it into the user turn.
+expects. generate() takes the user turn as one string and the standing rules
+as another, and this module is the only place they become a messages array.
+The rules themselves belong to agent/explain.py, because they are rules about
+a gate this module knows nothing about.
 
 The failure was worth the cost of finding, because it is the failure mode this
 whole layer is built around, wearing a different hat. Token spam is obviously
@@ -104,8 +106,9 @@ class GraniteClient:
     """
     One watsonx chat endpoint.
 
-    `generate(prompt) -> str` is the whole surface the loop uses, which is what
-    lets a stub stand in for it without importing anything from this file. The
+    `generate(prompt, system=...) -> str` is the whole surface the loop uses,
+    which is what lets a stub stand in for it without importing anything from
+    this file. The
     messages array is built here and nowhere else, so the loop cannot acquire
     an opinion about the chat template.
     """
@@ -142,19 +145,25 @@ class GraniteClient:
 
     # -- generation ---------------------------------------------------------
 
-    def messages(self, prompt: str) -> list:
+    def messages(self, prompt: str, system: str = "") -> list:
         """
         The prompt as a chat exchange.
 
         Separated from generate() so the shape sent to watsonx can be inspected
         and asserted on without a credential or a network call.
+
+        `system` is the caller's standing instructions. agent/explain.py owns
+        them, because they are rules about the gate the caller is being held to
+        and this module knows nothing about the gate. Absent one, the one-line
+        default below stands, so a caller that passes only a prompt still gets
+        a system turn rather than none.
         """
         return [
-            {"role": "system", "content": SYSTEM_MESSAGE},
+            {"role": "system", "content": system or SYSTEM_MESSAGE},
             {"role": "user", "content": prompt},
         ]
 
-    def generate(self, prompt: str) -> str:
+    def generate(self, prompt: str, system: str = "") -> str:
         import requests
         response = requests.post(
             f"{self.url.rstrip('/')}{CHAT_PATH}",
@@ -167,7 +176,7 @@ class GraniteClient:
             json={
                 "model_id": self.model_id,
                 "project_id": self.project_id,
-                "messages": self.messages(prompt),
+                "messages": self.messages(prompt, system),
                 **DEFAULT_PARAMETERS,
             },
             timeout=REQUEST_TIMEOUT_S,

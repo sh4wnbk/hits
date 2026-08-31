@@ -239,6 +239,34 @@ Phase 2 agent layer built and validated (2026-08-29):
   The README shows the floor, and says why: the floor is the path that
   reproduces byte-for-byte offline with no credentials. The `n_a` leak is a
   real defect and is not yet fixed.
+- **Prompt restructure attempted 2026-08-30 and it made Granite worse. The
+  recommendation is floor-first.** The `n_a` leak is fixed and stays fixed:
+  `permitted_numbers()` omits the frame clause for a frameless entry, and a
+  test asserts the placeholder is absent from the system turn, the user turn
+  and a regeneration turn for all three objects. Moving the standing rules into
+  the system turn and adding a plain-language-opening instruction was tried in
+  the same change, and measured: **0 grounded out of 15** across the three
+  objects. A controlled A/B with the rules back in the user turn and the `n_a`
+  fix retained gave **4 grounded out of 5** on the same manifest, so the
+  restructure caused the regression and the `n_a` fix did not.
+- **The new failure mode is typography, not content.** Asked for prose a
+  non-scientist can read, Granite writes like a journal: `km² s⁻²` and
+  `km²/s²` for `km^2/s^2`, and U+2011 NON-BREAKING HYPHEN in `2018‑06‑07`,
+  which stops the date matching its rendering and leaves `06` and `07` as
+  loose numerals. The instruction to write plainly and the instruction to quote
+  exactly pull against each other in this model. Do not treat this as a wording
+  problem to iterate on; it was tried once, bounded, and the result is above.
+- **Even when Granite passes, its prose is worse than the floor.** A grounded
+  answer is a recital of one figure per paragraph with no plain-language lead
+  and none of the feasibility framing, and it adds loose interpretive glosses
+  the solver never made.
+- **New gate limit, found live and not yet fixed: a reformatted date can pass.**
+  A grounded 3I/ATLAS answer contained "September 20, 2030". It passed because
+  `20` is `solve.tof_years` and `2030` is `solve.departure.year`, both real
+  renderings in that manifest. The prompt's no-month-name rule is therefore not
+  enforceable by membership alone whenever a date's fragments happen to be
+  grounded elsewhere. This belongs with the accepted limits in
+  `tests/corpus/known_limits.jsonl` and is recorded here until it is.
 - **The earlier record, kept because it is what the runs showed then.** Later the same day, six live
   attempts across two manifest shapes were all rejected and all served
   `deterministic_floor`. On a solve manifest Granite rewrites `2017-06-07` as
@@ -304,7 +332,7 @@ Three-object set built and validated (2026-08-30):
   the solver never emitted, the second is the launcher model this project does
   not have. The target's designation comes from the manifest header, not an
   entry, because a name is not a computed quantity.
-- Suite: 205 passed, 1 skipped, 1 xfailed, 0 failed.
+- Suite: 208 passed, 1 skipped, 1 xfailed, 0 failed.
 
 Currently unbuilt, and therefore not to be described as working: Granite
 Guardian, every judges endpoint, the frontend, and the deployment.

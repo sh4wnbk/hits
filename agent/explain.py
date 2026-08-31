@@ -124,6 +124,15 @@ class Explanation:
 # The prompt
 # ---------------------------------------------------------------------------
 
+SYSTEM_FRAMING = """\
+You explain the output of a deterministic orbital-mechanics solver to a general
+reader. The solver has already run and finished. You interpret its output; you
+do not produce figures of your own.
+
+Open with a single plain-language sentence a non-scientist can read, saying what
+the result means. Then give the detail underneath it. Do not open with a list,
+a heading, or a restatement of the request."""
+
 QUOTE_ONLY_RULE = """\
 QUOTE-ONLY RULE. Write no number that does not appear verbatim in the list of
 permitted numbers above. Not a rounding of one, not a total of two of them, not
@@ -161,6 +170,15 @@ Write connected prose. State that the model is patched-conic and two-body, with
 no n-body integration and no non-gravitational forces."""
 
 
+# The manifest's placeholder for an entry that has no frame, which is a value
+# in the schema's closed lexicon and not a word. It must never reach the model:
+# handed "frame n_a", Granite wrote "the flight time is 365 days, or 1 year, in
+# the n_a frame" and served it to a reader, and the gate had no reason to
+# object because n_a is not a number. Whatever the prompt shows, the model will
+# eventually say.
+NO_FRAME = "n_a"
+
+
 def permitted_numbers(manifest) -> str:
     """
     Every number the explanation is allowed to write, with what it is.
@@ -168,12 +186,20 @@ def permitted_numbers(manifest) -> str:
     The kind, unit and frame travel with each line because they are what the
     gate checks besides the digits, and a model that is not told them cannot
     satisfy them.
+
+    The frame clause is omitted entirely for an entry that has none. Writing
+    "frame n_a" leaked an internal token into user-facing prose; writing
+    "no frame" would invite "in no frame", which is not English either. A
+    dimensionless quantity is better served by the prompt saying nothing about
+    its frame, since there is nothing to say.
     """
     lines = []
     for entry in manifest.entries:
         alternates = entry.renderings[1:]
-        line = (f"- {entry.canonical}  [{entry.kind}, unit {entry.unit}, "
-                f"frame {entry.frame}]  {entry.label}")
+        facts = [entry.kind, f"unit {entry.unit}"]
+        if entry.frame != NO_FRAME:
+            facts.append(f"frame {entry.frame}")
+        line = f"- {entry.canonical}  [{', '.join(facts)}]  {entry.label}"
         if alternates:
             line = f"{line}  (may also be written {', '.join(alternates)})"
         lines.append(line)
@@ -194,22 +220,32 @@ def _rejection_block(rejected: Sequence[Finding], previous: str) -> str:
         "rule still applies in full.")
 
 
+# The standing instructions, which are the same for every call this layer ever
+# makes. They belong in the system turn because that is where an instruct model
+# expects the rules it is being held to, and because a rule repeated in the
+# user turn competes for attention with the material that actually differs
+# between calls. What differs between calls is the question, the manifest and,
+# on a retry, the rejection: that is the user turn and nothing else.
+SYSTEM_RULES = "\n\n".join([SYSTEM_FRAMING, QUOTE_ONLY_RULE])
+
+
 def build_prompt(manifest, question: str = "",
                  rejected: Sequence[Finding] = (),
                  previous: str = "") -> str:
-    """The prompt for one attempt. Regeneration differs only by the feedback block."""
+    """
+    The user turn for one attempt: the material specific to this call.
+
+    The rules are not here. They are in SYSTEM_RULES and travel in the system
+    turn. Regeneration differs from a first attempt only by the feedback block.
+    """
     asked = question or (
         "Explain this result in plain language to someone with no "
         "mission-design training.")
     parts = [
-        "You are explaining the output of a deterministic orbital-mechanics "
-        "solver to a general reader. The solver has already run and finished. "
-        "You interpret its output; you do not produce figures of your own.",
         f"THE QUESTION: {asked}",
         f"SOLVER CALL: {manifest.producer}, call_id {manifest.call_id}",
         f"FIDELITY: {manifest.fidelity_note}",
         f"PERMITTED NUMBERS:\n{permitted_numbers(manifest)}",
-        QUOTE_ONLY_RULE,
     ]
     if rejected:
         parts.append(_rejection_block(rejected, previous))
@@ -249,7 +285,8 @@ def explain(manifest, client=None, *, question: str = "",
     """
     Explain one solver call, and never return an ungrounded explanation.
 
-    `client` is any object with `generate(prompt) -> str`. Left None, the
+    `client` is any object with `generate(prompt, system=...) -> str`. Left
+    None, the
     environment decides: credentials present means Granite, credentials absent
     means the floor. Nothing about a credential ever reaches this function's
     arguments.
@@ -269,7 +306,7 @@ def explain(manifest, client=None, *, question: str = "",
 
     for index in range(max_retries + 1):
         try:
-            candidate = client.generate(prompt)
+            candidate = client.generate(prompt, system=SYSTEM_RULES)
         except Exception as exc:                      # noqa: BLE001
             attempts.append(Attempt(index=index, text="",
                                     error=f"{type(exc).__name__}: {exc}"))

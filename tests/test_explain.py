@@ -64,9 +64,11 @@ class ScriptedGranite:
     def __init__(self, *replies):
         self.replies = list(replies)
         self.prompts = []
+        self.systems = []
 
-    def generate(self, prompt):
+    def generate(self, prompt, system=""):
         self.prompts.append(prompt)
+        self.systems.append(system)
         # The last scripted reply repeats, so "fabricates on every call" is one
         # reply rather than a list whose length has to track the retry budget.
         index = min(len(self.prompts), len(self.replies))
@@ -83,7 +85,7 @@ class UnreachableGranite:
     def __init__(self):
         self.calls = 0
 
-    def generate(self, prompt):
+    def generate(self, prompt, system=""):
         self.calls += 1
         raise ConnectionError("watsonx did not answer")
 
@@ -138,7 +140,14 @@ def test_the_rejected_token_is_fed_back_into_the_next_prompt(manifest):
     assert FABRICATED_TOKEN in second
     assert "fabricated-number" in second
     assert "REJECTED" in second
-    assert "QUOTE-ONLY RULE" in second, "the rule is restated, not replaced"
+    # The quote-only rule is not restated in the retry's user turn any more; it
+    # rides the system turn on every call, so it is in force on the retry
+    # without competing with the feedback for attention. Both are asserted,
+    # because "the rule still applies" is the claim and where it lives is the
+    # implementation of it.
+    assert "quote-only rule still applies" in second
+    assert client.systems[1] == agent_explain.SYSTEM_RULES
+    assert "QUOTE-ONLY RULE" in client.systems[1]
 
 
 def test_recovery_on_a_retry_is_credited_to_the_retry(manifest):
@@ -252,11 +261,66 @@ def test_the_prompt_carries_every_permitted_rendering(manifest):
         assert entry.kind in listing
 
 
-def test_the_prompt_states_the_rules_the_gate_enforces(manifest):
-    prompt = agent_explain.build_prompt(manifest)
+def test_the_rules_the_gate_enforces_are_in_the_system_turn(manifest):
+    """
+    The standing rules belong in the system turn and the per-call material in
+    the user turn. A rule repeated in the user turn competes for attention with
+    the thing that actually differs between calls.
+    """
     for required in ("QUOTE-ONLY RULE", "published", "frame", "unit",
-                     "patched-conic", manifest.call_id):
-        assert required in prompt
+                     "patched-conic", "plain-language sentence"):
+        assert required in agent_explain.SYSTEM_RULES
+
+
+def test_the_user_turn_carries_only_the_call(manifest):
+    prompt = agent_explain.build_prompt(manifest)
+    assert manifest.call_id in prompt
+    assert "PERMITTED NUMBERS" in prompt
+    assert "QUOTE-ONLY RULE" not in prompt, (
+        "the standing rules moved to the system turn; a copy here is the "
+        "duplication the split exists to remove")
+
+
+def test_the_system_rules_reach_the_client(manifest):
+    """
+    Threaded, not merely defined. A system message the loop never passes is a
+    system message the model never sees.
+    """
+    client = ScriptedGranite(GROUNDED_REPLY)
+    agent_explain.explain(manifest, client)
+    assert client.systems == [agent_explain.SYSTEM_RULES]
+
+
+def test_no_prompt_the_model_sees_contains_the_no_frame_placeholder(manifest):
+    """
+    `n_a` is the manifest schema's placeholder for an entry with no frame. It
+    is a lexicon value, not a word, and handed "frame n_a" Granite wrote "in
+    the n_a frame" into prose shown to a reader. Whatever the prompt contains,
+    the model will eventually say, so the placeholder must not be in it.
+
+    Checked on the system turn, the first user turn, and a regeneration user
+    turn carrying a rejection block, because the rejection block quotes the
+    gate's own findings and those are built from manifest fields too.
+    """
+    from verify.groundedness import Finding
+
+    dimensionless = [e for e in manifest.entries
+                     if e.frame == agent_explain.NO_FRAME]
+    assert dimensionless, (
+        "this manifest has no frameless entry, so it cannot prove the leak is "
+        "closed")
+
+    rejected = (Finding(text="99999", reason="fabricated-number", start=0,
+                        note="99999 is not a manifest rendering"),)
+    surfaces = {
+        "system": agent_explain.SYSTEM_RULES,
+        "user": agent_explain.build_prompt(manifest),
+        "user on regen": agent_explain.build_prompt(
+            manifest, rejected=rejected, previous="a rejected answer"),
+    }
+    for name, text in surfaces.items():
+        assert agent_explain.NO_FRAME not in text, (
+            f"the {name} turn hands the model {agent_explain.NO_FRAME!r}")
 
 
 def test_the_question_reaches_the_prompt(manifest):

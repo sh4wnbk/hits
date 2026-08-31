@@ -37,7 +37,7 @@ computed by the same method and that no published intercept study exists to
 validate them against, because none does.
 
 **Status.** The solver, the three-object set, the groundedness gate, and the
-agent layer are built and tested (205 passed, 1 skipped, 1 xfailed). The API,
+agent layer are built and tested (208 passed, 1 skipped, 1 xfailed). The API,
 the web frontend, the judges endpoints, and the deployment are not built yet,
 and nothing below describes them as though they were.
 
@@ -69,17 +69,21 @@ the eq. 4 quantity in a way that reads as a label wrapped around a figure. So
 the system served its deterministic floor: correct, grounded, and visibly
 credited to the template rather than to the model.
 
-That is one of two things that happen. Across eleven live calls on the same
-manifest that day, seven came back `granite_after_regen`, grounded on the
-second attempt after the eq. 4 relabel was fed back, and four fell to the
-floor. So Granite now clears the gate more often than not, which earlier runs
-did not. What it produces when it clears is worth being blunt about: a flat
-recital of one figure per paragraph that drops the plain-language opening and
-the feasibility framing entirely, and leaks `n_a`, an internal placeholder from
-the manifest's frame lexicon, into a sentence shown to a reader. It is grounded
-and it is worse. The block above is the floor because the floor is the path a
-judge can reproduce, offline and without credentials, and get these bytes every
-time.
+Granite does sometimes clear the gate. On this manifest it cleared four times
+in five with the rules in the user turn, and the `n_a` placeholder it used to
+leak out of the manifest's frame lexicon is now fixed at source, so no prompt
+contains it. What it writes when it clears is still a recital of one figure per
+paragraph, with no plain-language opening and none of the framing above.
+
+Moving the standing rules into the system turn and asking for a plain-language
+opening was tried once, deliberately bounded, and measured across the three
+objects at five runs each: nothing passed, fifteen times out of fifteen. The
+failure had stopped being about content and become typography, `km² s⁻²` for
+`km^2/s^2` and a non-breaking hyphen inside `2018‑06‑07` that leaves `06` and
+`07` as loose numerals. Told to write plainly and to quote exactly, this model
+cannot do both. So the recommendation is floor-first, and the block above is
+the floor: the path a judge reproduces offline, without credentials, byte for
+byte, every time.
 
 The first and last paragraphs are doing deliberate work. The same template
 answers for 2I/Borisov and 3I/ATLAS, whose departure energies are more than
@@ -289,7 +293,7 @@ solver runs unchanged and explanations are served by the deterministic floor.
 solver/   orbital mechanics, the three-object set, validation, manifest emitter
 verify/   extraction rule, groundedness gate, adversarial corpus loader
 agent/    Granite client, generate-and-gate loop, deterministic floor
-tests/    205 tests, including the corpus and the invariant proofs
+tests/    208 tests, including the corpus and the invariant proofs
 data/     comment corpora, cluster report, committed state vectors, Lyra PDF
 docs/     architecture, verification, manifest contract, process record
 specs/    mission, tech stack, roadmap
