@@ -10,15 +10,16 @@ reachable.
 |---|---|---|
 | [GMAT](https://software.nasa.gov/software/GSC-17177-1) (NASA) | Free, open source | Mission-design expertise. It is an environment to work in, not a question you can ask |
 | [OITS](https://github.com/AdamHibberd/Optimum_Interplanetary_Trajectory) (Project Lyra) | Free, open source | MATLAB, the SPICE toolkit, and the NOMAD optimizer, plus knowing which bodies to sequence |
-| OTIS (NASA Glenn) | Free, export-controlled | ITAR. Not releasable to, or usable by, anyone who is not a United States person |
+| [OTIS](https://software.nasa.gov/software/LEW-20403-1) (NASA Glenn) | Free, U.S. release only | Where you live. NASA's own catalog entry limits distribution to domestic United States use |
 | TRACE (The Aerospace Corporation) | Internal | Never publicly released |
 
-So the capability is not missing. It is locked away, behind expertise in three
-of those rows and behind citizenship in the fourth, and the people it is locked
-away from are the ones asking. 3,171 questions pulled out of 19,122 comments on
-six NASA JPL videos say what they want to know, and the two largest technical
-themes are how long it would take and whether we could catch it. None of those
-people is going to install GMAT.
+So the capability is not missing. It is locked away, behind expertise in the
+first two rows, behind a border in the third, and behind a door that was never
+opened in the fourth, and the people it is locked away from are the ones
+asking. 3,171 questions pulled out of 19,122 comments on six NASA JPL videos
+say what they want to know, and the two largest technical themes are how long
+it would take and whether we could catch it. None of those people is going to
+install GMAT.
 
 HITS is that capability with the barrier removed. It computes real intercept
 trajectories over the hyperbolic orbits of all three interstellar objects
