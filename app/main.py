@@ -37,6 +37,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 
 from agent.explain import explain
+from app.gate_demo import gate_demo
 from solver import objects
 from solver.frozen import FrozenIntercept, load
 
@@ -136,6 +137,21 @@ def explain_object(object_key: str) -> Dict[str, Any]:
         "verification_basis": fi.verification_basis,
         "call_id": fi.call_id,
     }
+
+
+@app.get("/gate/demo/{object_key:path}")
+def gate_demo_endpoint(object_key: str) -> Dict[str, Any]:
+    """
+    Watch the number check accept a real figure and reject an invented one.
+
+    The judges-facing exhibit for CLAUDE.md's first non-negotiable. Two
+    candidates, differing by one digit of one figure, run through the same
+    `verify.groundedness.check` that gates every explanation this service
+    serves. No watsonx, no credential, no model: the verdict is a comparison
+    against the manifest, and a reader can see the comparison being made rather
+    than being told it happens.
+    """
+    return gate_demo(_frozen(object_key))
 
 
 @app.get("/", response_class=HTMLResponse)
