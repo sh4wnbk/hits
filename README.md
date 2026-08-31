@@ -153,13 +153,13 @@ n-body integration, and does not model non-gravitational forces.
 
 ```mermaid
 flowchart LR
-  H[JPL Horizons<br/>via astroquery] --> S
-  SBDB[Small-Body Database<br/>designation only] -.-> S
-  S[solver/<br/>hapsira Lambert, grids] --> M[solver/manifest.py<br/>every citable number]
-  M --> A[agent/<br/>Granite explains]
-  M --> V[verify/<br/>groundedness gate]
+  H["JPL Horizons\nvia astroquery"] --> S
+  SBDB["Small-Body Database\ndesignation only"] -.-> S
+  S["solver/\nhapsira Lambert, grids"] --> M["solver/manifest.py\nevery citable number"]
+  M --> A["agent/\nGranite explains"]
+  M --> V["verify/\ngroundedness gate"]
   A --> V
-  V --> R[grounded explanation<br/>or deterministic floor]
+  V --> R["grounded explanation\nor deterministic floor"]
 ```
 
 The solver computes and the model interprets. That split is enforced by
@@ -293,11 +293,11 @@ solver runs unchanged and explanations are served by the deterministic floor.
 solver/   orbital mechanics, the three-object set, validation, manifest emitter
 verify/   extraction rule, groundedness gate, adversarial corpus loader
 agent/    Granite client, generate-and-gate loop, deterministic floor
-tests/    240 tests, including the corpus and the invariant proofs
+tests/    242 tests, including the corpus and the invariant proofs
 data/     comment corpora, cluster report, committed state vectors, Lyra PDF
 docs/     architecture, verification, manifest contract, process record
 specs/    mission, tech stack, roadmap
-plots/    C3 porkchop slice
+plots/    C3 porkchop slice, demand clusters, validation comparison
 ```
 
 ## Documents
