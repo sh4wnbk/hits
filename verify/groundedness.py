@@ -50,6 +50,7 @@ from verify.corpus_ingest import (
     tokens_in_manifest, sentence_before, sentence_after,
     nearest_position, find_in_sentence,
 )
+from verify.normalize import canonicalize
 from verify.extract import (
     extract, raw_unit_text, CITABLE, REFERENCE, SPELLED_OUT, MALFORMED,
 )
@@ -141,6 +142,7 @@ def check_attribution(text: str, manifest) -> List[Finding]:
     published. Absence proves nothing there, because most correct sentences
     about a computed number say nothing about provenance at all.
     """
+    text = canonicalize(text)
     findings: List[Finding] = []
     index = manifest.index()
 
@@ -293,7 +295,15 @@ def check_membership(text: str, manifest) -> List[Finding]:
 
     A string lookup, and nothing else. The renderings were enumerated at emit
     time precisely so this step never has to round.
+
+    The candidate is canonicalized first, which is typography and not
+    tolerance: `km² s⁻²` and `km^2/s^2` are one unit spelled two ways, and a
+    U+2011 hyphen inside a date is the same date. See verify/normalize.py for
+    why that is a separate module and why its tables are closed. Offsets in the
+    findings below refer to the canonical text, which is the text every check
+    here reads.
     """
+    text = canonicalize(text)
     findings: List[Finding] = []
     index = manifest.index()
     citations = _citation_index(manifest)

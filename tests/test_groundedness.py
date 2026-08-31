@@ -165,6 +165,33 @@ def test_case(case):
             f"  findings: {[(f.text, f.reason) for f in verdict.findings]}")
 
 
+def test_typography_does_not_change_what_the_gate_accepts():
+    """
+    The live failure, end to end. Granite wrote `km² s⁻²` and a U+2011 hyphen
+    inside an ISO date, and the gate rejected `km²`, `06` and `07` for a
+    sentence in which every value was correct. Rejecting a real number for the
+    shape of its glyph is not strictness, it is a wrong answer.
+
+    The other half of the claim is in the same test: dressing a fabricated
+    number in the same typography does not rescue it.
+    """
+    check = _gate()
+    manifest = load_manifest_for(load_all()[0])
+    index = manifest.index()
+    c3 = "1331.16"
+    assert c3 in index, "fixture changed; pick another computed rendering"
+
+    typeset = f"The departure energy is {c3} km\u00b2 s\u207b\u00b2."
+    assert check(typeset, manifest).grounded
+
+    invented = "1331.17"
+    assert invented not in index
+    verdict = check(f"The departure energy is {invented} km\u00b2 s\u207b\u00b2.",
+                    manifest)
+    assert not verdict.grounded
+    assert any(f.reason == "fabricated-number" for f in verdict.findings)
+
+
 def test_gate_does_no_arithmetic():
     """
     The guarantee, made checkable instead of promised.
