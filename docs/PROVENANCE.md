@@ -57,6 +57,82 @@ The launch instant 2017-06-07 12:00:00 is committed in TDB as stated; the
 roughly 69-second UTC-versus-TDB offset at that date is far below every sample
 tolerance and is noted here rather than resolved.
 
+## The two objects with nothing to validate against
+
+2I/Borisov and 3I/ATLAS are computed down the same path as 1I/'Oumuamua and
+are validated against nothing, because nobody has published an intercept study
+for either. That is a difference in what is known, not a difference in method,
+and it is recorded here and carried as a field on every result rather than
+left to a reader to infer.
+
+| Body | Role | Epoch (TDB) | Frame | Center | Retrieved (UTC) | Committed states |
+|---|---|---|---|---|---|---|
+| Earth | 2I/Borisov intercept departure | single, 2030-03-13 00:00:00 (JD 2462573.5) | ECLIPJ2000 | Sun | 2026-08-31T00:27:12Z | 1 state at 0.9938 AU |
+| 2I/Borisov | 2I/Borisov intercept arrival | single, 2050-03-13 00:00:00 (JD 2469878.5) | ECLIPJ2000 | Sun | 2026-08-31T00:27:12Z | 1 state at 209.4517 AU |
+| Earth | 3I/ATLAS intercept departure | single, 2030-09-20 00:00:00 (JD 2462764.5) | ECLIPJ2000 | Sun | 2026-08-31T00:27:13Z | 1 state at 1.0045 AU |
+| 3I/ATLAS | 3I/ATLAS intercept arrival | single, 2050-09-20 00:00:00 (JD 2470069.5) | ECLIPJ2000 | Sun | 2026-08-31T00:27:13Z | 1 state at 305.7675 AU |
+
+Horizons ids are "2I" and "3I", which resolve to `Borisov (C/2019 Q4)` and
+`ATLAS (C/2025 N1)` respectively. Both were confirmed by a live call before the
+states were committed.
+
+### Why these epochs
+
+The 'Oumuamua samples take their epochs from Hein et al. 2019, so the epoch
+choice is not a choice at all: it is what reproducing a published figure
+requires. Neither of these objects has a source to take epochs from, so the
+transfer is chosen by a rule, and the rule is stated so that a reader can see
+it is not a search for a flattering number:
+
+> the cheapest departure day in calendar year 2030, at a flight time of 7305
+> days.
+
+2030 is after discovery for both objects and after the retrieval date, so the
+departure is a departure rather than a hindcast. 7305 days is twenty years on
+the 365.25-day year, which is the flight duration the paper uses for Sample B,
+so both unvalidated transfers sit in the same duration class as the one
+'Oumuamua transfer with a published arrival figure behind it. The day was found
+by solving every departure day of 2030 at that flight time against the matching
+arrival state and taking the minimum departure C3. Both minima are interior to
+the year rather than on its edge, so neither is an artefact of where the scan
+was cut. The scan is exploratory and is not committed; the four states the
+chosen transfers read are.
+
+### The frame check without a published figure
+
+The 'Oumuamua frame check sets heliocentric speed and inclination against
+published values. These objects have no published intercept study, and quoting
+orbital elements from recall is the fabricated citation this repository exists
+to refuse, so the check is made independent rather than published: the ecliptic
+osculating elements derived from the committed state vector are compared
+against the elements Horizons itself reports for the same body at the same
+epoch, requested separately from the vectors. A state that came back in the
+equatorial frame would disagree by up to 23.4 degrees of inclination, and a
+barycentric rather than heliocentric center would move the eccentricity.
+
+| Body | Quantity | From the committed state | Horizons elements | Difference |
+|---|---|---|---|---|
+| 2I/Borisov | eccentricity | 3.32195 | 3.32195 | 9.43e-10 |
+| 2I/Borisov | inclination | 44.7746 deg | 44.7746 deg | 6.75e-13 |
+| 2I/Borisov | perihelion distance | 1.97665 AU | 1.97665 AU | 1.83e-10 |
+| 3I/ATLAS | eccentricity | 6.00201 | 6.00201 | 1.82e-09 |
+| 3I/ATLAS | inclination | 175.1605 deg | 175.1605 deg | 5.68e-14 |
+| 3I/ATLAS | perihelion distance | 1.32012 AU | 1.32012 AU | 6.81e-11 |
+
+Both are hyperbolic and both are on the outgoing leg at the arrival epoch,
+which the eq. 4 arrival computation requires and which `solver/solve.py` raises
+on rather than assumes. The retrieval discipline below applies unchanged: these
+numbers carry 2026-08-31 and a later retrieval for the same target can differ.
+
+### What is not claimed
+
+Nothing here is a validation. The states are frame-checked and the elements
+agree with Horizons, which establishes that HITS is computing over the orbit
+Horizons holds, and establishes nothing at all about whether the transfer
+figures are right. `solver/objects.py` carries that distinction as the
+`verification_status` field, and the string for these two objects says so in
+the words a reader sees.
+
 ## Epoch blocker: resolved
 
 The blocker is closed by the source. Fig. 5 (p.555) gives Sample A as launch

@@ -244,6 +244,36 @@ Phase 2 agent layer built and validated (2026-08-29):
   pass/fail verdict for the model to quote. Do not describe a grounded
   explanation as a correct one.
 
+Three-object set built and validated (2026-08-30):
+- data/fetch_objects.py: 2I/Borisov ("2I") and 3I/ATLAS ("3I") fetched down the
+  same path 'Oumuamua uses, four pinned states committed. The six Lyra keys are
+  untouched and the file diff is insertions only.
+- The transfer for each is chosen by a stated rule, not taken from a source,
+  because no published intercept study exists for either: the cheapest
+  departure day of calendar year 2030 at a flight time of 7305 days, twenty
+  years on the 365.25-day year and the duration class of Lyra's Sample B. Both
+  C3 minima are interior to the year. Rule and scan recorded in
+  docs/PROVENANCE.md.
+- The frame check for these two is independent rather than published:
+  state-derived ecliptic elements against the elements Horizons reports
+  separately for the same body at the same epoch. Agreement to nine decimals
+  on e, inclination and perihelion distance. Both hyperbolic, both outgoing.
+- solver/objects.py: the fixed set of three, no free-text target anywhere.
+  `verification_status` is a real field on the object, on the result, and in
+  the serialized form, so a UI and a judges page render it per object. It is
+  deliberately not a manifest entry: a claim about the literature is not a
+  number the solver computed.
+- solver/intercept.py: the render envelope. One manifest and one call_id per
+  object, proven by a test that each object's answer fails the gate against
+  both other manifests. Borisov and 3I/ATLAS share a flight time and a C3
+  order of magnitude, so this is not theoretical.
+- The deterministic floor answers all three and all three are grounded.
+- **"Validated against published figures" attaches to 1I/'Oumuamua and to
+  nothing else.** Borisov and 3I/ATLAS are computed with the same method and
+  checked against no external figure, because none exists. Do not let the
+  three-object count borrow 'Oumuamua's validation.
+- Suite: 202 passed, 1 skipped, 1 xfailed, 0 failed.
+
 Currently unbuilt, and therefore not to be described as working: Granite
 Guardian, every judges endpoint, the frontend, and the deployment.
 
