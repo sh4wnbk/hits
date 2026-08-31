@@ -192,6 +192,48 @@ def test_typography_does_not_change_what_the_gate_accepts():
     assert any(f.reason == "fabricated-number" for f in verdict.findings)
 
 
+def test_word_units_ground_and_still_discriminate():
+    """
+    A reader who is not a mission designer does not read "km^2/s^2". The word
+    forms are accepted so an explanation written for them is not rejected for
+    its unit, and the two ways that could go wrong are asserted alongside:
+    a wrong value in word units is still wrong, and a right value carrying the
+    wrong word unit is still a unit mismatch.
+    """
+    check = _gate()
+    manifest = load_manifest_for(load_all()[0])
+    index = manifest.index()
+    c3 = "1331.16"
+    assert c3 in index and manifest.index()[c3][0].unit == "km^2/s^2"
+
+    assert check(
+        f"The departure energy is {c3} kilometres squared per second squared.",
+        manifest).grounded
+
+    invented = check(
+        "The departure energy is 1331.17 kilometres squared per second squared.",
+        manifest)
+    assert not invented.grounded
+    assert any(f.reason == "fabricated-number" for f in invented.findings)
+
+    mismatched = check(
+        f"The departure energy is {c3} kilometres per second.", manifest)
+    assert not mismatched.grounded
+    assert any(f.reason == "wrong-unit" for f in mismatched.findings)
+
+
+def test_the_gate_reads_its_unit_spellings_from_the_manifest():
+    """
+    The manifest owns what a number may be written as. A synonym table defined
+    inside the gate would be the gate granting itself that authority.
+    """
+    from solver.manifest import UNIT_SYNONYMS as source
+    from verify import exemptions
+    assert exemptions.UNIT_SYNONYMS is source
+    assert exemptions.UNIT_LOOKAHEAD_CHARS > max(
+        len(sp) for sps in source.values() for sp in sps)
+
+
 def test_gate_does_no_arithmetic():
     """
     The guarantee, made checkable instead of promised.

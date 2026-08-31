@@ -21,24 +21,26 @@ from typing import Tuple
 # Clause 1: the override lexicons
 # ---------------------------------------------------------------------------
 
-# Canonical unit to the spellings an explanation may write. The canonical form
-# is the manifest's; the synonyms are what prose actually uses.
-UNIT_SYNONYMS = {
-    "km^2/s^2": ("km^2/s^2", "km2/s2", "km²/s²"),
-    "km/s": ("km/s", "kilometres per second", "kilometers per second"),
-    "km": ("km", "kilometres", "kilometers"),
-    "AU": ("AU", "au", "astronomical units"),
-    "d": ("days", "day"),
-    "yr": ("years", "year", "yr"),
-    "JD": ("JD", "Julian Date", "julian date"),
-    "%": ("%", "percent", "per cent"),
-    "deg": ("deg", "degrees"),
-}
+# Canonical unit to the spellings an explanation may write. Imported, not
+# defined: solver/manifest.py owns it, beside the closed unit lexicon it keys
+# on. The manifest decides what a number may be written as; the gate only
+# checks. A synonym table owned here would be the gate granting itself that
+# authority, which is the one thing this design withholds from it.
+from solver.manifest import UNIT_SYNONYMS  # noqa: E402
 
-# Longest first so km^2/s^2 is recognised before km/s can match inside it.
+# Longest first so km^2/s^2 is recognised before km/s can match inside it, and
+# so "kilometres squared per second squared" is recognised before "kilometres".
 UNIT_SPELLINGS: Tuple[Tuple[str, str], ...] = tuple(
     sorted((((sp, canon) for canon, sps in UNIT_SYNONYMS.items() for sp in sps)),
            key=lambda pair: len(pair[0]), reverse=True))
+
+# How far past a numeral to look for its unit. Derived from the table rather
+# than pinned, because the word forms are far longer than the symbols: a
+# hardcoded window silently stopped seeing a unit the moment a longer spelling
+# was added, and the failure would have looked like a missing unit rather than
+# a window that was too small. The allowance covers the whitespace between the
+# numeral and the unit.
+UNIT_LOOKAHEAD_CHARS = max(len(sp) for sp, _ in UNIT_SPELLINGS) + 4
 
 # The quantities HITS reports. A numeral next to one of these is a measurement
 # however it is dressed. "duration" is included because the manifest carries

@@ -36,6 +36,7 @@ from typing import List, Optional
 from verify.corpus_ingest import all_tokens, sentence_at
 from verify.exemptions import (
     COMPARISON_MARKERS, COUNTED_NOUNS, DOTTED_VERSION, EXEMPTION_ROWS,
+    UNIT_LOOKAHEAD_CHARS,
     LIST_MARKER, MALFORMED_NUMERAL, OVERRIDE_WINDOW_WORDS, QUANTITY_NOUNS,
     REFERENCE_WORDS, SPELLED_RUN, UNIT_SPELLINGS, VERSION_ANCHORS,
 )
@@ -77,7 +78,7 @@ def _window(text: str, start: int, end: int) -> str:
 
 def attached_unit(text: str, end: int) -> Optional[str]:
     """The unit immediately following a token, if any. Only what follows counts."""
-    tail = text[end:end + 26].lstrip()
+    tail = text[end:end + UNIT_LOOKAHEAD_CHARS].lstrip()
     for spelling, canonical in UNIT_SPELLINGS:
         if tail.startswith(spelling):
             return canonical

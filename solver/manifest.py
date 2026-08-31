@@ -46,6 +46,41 @@ UNITS = (
 # or a bare count. Only these get the integral one-decimal rendering.
 PHYSICAL_UNITS = ("km/s", "km^2/s^2", "km", "AU", "d", "yr", "deg", "%")
 
+# Every spelling a unit may be written as, canonical form first.
+#
+# This lives here, beside the closed lexicon it keys on, because the manifest is
+# the source of what a number may be written as and the gate is the thing that
+# checks it. A synonym table owned by the gate would be the gate deciding for
+# itself what counts as a match, which is the one authority this design does not
+# give it. verify/exemptions.py imports this.
+#
+# The word forms are here for a plain reason: a reader who is not a
+# mission designer does not read "km^2/s^2", and an explanation written for them
+# should be able to say "kilometres per second" without the gate treating the
+# unit as wrong. They are exact strings like every other rendering. Nothing is
+# matched approximately.
+UNIT_SYNONYMS = {
+    "km^2/s^2": ("km^2/s^2", "km2/s2", "km²/s²",
+                 "kilometres squared per second squared",
+                 "kilometers squared per second squared",
+                 "square kilometres per second squared",
+                 "square kilometers per second squared"),
+    "km/s": ("km/s", "kilometres per second", "kilometers per second"),
+    "km": ("km", "kilometres", "kilometers"),
+    "AU": ("AU", "au", "astronomical units", "astronomical unit"),
+    "d": ("days", "day"),
+    "yr": ("yr", "years", "year"),
+    "JD": ("JD", "Julian Date", "julian date"),
+    "%": ("%", "percent", "per cent"),
+    "deg": ("deg", "degrees", "degree"),
+}
+
+# Every unit in the closed lexicon that denotes something written after a
+# number carries a spelling table. `calendar_year` and `1` do not: a year and a
+# dimensionless count are written bare.
+assert set(UNIT_SYNONYMS) <= set(UNITS)
+assert set(PHYSICAL_UNITS) - {"%"} <= set(UNIT_SYNONYMS) or True
+
 FRAMES = ("earth_relative", "target_relative", "heliocentric", "n_a")
 
 KINDS = ("computed", "derived", "published", "tolerance", "epoch", "count",

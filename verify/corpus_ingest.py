@@ -291,7 +291,7 @@ def _unit_after(text: str, end: int) -> Optional[str]:
     belongs to a later number: in "C3 for 2027 is 1331.16 km^2/s^2" the energy
     unit is the C3's, not the year's.
     """
-    tail = text[end:end + 24]
+    tail = text[end:end + UNIT_LOOKAHEAD_CHARS]
     stripped = tail.lstrip()
     if not stripped:
         return None

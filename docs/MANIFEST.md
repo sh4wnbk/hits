@@ -129,11 +129,52 @@ Closed. `km/s`, `km^2/s^2`, `km`, `AU`, `d`, `yr`, `JD`, `%`, `deg`,
 `calendar_year`, `1` (dimensionless). A unit outside this list is a contract
 change, not a local choice.
 
-Synonyms accepted from an explanation and normalized to the lexicon form:
-`km^2/s^2` also matches `km²/s²` and `km2/s2`; `km/s` also matches
-`kilometres per second` and `kilometers per second`; `%` also matches
-`percent`; `d` also matches `day` and `days`; `yr` also matches `year` and
-`years`; `AU` also matches `au`.
+Every spelling a unit may be written as lives in `solver.manifest.UNIT_SYNONYMS`,
+beside the lexicon it keys on, and `verify/exemptions.py` imports it. The
+manifest is the source of what a number may be written as; the gate only checks.
+A synonym table owned by the gate would be the gate deciding for itself what
+counts as a match, which is the one authority this design withholds from it.
+
+| Unit | Also accepted as |
+|---|---|
+| `km^2/s^2` | `km2/s2`, `km²/s²`, `kilometres squared per second squared`, `kilometers squared per second squared`, `square kilometres per second squared`, `square kilometers per second squared` |
+| `km/s` | `kilometres per second`, `kilometers per second` |
+| `km` | `kilometres`, `kilometers` |
+| `AU` | `au`, `astronomical units`, `astronomical unit` |
+| `d` | `day`, `days` |
+| `yr` | `year`, `years` |
+| `JD` | `Julian Date`, `julian date` |
+| `%` | `percent`, `per cent` |
+| `deg` | `degrees`, `degree` |
+
+The word forms are there because the reader HITS is built for does not read
+`km^2/s^2`, and an explanation written for them should be able to say
+"kilometres per second" without the gate calling the unit wrong. They are exact
+strings like every other accepted form. Nothing here is matched approximately:
+a correct value carrying `kilometers per second` where the manifest declares
+`km^2/s^2` is still a `wrong-unit` rejection.
+
+`calendar_year` and `1` carry no spellings, because a year and a dimensionless
+count are written bare.
+
+How far past a numeral the gate looks for its unit is derived from this table
+(`UNIT_LOOKAHEAD_CHARS`) rather than pinned. A fixed window stops seeing a unit
+the moment a longer spelling is added, and the failure looks like a missing unit
+rather than a window that was too small.
+
+### Typographic canonicalization
+
+Before matching, a candidate passes through `verify/normalize.py`, which maps
+Unicode dashes to the ASCII hyphen and superscript glyphs to caret form, then
+rewrites a short closed list of complete unit strings (`km^2 s^-2` to
+`km^2/s^2`, `km s^-1` to `km/s`).
+
+This is string rewriting and not tolerance. It cannot compare magnitudes, round,
+or turn one numeral into another, and both of its tables are closed, so a glyph
+nobody enumerated survives untouched and is rejected. It exists because Granite,
+asked for readable prose, wrote `km² s⁻²` and put U+2011 NON-BREAKING HYPHEN
+inside `2018-06-07`, which stopped the ISO date matching and left `06` and `07`
+loose. Every value in that sentence was correct.
 
 ## Precision: one canonical value, several declared renderings
 
