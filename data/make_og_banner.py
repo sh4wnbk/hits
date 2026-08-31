@@ -18,14 +18,14 @@ card says so the next time it is generated.
 
 Declared: the prose in FACTS, each entry carrying the file that backs it.
 
-THE CLAIM LINE IS NOT THE README'S
-----------------------------------
-README.md says "The largest disagreement is 4.92%". That is the largest of the
-two rows the README table expresses as a percentage; the other three are given
-in km/s. Taken over all five on one scale, which is what the chart does, the
-largest is Sample B at 6.94% (0.042 km/s on a published 0.6 km/s). This card
-quotes the figure the chart shows, because a claim on a card is read against
-the picture beside it.
+WHY THE LARGEST DISAGREEMENT IS 6.94%
+-------------------------------------
+The five comparisons carry three units, so "largest" only means anything on the
+relative scale the chart uses. There Sample B is the largest at 6.94% (0.042
+km/s on a published 0.6 km/s), not C3 2027 at 4.92%, which is only the largest
+of the rows a mixed-unit table happens to print as a percentage. README.md and
+docs/VERIFICATION.md give the same relative column, so the card, the chart and
+the prose quote one figure.
 
 Rendering is Pillow, as in data/plot_demand.py and solver/plot.py, and the
 chart is pasted once with LANCZOS rather than being redrawn, so the card cannot

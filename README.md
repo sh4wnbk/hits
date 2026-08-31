@@ -179,24 +179,25 @@ the process discipline both tools worked under.
 
 ## Verification
 
-The solver reproduces five published quantities from Project Lyra's
-'Oumuamua study (Hein et al. 2019, Acta Astronautica 161, 552-561). The
-largest disagreement is 4.92%. Every row below is 1I/'Oumuamua, and there is
-no equivalent table for the other two objects because there is nothing to put
-in it: no intercept study has been published for 2I/Borisov or 3I/ATLAS. They
-are computed by the same method, over state vectors fetched down the same path
-and frame-checked against the elements Horizons reports for the same body at
-the same epoch, and validated against nothing. Each object carries that
-distinction as a `verification_status` field rather than as a footnote, so a
-reader who sees only one answer still sees what backs it.
+The solver reproduces five published quantities from Project Lyra's 'Oumuamua
+study (Hein et al. 2019, Acta Astronautica 161, 552-561). The largest
+disagreement is 6.94%, and every quantity is inside the tolerance that was
+declared for it before the comparison ran. Every row below is 1I/'Oumuamua,
+and there is no equivalent table for the other two objects because there is
+nothing to put in it: no intercept study has been published for 2I/Borisov or
+3I/ATLAS. They are computed by the same method, over state vectors fetched
+down the same path and frame-checked against the elements Horizons reports for
+the same body at the same epoch, and validated against nothing. Each object
+carries that distinction as a `verification_status` field rather than as a
+footnote, so a reader who sees only one answer still sees what backs it.
 
-| Quantity | HITS | Published | Difference |
-|---|---|---|---|
-| Perihelion v_inf (frame gate) | 26.286 km/s | 26.33 km/s | 0.044 km/s |
-| C3, 2027 launch | 1331.16 km²/s² | 1400 km²/s² | 4.92% |
-| C3 floor | 714.36 km²/s² | 703 km²/s² | 1.62% |
-| Sample A arrival v_inf2 | 13.967 km/s | 13.6 km/s | 0.367 km/s |
-| Sample B arrival v_inf2 | 0.642 km/s | 0.6 km/s | 0.042 km/s |
+| Quantity | HITS | Published | Difference | Relative |
+|---|---|---|---|---|
+| Perihelion v_inf (frame gate) | 26.286 km/s | 26.33 km/s | 0.044 km/s | 0.17% |
+| C3, 2027 launch | 1331.16 km²/s² | 1400 km²/s² | 68.84 km²/s² | 4.92% |
+| C3 floor | 714.36 km²/s² | 703 km²/s² | 11.36 km²/s² | 1.62% |
+| Sample A arrival v_inf2 | 13.967 km/s | 13.6 km/s | 0.367 km/s | 2.70% |
+| Sample B arrival v_inf2 | 0.642 km/s | 0.6 km/s | 0.042 km/s | 6.94% |
 
 ![HITS against published Lyra figures](plots/validation_comparison.png)
 
