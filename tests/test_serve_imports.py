@@ -171,6 +171,51 @@ def test_the_three_answers_are_distinct(client):
     assert len(call_ids) == 3
 
 
+def test_a_committed_answer_is_served_and_a_missing_one_falls_to_the_floor(
+        client, monkeypatch):
+    """
+    The two branches of /explain, both of them, because the page depends on the
+    fall-through and nothing exercised it.
+
+    A frozen answer is served as it was frozen, `served_by` and `generated_at`
+    carried from the file rather than recomputed, and `source` says `cached` so
+    a reader can tell a watched generation from one made for them. With no file
+    the request falls to the gated floor and says so. The cache is stubbed
+    rather than written into data/answers/, so the test states the behaviour
+    without depending on whether a generation has been run yet.
+    """
+    from app import answers as answer_store
+    from app.main import answer_store as bound
+
+    frozen = answer_store.CachedAnswer(
+        object_key="oumuamua",
+        text="Frozen prose, standing in for a watched generation.",
+        served_by="granite_after_regen",
+        model_id="ibm/granite-4-h-small",
+        generated_at="2026-08-30T00:00:00Z",
+        call_id="stub",
+        verification_status=objects.VALIDATED,
+        regenerations=1,
+        verified_grounded=True,
+    )
+    monkeypatch.setattr(bound, "load", lambda key: frozen if key == "oumuamua" else None)
+
+    hit = client.get("/explain/oumuamua").json()
+    assert hit["source"] == "cached"
+    assert hit["text"] == frozen.text
+    assert hit["served_by"] == "granite_after_regen"
+    assert hit["model_id"] == "ibm/granite-4-h-small"
+    assert hit["generated_at"] == "2026-08-30T00:00:00Z"
+    assert hit["regenerations"] == 1
+    assert hit["grounded"] is True
+
+    miss = client.get("/explain/borisov").json()
+    assert miss["source"] == "live-no-cache"
+    assert miss["served_by"] == "deterministic_floor"
+    assert miss["floor_reason"] == "no watsonx credentials in the environment"
+    assert miss["grounded"] is True
+
+
 def test_an_unknown_target_is_404_and_names_the_closed_set(client):
     """
     A free-text designation is refused rather than resolved. The message hands

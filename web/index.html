@@ -46,7 +46,7 @@
   .wrap{ max-width:1000px; margin:0 auto; padding:0 1.25rem; }
 
   .topbar{ position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter:saturate(140%) blur(8px); border-bottom:1px solid var(--line-soft); }
-  .topbar .row{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem 0; }
+  .topbar .row{ display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:.7rem 0; flex-wrap:wrap; }
   .brand{ display:flex; align-items:baseline; gap:.6rem; min-width:0; }
   .brand .name{ font-family:"IBM Plex Mono", monospace; font-weight:500; letter-spacing:.06em; font-size:1rem; }
   .brand .full{ color:var(--muted); font-size:.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -148,7 +148,9 @@
   footer .disc{ max-width:72ch; }
   footer .credit{ color:var(--faint); font-size:.82rem; margin-top:.5rem; }
 
-  @media (max-width:760px){ .objects{ grid-template-columns:1fr; } .brand .full{ display:none; } .hero .inner{ padding:4rem 0 3.2rem; } .srv{ margin-left:0; } .answer .head{ flex-wrap:wrap; } }
+  @media (max-width:900px){ .objects{ grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); } }
+  @media (max-width:760px){ .brand .full{ display:none; } .hero .inner{ padding:4rem 0 3.2rem; } .srv{ margin-left:0; } .answer .head{ flex-wrap:wrap; } }
+  @media (max-width:480px){ .controls{ width:100%; justify-content:flex-end; } }
   @media (prefers-reduced-motion:reduce){ *{ transition:none !important; animation:none !important; } }
 </style>
 </head>
@@ -263,14 +265,14 @@
       <div class="row ok">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
         <div>
-          <div class="val">393.34 km²/s²</div>
+          <div class="val"><span id="gate-ok">loading</span> km²/s²</div>
           <div class="say">The real launch energy. Waved through, because it is one of the numbers the solver actually produced.</div>
         </div>
       </div>
       <div class="row no">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
         <div>
-          <div class="val">393.39 km²/s²</div>
+          <div class="val"><span id="gate-no">loading</span> km²/s²</div>
           <div class="say">The same number with one digit changed. Caught and flagged as made up, because the solver never produced it.</div>
         </div>
       </div>
@@ -327,35 +329,26 @@
 (function(){
   "use strict";
 
-  // Object answers are served from /explain/{key} on the deployed service.
-  // Borisov's real floor answer is shown here as the live example; Claude Code
-  // replaces each `answer` with a fetch to /explain/{key} -> { text, served_by }.
+  // Object answers are fetched from /explain/{key} on this origin, which
+  // serves the committed answer for that object when one has been frozen and
+  // the gated deterministic floor when none has. Nothing about an answer is
+  // written here: the prose, the figures in it and the path that produced it
+  // all arrive from the endpoint.
   var OBJECTS = [
     {
       key:"oumuamua", name:"ʻOumuamua", code:"1I", found:"seen in 2017", validated:true,
       blurb:"The first known visitor from another star.",
-      about:"Found in October 2017, ʻOumuamua was the first object confirmed to have come from outside the solar system. It was already on its way back out when it was spotted.",
-      served_by:null, answer:null
+      about:"Found in October 2017, ʻOumuamua was the first object confirmed to have come from outside the solar system. It was already on its way back out when it was spotted."
     },
     {
       key:"borisov", name:"Borisov", code:"2I", found:"seen in 2019", validated:false,
       blurb:"An interstellar comet, with a visible tail.",
-      about:"Discovered in 2019, Borisov was the second interstellar object found, and unlike ʻOumuamua it was clearly a comet.",
-      served_by:"deterministic_floor",
-      answer:[
-        "Catching 2I/Borisov would mean leaving Earth with 1727.89 km^2/s^2 of launch energy, a very high-energy departure, and then flying for 20 years to reach it. Every interstellar object is high-energy to chase, because none of them is in orbit around the Sun and all of them are leaving it at speed. What follows is the size of that cost, worked out, and not a judgement on whether it could be met.",
-        "A trajectory connecting Earth to the target exists for the departure asked about. Leaving Earth on 2030-03-13 and arriving on 2050-03-13, the flight time is 7305 days, or 20 years. That such a trajectory exists is geometry, and geometry is nearly always obliging; what separates one departure from another is what it costs to fly.",
-        "Reaching it from an Earth-relative departure costs 1727.89 km^2/s^2 of characteristic energy, which is a hyperbolic excess speed of 41.56787 km/s once clear of Earth.",
-        "The probe would meet the target at 16.89188 km/s in the target-relative frame, which is the speed it passes at. Its asymptotic arrival relative velocity, the quantity the mission-design literature compares against, is 16.93682 km/s.",
-        "What HITS settles here is the trajectory, not the launch vehicle. It computes what the transfer costs and does not model launcher capability, so the departure energy above is the input to a feasibility judgement rather than the judgement itself. Which means this answer reads the same way whatever the size of that figure. A departure energy an existing launcher could supply, and a departure energy far past anything ever flown, come back in identical sentences, because HITS has no launcher model with which to tell them apart. Nothing above should be read as HITS having found the mission flyable.",
-        "All figures are patched-conic, two-body. HITS does not perform n-body integration and does not model non-gravitational forces, so a figure is a faithful record of what the solver computed rather than a claim that it is right to the precision it is quoted at."
-      ]
+      about:"Discovered in 2019, Borisov was the second interstellar object found, and unlike ʻOumuamua it was clearly a comet."
     },
     {
       key:"atlas", name:"ATLAS", code:"3I", found:"seen in 2025", validated:false,
       blurb:"The third interstellar object, and the newest.",
-      about:"Found in 2025 by the ATLAS survey, this is the third interstellar object on record.",
-      served_by:null, answer:null
+      about:"Found in 2025 by the ATLAS survey, this is the third interstellar object on record."
     }
   ];
 
@@ -369,30 +362,13 @@
   var GATE = "https://hits-f3s4.onrender.com/gate/demo/oumuamua";
   function linkGate(t){ return t.replace(/\/gate\/demo\/oumuamua/g, '<a href="'+GATE+'">/gate/demo/oumuamua</a>'); }
 
+  // The questions are the page's own; every answer comes from /evidence/{id},
+  // which serves the committed prose and the sources behind it.
   var EVIDENCE = [
-    { id:"E1", q:"Why has nobody gone after it?", a:[
-      "Somebody did the work. In 2019 a team published a full study of sending a spacecraft to 1I/'Oumuamua, with launch windows, flight times and the energy each option would need. So the answer is not that nobody has thought about it.",
-      "What is missing is a way for anyone else to ask. The software that does this is real and most of it is free: GMAT is NASA's, open source, and is an environment you work in rather than a question you can put to it. OITS, the tool the 'Oumuamua study itself used, is open source and needs MATLAB, the SPICE toolkit and the NOMAD optimizer before it will tell you anything, plus knowing which bodies to sequence. OTIS is free but restricted to release inside the United States. TRACE, at The Aerospace Corporation, was never released publicly at all, and its lineage traces back to orbit determination work of the 1960s, so the capability itself is not new.",
-      "The gap is usability, not availability. Two of those four tools, GMAT and OITS, can be downloaded today by anyone reading this, and neither will answer a question put to it by somebody who does not already know how to ask. That is the gap HITS is built into, and the reason it answers one question instead of being another environment to learn."
-    ]},
-    { id:"E2", q:"Has anyone studied this seriously?", a:[
-      "Yes, and the study is in this repository. Project Lyra, published in Acta Astronautica in 2019 by Hein and colleagues, worked out what it would take to send a spacecraft after 1I/'Oumuamua once it was already on its way out of the solar system. The paper covers launch dates, flight durations, the energy a departure would need, and how fast a probe would be moving when it arrived.",
-      "The full paper is committed here as data/lyra/hein_2019_acta_161_552.pdf, so nothing about this answer rests on a citation you would have to go and find.",
-      "It matters for a second reason. Those published figures are what HITS checks itself against: the solver recomputes quantities the paper reports, and the comparison is what makes the numbers here something other than an assertion. That comparison is the subject of the next question."
-    ]},
-    { id:"E3", q:"How do we know the numbers are right?", a:[
-      "Two different things back these numbers, and they are worth keeping apart.",
-      "The first applies to every object. Nothing written in an explanation is produced by the language model. The solver runs first and finishes, and it emits a manifest listing every number that may be quoted along with the exact spellings each may be written as. Before any explanation reaches you, a deterministic check compares every number in it against that manifest, and anything not found there is rejected and the text is regenerated or replaced. You can watch that check run, on this deployment, at /gate/demo/oumuamua.",
-      "The second applies to one object only, and this is the part that is easy to overstate. 1I/'Oumuamua has published figures to be checked against, from the 2019 Project Lyra paper, and HITS recomputes five of them: the object's excess speed relative to Earth, the departure energy for a 2027 launch, the lowest departure energy available, and the arrival speeds for the paper's two sample missions. Each comparison prints the computed value, the published value and the difference between them, and where HITS disagrees with the paper the disagreement is reported rather than hidden.",
-      "2I/Borisov and 3I/ATLAS have no published intercept study to be checked against, because nobody has published one. They are computed by the same solver, from the same committed ephemerides, with the same frame checks, and against no external figure at all. That is why each object on this page carries its own verification status rather than sharing one: the validation belongs to 1I/'Oumuamua, and the other two do not inherit it.",
-      "Everything above is patched-conic, two-body. HITS does not perform n-body integration and does not model non-gravitational forces."
-    ]},
-    { id:"E4", q:"Could the AI be inventing these?", a:[
-      "It cannot, and you do not have to take that on trust.",
-      "The model never produces a figure. The solver runs to completion before the model is called, and hands it a fixed list of the numbers that exist for that question, so the set of legitimate values is settled before a word is written. Afterwards a deterministic check reads every number out of the generated text and looks it up in that list. A number that is not there is a rejection, and the explanation is regenerated with the offending value pointed out, twice, before the system gives up and serves a template answer built only from manifest values instead. The check performs no arithmetic of its own, which is what keeps it from talking itself into accepting a near miss.",
-      "You can watch this happen. Open /gate/demo/oumuamua on this deployment, or see it laid out under 'See the check run' below. It takes the real answer, makes one copy with a single digit of one figure changed, and runs both through the same check the serving path uses. The real figure is accepted; the altered one comes back rejected, named, with the reason attached. No model and no credential is involved in that demonstration.",
-      "One limit, stated plainly: the check certifies that every number came from the solver. It does not certify that the sentence around the number is true. A grounded explanation is one that quotes only real figures, which is not the same as one that reasons about them correctly."
-    ]}
+    { id:"E1", q:"Why has nobody gone after it?" },
+    { id:"E2", q:"Has anyone studied this seriously?" },
+    { id:"E3", q:"How do we know the numbers are right?" },
+    { id:"E4", q:"Could the AI be inventing these?" }
   ];
 
   var $ = function(s,r){ return (r||document).querySelector(s); };
@@ -434,31 +410,58 @@
     render();
   }
 
+  function esc(t){ var d=document.createElement("div"); d.textContent=t; return d.innerHTML; }
+
+  function paras(t){
+    return String(t == null ? "" : t).split(/\n\s*\n/).map(function(x){
+      return x.trim();
+    }).filter(function(x){ return x.length > 0; });
+  }
+
+  function pill(served_by){
+    var granite = served_by.indexOf("granite") === 0;
+    var a = document.createElement("a");
+    a.className = "srv" + (granite ? " granite" : "");
+    a.href = "#legend";
+    a.title = granite ? "Written by Granite, then checked. What is this?"
+                      : "Written by the deterministic template. What is this?";
+    a.innerHTML = '<span class="sd"></span>' + (granite ? "Granite" : "template answer");
+    return a;
+  }
+
+  // Clicking between objects faster than the network answers would otherwise
+  // let an earlier reply land in a panel that now belongs to a later one. Each
+  // request carries a sequence number and only the newest may write.
+  var seq = 0;
+
   function render(){
     var o = OBJECTS.filter(function(x){ return x.key===selected; })[0];
     $("#about-label").textContent = "About " + o.name;
     $("#about-text").textContent = o.about;
+
     var box = $("#answer"); box.innerHTML="";
     var head = el("div","head");
     head.appendChild(el("span","who", o.name));
-    if(o.served_by){
-      var granite = o.served_by.indexOf("granite")===0;
-      var a = document.createElement("a");
-      a.className = "srv" + (granite?" granite":"");
-      a.href = "#legend";
-      a.title = granite ? "Written by Granite, then checked. What is this?" : "Written by the deterministic template. What is this?";
-      a.innerHTML = '<span class="sd"></span>' + (granite ? "Granite" : "template answer");
-      head.appendChild(a);
-    }
     box.appendChild(head);
     var body = el("div","body");
-    if(o.answer){ o.answer.forEach(function(p){ body.appendChild(el("p",null,p)); }); }
-    else {
-      var p = el("p","pending");
-      p.innerHTML = "Served live from <code>/explain/"+o.key+"</code>. This fills with the gated answer for "+o.name+" the same way Borisov is shown, once its generation lands.";
-      body.appendChild(p);
-    }
+    body.appendChild(el("p","pending","Loading the checked answer."));
     box.appendChild(body);
+
+    var mine = ++seq;
+    fetch("/explain/" + encodeURIComponent(o.key)).then(function(r){
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function(d){
+      if(mine !== seq) return;
+      body.innerHTML = "";
+      if(d.served_by) head.appendChild(pill(d.served_by));
+      paras(d.text).forEach(function(p){ body.appendChild(el("p",null,p)); });
+    })["catch"](function(){
+      if(mine !== seq) return;
+      body.innerHTML = "";
+      body.appendChild(el("p","pending",
+        "The answer could not be loaded. The server could not be reached."));
+    });
   }
   render();
 
@@ -470,10 +473,59 @@
     var chev = el("span","chev"); chev.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
     btn.appendChild(chev);
     var panel = el("div","panel");
-    e.a.forEach(function(p){ var pp=el("p"); pp.innerHTML=linkGate(p); panel.appendChild(pp); });
-    btn.addEventListener("click", function(){ var open=wrap.getAttribute("open-panel")==="true"; wrap.setAttribute("open-panel",String(!open)); btn.setAttribute("aria-expanded",String(!open)); });
+    panel.appendChild(el("p",null,"Loading."));
+
+    // Fetched when the panel is first opened, and the first panel opens on
+    // load, so a reader who opens nothing costs the service one request.
+    var got = false;
+    function fill(){
+      if(got) return;
+      got = true;
+      fetch("/evidence/" + encodeURIComponent(e.id)).then(function(r){
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      }).then(function(d){
+        panel.innerHTML = "";
+        paras(d.text).forEach(function(p){
+          var pp = el("p"); pp.innerHTML = linkGate(esc(p)); panel.appendChild(pp);
+        });
+      })["catch"](function(){
+        got = false;
+        panel.innerHTML = "";
+        panel.appendChild(el("p",null,
+          "The answer could not be loaded. The server could not be reached."));
+      });
+    }
+
+    btn.addEventListener("click", function(){
+      var open = wrap.getAttribute("open-panel")==="true";
+      wrap.setAttribute("open-panel", String(!open));
+      btn.setAttribute("aria-expanded", String(!open));
+      if(!open) fill();
+    });
     wrap.appendChild(btn); wrap.appendChild(panel); evWrap.appendChild(wrap);
+    if(i===0) fill();
   });
+
+  // The accepted and rejected figures in "See the check run" are the pair
+  // /gate/demo/oumuamua computes, fetched rather than written here. The
+  // section exists to show that no number reaches a reader ungrounded, so a
+  // number typed into it would be the one exception it was built to deny.
+  (function(){
+    var ok = document.getElementById("gate-ok");
+    var no = document.getElementById("gate-no");
+    if(!ok || !no) return;
+    fetch("/gate/demo/oumuamua?format=json").then(function(r){
+      if(!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function(d){
+      ok.textContent = d.injection.solver_value;
+      no.textContent = d.injection.injected_token;
+    })["catch"](function(){
+      ok.textContent = "unavailable";
+      no.textContent = "unavailable";
+    });
+  })();
 })();
 </script>
 </body>
