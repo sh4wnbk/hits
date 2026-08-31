@@ -11,6 +11,8 @@ The offline guarantee holds here as everywhere: every number comes from
 committed state vectors and no Horizons call is made.
 """
 
+import re
+
 import pytest
 
 from agent.template import explain_intercept
@@ -141,6 +143,10 @@ def test_floor_answers_every_object_and_is_grounded(intercepts):
 # departure energy turns out to be. Kept as data so the assertion below names
 # what is missing rather than reporting that a long string was absent.
 FRAMING = (
+    "would mean leaving Earth with",
+    "a very high-energy departure",
+    "Every interstellar object is high-energy to chase",
+    "not a judgement on whether it could be met",
     "That such a trajectory exists is geometry",
     "what separates one departure from another is what it costs to fly",
     "the input to a feasibility judgement rather than the judgement itself",
@@ -178,12 +184,15 @@ def test_the_only_difference_between_objects_is_the_numbers(intercepts):
     skeletons = {}
     for key, ir in intercepts.items():
         text = explain_intercept(ir.manifest)
+        # The designation goes first. 'Oumuamua's flight time renders as "1",
+        # and substituting renderings first would eat the 1 in "1I/'Oumuamua"
+        # and leave a skeleton that differs for a reason that is not real.
+        text = text.replace(ir.obj.designation, "<TARGET>")
         for e in sorted(ir.manifest.entries,
                         key=lambda e: len(e.canonical), reverse=True):
             text = text.replace(e.canonical, "<N>")
         # Singular and plural nouns follow the rendering, not the framing.
-        text = text.replace("<N> day,", "<N> days,").replace(
-            "<N> year.", "<N> years.")
+        text = re.sub(r"<N> (day|year)\b", r"<N> \1s", text)
         skeletons[key] = text
 
     distinct = set(skeletons.values())
@@ -202,8 +211,44 @@ def test_floor_states_no_feasibility_verdict(intercepts):
     for ir in intercepts.values():
         text = explain_intercept(ir.manifest).lower()
         for verdict_word in ("infeasible", "impossible", "unachievable",
-                             "is feasible", "not feasible"):
+                             "is feasible", "not feasible", "we can",
+                             "we cannot", "we could not", "beyond current",
+                             "no rocket", "not possible"):
             assert verdict_word not in text
+
+
+def test_the_lead_is_plain_language_and_scale_generic(intercepts):
+    """
+    The lead answers a human's question before the solver's vocabulary starts.
+
+    Two things it must not do. It must not judge, which the verdict test above
+    covers. And it must not characterise this object's cost by comparison with
+    another object's, because that comparison is a number the solver never
+    emitted: the whole reason the scale word is "high-energy" and not "higher
+    than 'Oumuamua's".
+    """
+    for key, ir in intercepts.items():
+        lead = explain_intercept(ir.manifest).split("\n\n")[0]
+
+        # Plain language: the solver's frame vocabulary stays below the lead.
+        for jargon in ("characteristic energy", "target-relative",
+                       "Earth-relative", "asymptotic", "hyperbolic excess",
+                       "patched-conic"):
+            assert jargon not in lead, f"{key}: {jargon!r} in the lead"
+
+        # The headline numbers a reader wants, and they are manifest renderings.
+        for entry_id in ("solve.c3", "solve.tof_years"):
+            assert ir.manifest.canonical(entry_id) in lead
+
+        # No cross-object comparison, derived or named.
+        for other in intercepts.values():
+            if other.obj.key == key:
+                continue
+            assert other.obj.designation not in lead
+            assert other.manifest.canonical("solve.c3") not in lead
+        for comparative in ("times", "higher than", "larger than", "compared",
+                            "more than"):
+            assert comparative not in lead, f"{key}: {comparative!r} in the lead"
 
 
 def test_an_answer_does_not_ground_against_another_object(intercepts):

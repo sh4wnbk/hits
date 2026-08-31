@@ -226,7 +226,20 @@ Phase 2 agent layer built and validated (2026-08-29):
   regenerations. The test suite still drives every path by stub, so what CI
   proves is the loop's behaviour and the live run is what proves the
   endpoint's.
-- **That first pass has not reproduced.** Later the same day, six live
+- **Updated 2026-08-30, later the same day: it reproduces, on the solve shape,
+  and what it returns is worse than the floor.** Eleven live calls on the
+  intercept manifest gave seven `granite_after_regen` and four
+  `deterministic_floor`. The regeneration works: attempt one is rejected for
+  relabelling the eq. 4 quantity, the rejected token is fed back, attempt two
+  passes. So do not repeat "the Granite path does not reproduce" as though it
+  were still the whole story. What is still true, and is the sharper point, is
+  that a grounded Granite answer is a flat one-figure-per-paragraph recital
+  that drops the plain-language lead and the whole feasibility framing, and
+  leaks `n_a`, an internal frame-lexicon placeholder, into user-facing prose.
+  The README shows the floor, and says why: the floor is the path that
+  reproduces byte-for-byte offline with no credentials. The `n_a` leak is a
+  real defect and is not yet fixed.
+- **The earlier record, kept because it is what the runs showed then.** Later the same day, six live
   attempts across two manifest shapes were all rejected and all served
   `deterministic_floor`. On a solve manifest Granite rewrites `2017-06-07` as
   "June 7, 2017", so the gate rejects `7`; on the validate manifest it computes
@@ -282,7 +295,16 @@ Three-object set built and validated (2026-08-30):
   should be:** a line separating an affordable departure energy from an absurd
   one is a launcher model, and HITS has no launcher model. The template may say
   it is scale-blind; it may not say which side of a line a figure falls on.
-- Suite: 204 passed, 1 skipped, 1 xfailed, 0 failed.
+- The intercept answer opens with a plain-language lead naming the target,
+  the launch energy and the flight time, with the solver's vocabulary below it.
+  The scale word is "a very high-energy departure", which is a statement about
+  the class (an interstellar object is unbound and leaving, so chasing one is
+  expensive whichever) and never a ranking. **A comparison against another
+  object, or against any launcher, is forbidden here**: the first is a ratio
+  the solver never emitted, the second is the launcher model this project does
+  not have. The target's designation comes from the manifest header, not an
+  entry, because a name is not a computed quantity.
+- Suite: 205 passed, 1 skipped, 1 xfailed, 0 failed.
 
 Currently unbuilt, and therefore not to be described as working: Granite
 Guardian, every judges endpoint, the frontend, and the deployment.

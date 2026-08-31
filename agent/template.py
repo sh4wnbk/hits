@@ -38,6 +38,30 @@ reports the cost and says plainly that the cost is the input to a feasibility
 judgement rather than the judgement itself. Inventing a capability threshold
 would be a generated number wearing a verdict's clothes.
 
+## The plain-language lead
+
+The intercept answer used to open in the solver's voice, with a transfer that
+exists and a characteristic energy in an Earth-relative frame. That is the
+right vocabulary for the reader who wants the detail and the wrong one for the
+reader HITS exists for, who asked whether we could catch the thing and should
+not have to parse a frame convention to find out what it would take.
+
+So the answer opens with a sentence naming the target, the launch energy, and
+the flight time, and the technical paragraphs follow underneath unchanged. The
+lead quotes manifest renderings like everything else here; the only thing in it
+that is not a rendering is the designation, which comes from the manifest
+header because a target's name is a label the caller supplied and not a
+quantity the solver computed.
+
+The scale word in the lead is the delicate part. "A very high-energy departure"
+is true of all three objects and is a statement about the class: an
+interstellar object is unbound and leaving, so chasing one is expensive
+whichever one is asked about. What it deliberately is not is a comparison. "Far
+higher than 'Oumuamua's" would be a ratio the solver never emitted, and
+"beyond current launch vehicles" would be the launcher model this module is not
+allowed to have. The lead describes the kind of thing a departure energy is
+here. It does not rank this one.
+
 ## Why the intercept answer says its own wording is scale-blind
 
 Refusing to judge is not the same as reading as though there were nothing to
@@ -101,6 +125,22 @@ def _noun(rendering: str, singular: str, plural: str) -> str:
     return singular if rendering == "1" else plural
 
 
+def _target(manifest) -> str:
+    """
+    What to call the target in the plain-language lead.
+
+    The designation is a label the caller supplied alongside the call, not a
+    quantity the solver computed, so it comes from the manifest header rather
+    than from an entry. A manifest built without one, which is what a bare
+    `from_solve_result(result)` produces, gets "this object" and the sentence
+    still reads. Naming it is a readability gain and never a grounding claim:
+    the digit in "2I/Borisov" is part of a designation, which is exactly the
+    label case verify/extract.py's first clause exists to keep incidental, and
+    tests/test_intercept.py watches the gate agree.
+    """
+    return manifest.inputs.get("designation") or "this object"
+
+
 FIDELITY = (
     "All figures are patched-conic, two-body. HITS does not perform n-body "
     "integration and does not model non-gravitational forces, so a figure is a "
@@ -133,6 +173,17 @@ def explain_intercept(manifest) -> str:
         "v_arr": "solve.v_arr",
         "v_inf2": "solve.v_inf2",
     })
+
+    lead = (
+        f"Catching {_target(manifest)} would mean leaving Earth with "
+        f"{v['c3']} km^2/s^2 of launch energy, a very high-energy departure, "
+        f"and then flying for {v['tof_years']} "
+        f"{_noun(v['tof_years'], 'year', 'years')} to reach it. Every "
+        "interstellar object is high-energy to chase, because none of them is "
+        "in orbit around the Sun and all of them are leaving it at speed. What "
+        "follows is the size of that cost, worked out, and not a judgement on "
+        "whether it could be met."
+    )
 
     when = (
         "A trajectory connecting Earth to the target exists for the departure "
@@ -170,7 +221,7 @@ def explain_intercept(manifest) -> str:
         "mission flyable."
     )
 
-    return "\n\n".join([when, cost, arrival, limit, FIDELITY])
+    return "\n\n".join([lead, when, cost, arrival, limit, FIDELITY])
 
 
 # ---------------------------------------------------------------------------
