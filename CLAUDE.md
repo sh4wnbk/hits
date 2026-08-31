@@ -158,6 +158,23 @@ or assistant, should treat this list as authoritative over their own recall.
   and Granite returned incoherent token spam on a prompt that reads perfectly
   well to a person. `agent/granite.py` uses `/ml/v1/text/chat` with a messages
   array so the template is applied server-side. Do not "simplify" it back.
+- **The asserts in `ManifestEntry` have never run, and one of them guards the
+  published-versus-computed seam.** `is_number` returns on its first line
+  (`solver/manifest.py`, the property under `__post_init__`), so the four
+  asserts written below the return are unreachable: that every entry's unit,
+  frame and kind are inside their lexicons, that renderings are non-empty, and
+  that a `kind="published"` entry carries its citation. They read as though
+  they were meant to close `__post_init__`. The concern is not that they are
+  dead, it is that nothing has ever checked what they check, so an entry may
+  have been out of lexicon or uncited since Phase 2 and no test would have
+  said so. The citation guard is the one that matters: attribution checking
+  leans on published entries being distinguishable from computed ones, and an
+  uncited published entry is exactly that seam failing quietly. **Verify the
+  three frozen manifests and the validate manifest against all four
+  conditions before handoff 2 wires Granite**, and only then decide whether
+  the asserts move or become a test. A separate watched task, not a
+  deadline-night edit. Found 2026-08-31 during the deploy handoff and
+  deliberately not fixed there.
 
 ### Plan versus shipped
 

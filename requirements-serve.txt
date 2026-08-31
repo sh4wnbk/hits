@@ -1,0 +1,14 @@
+# Runtime dependencies of the deployed web process, and nothing else.
+#
+# hapsira, astropy, numpy and scipy are absent on purpose. The solver ran at
+# build time and its output is committed to data/manifests/; this process reads
+# json. tests/test_serve_imports.py fails if that stops being true, which is
+# what keeps this file honest as the service grows.
+#
+# requests is here because agent/granite.py imports it at module scope, and
+# agent/explain.py imports agent.granite in order to ask the environment
+# whether a credential exists. No credential is set on this deployment, so the
+# answer is no and the floor is served, but the import still has to resolve.
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+requests==2.34.2
