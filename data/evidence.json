@@ -1,0 +1,38 @@
+{
+  "E1": {
+    "text": "Somebody did the work. In 2019 a team published a full study of sending a spacecraft to 1I/'Oumuamua, with launch windows, flight times and the energy each option would need. So the answer is not that nobody has thought about it.\n\nWhat is missing is a way for anyone else to ask. The software that does this is real and most of it is free: GMAT is NASA's, open source, and is an environment you work in rather than a question you can put to it. OITS, the tool the 'Oumuamua study itself used, is open source and needs MATLAB, the SPICE toolkit and the NOMAD optimizer before it will tell you anything, plus knowing which bodies to sequence. OTIS is free but restricted to release inside the United States. TRACE, at The Aerospace Corporation, was never released publicly at all, and its lineage traces back to orbit determination work of the 1960s, so the capability itself is not new.\n\nThe gap is usability, not availability. Two of those four tools, GMAT and OITS, can be downloaded today by anyone reading this, and neither will answer a question put to it by somebody who does not already know how to ask. That is the gap HITS is built into, and the reason it answers one question instead of being another environment to learn.",
+    "sources": [
+      "README.md, 'The capability isn't missing. It's locked away, four ways' (GMAT, OITS with MATLAB/SPICE/NOMAD, OTIS US-only, TRACE unreleased)",
+      "CLAUDE.md accuracy guardrail: the gap is usability, not availability",
+      "CLAUDE.md accuracy guardrail: TRACE is The Aerospace Corporation's, lineage to a 1964 orbit determination report, SSD-TDR-64-159",
+      "data/lyra/hein_2019_acta_161_552.pdf"
+    ]
+  },
+  "E2": {
+    "text": "Yes, and the study is in this repository. Project Lyra, published in Acta Astronautica in 2019 by Hein and colleagues, worked out what it would take to send a spacecraft after 1I/'Oumuamua once it was already on its way out of the solar system. The paper covers launch dates, flight durations, the energy a departure would need, and how fast a probe would be moving when it arrived.\n\nThe full paper is committed here as data/lyra/hein_2019_acta_161_552.pdf, so nothing about this answer rests on a citation you would have to go and find.\n\nIt matters for a second reason. Those published figures are what HITS checks itself against: the solver recomputes quantities the paper reports, and the comparison is what makes the numbers here something other than an assertion. That comparison is the subject of the next question.",
+    "sources": [
+      "data/lyra/hein_2019_acta_161_552.pdf",
+      "solver/lyra.py, PUBLICATION_REFERENCE: Hein et al. 2019, Acta Astronautica 161, 552-561, DOI 10.1016/j.actaastro.2018.12.042"
+    ]
+  },
+  "E3": {
+    "text": "Two different things back these numbers, and they are worth keeping apart.\n\nThe first applies to every object. Nothing written in an explanation is produced by the language model. The solver runs first and finishes, and it emits a manifest listing every number that may be quoted along with the exact spellings each may be written as. Before any explanation reaches you, a deterministic check compares every number in it against that manifest, and anything not found there is rejected and the text is regenerated or replaced. You can watch that check run, on this deployment, at /gate/demo/oumuamua.\n\nThe second applies to one object only, and this is the part that is easy to overstate. 1I/'Oumuamua has published figures to be checked against, from the 2019 Project Lyra paper, and HITS recomputes five of them: the object's excess speed relative to Earth, the departure energy for a 2027 launch, the lowest departure energy available, and the arrival speeds for the paper's two sample missions. Each comparison prints the computed value, the published value and the difference between them, and where HITS disagrees with the paper the disagreement is reported rather than hidden.\n\n2I/Borisov and 3I/ATLAS have no published intercept study to be checked against, because nobody has published one. They are computed by the same solver, from the same committed ephemerides, with the same frame checks, and against no external figure at all. That is why each object on this page carries its own verification status rather than sharing one: the validation belongs to 1I/'Oumuamua, and the other two do not inherit it.\n\nEverything above is patched-conic, two-body. HITS does not perform n-body integration and does not model non-gravitational forces.",
+    "sources": [
+      "solver/objects.py, verification_status per object (VALIDATED / UNVALIDATED)",
+      "docs/VERIFICATION.md, claim table with the command that settles each row",
+      "docs/MANIFEST.md, the manifest contract and the rendering ladder",
+      "data/lyra/hein_2019_acta_161_552.pdf",
+      "the live endpoint /gate/demo/{object}"
+    ]
+  },
+  "E4": {
+    "text": "It cannot, and you do not have to take that on trust.\n\nThe model never produces a figure. The solver runs to completion before the model is called, and hands it a fixed list of the numbers that exist for that question, so the set of legitimate values is settled before a word is written. Afterwards a deterministic check reads every number out of the generated text and looks it up in that list. A number that is not there is a rejection, and the explanation is regenerated with the offending value pointed out, twice, before the system gives up and serves a template answer built only from manifest values instead. The check performs no arithmetic of its own, which is what keeps it from talking itself into accepting a near miss.\n\nYou can watch this happen. Open /gate/demo/oumuamua on this deployment. It takes the real answer, makes one copy with a single digit of one figure changed, and runs both through the same check the serving path uses. The real figure is accepted; the altered one comes back rejected, named, with the reason attached. No model and no credential is involved in that demonstration.\n\nOne limit, stated plainly: the check certifies that every number came from the solver. It does not certify that the sentence around the number is true. A grounded explanation is one that quotes only real figures, which is not the same as one that reasons about them correctly.",
+    "sources": [
+      "verify/groundedness.py, membership and attribution checks",
+      "agent/explain.py, the generate/gate/regenerate/floor loop and MAX_RETRIES",
+      "tests/test_groundedness.py::test_gate_does_no_arithmetic",
+      "the live endpoint /gate/demo/{object}",
+      "CLAUDE.md: the gate certifies grounding, not truth"
+    ]
+  }
+}
