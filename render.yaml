@@ -1,0 +1,48 @@
+# render.yaml — the HITS deployment, as a Blueprint.
+#
+# CLAUDE.md makes accessibility a design gate: no clone, no virtual
+# environment, no API key, works on a phone. This file is where that stops
+# being a stated intention. A reader reaches one URL and gets the same numbers
+# a judge with a clone gets, because the solver ran before the deploy and its
+# output is committed to data/manifests/.
+#
+# ## Why the build does not install the solver
+#
+# requirements-serve.txt names fastapi, uvicorn and requests. It does not name
+# hapsira, astropy, numpy or scipy, and that is what makes a free instance
+# viable at all: the scientific stack does not fit in the memory or the build
+# minutes, and it is not needed, because nothing at request time solves
+# anything. tests/test_serve_imports.py fails if a handler ever reaches for it,
+# so the deployment and the test suite disagree loudly rather than quietly.
+#
+# ## Why there are no environment variables here
+#
+# No WATSONX_* value is set, deliberately. With the credentials absent,
+# agent/explain.py serves the deterministic floor and reports
+# served_by=deterministic_floor, which is the path that reproduces
+# byte-for-byte with no account and no network. CLAUDE.md requires offline and
+# credentialed results to be reported separately; serving only the offline path
+# here means nothing on this deployment can be mis-credited to the credentialed
+# one. Wiring Granite is a separate change, and it will show in this file.
+#
+# ## Free instances sleep
+#
+# A free web service is spun down after inactivity and the next request pays a
+# cold start of roughly a minute. /health exists to be cheap enough to keep
+# warm: it returns a constant and loads no manifest.
+
+services:
+  - type: web
+    name: hits
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: pip install -r requirements-serve.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      # The runtime the suite is green on. Pinned because an implicit default
+      # that moves is a deploy that breaks on a day nobody changed anything.
+      - key: PYTHON_VERSION
+        value: "3.12.3"
