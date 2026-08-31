@@ -6,22 +6,27 @@ The intercept math exists. It has existed at NASA and in aerospace tools since
 1964, most of it is free, and some of it is a download away. What it is not is
 reachable.
 
-| Tool | Status | What stands between you and an answer |
-|---|---|---|
-| [GMAT](https://software.nasa.gov/software/GSC-17177-1) (NASA) | Free, open source | Mission-design expertise. It is an environment to work in, not a question you can ask |
-| [OITS](https://github.com/AdamHibberd/Optimum_Interplanetary_Trajectory) (Project Lyra) | Free, open source | MATLAB, the SPICE toolkit, and the NOMAD optimizer, plus knowing which bodies to sequence |
-| [OTIS](https://software.nasa.gov/software/LEW-20403-1) (NASA Glenn) | Free, U.S. release only | Where you live. NASA's own catalog entry limits distribution to domestic United States use |
-| TRACE (The Aerospace Corporation) | Internal | Never publicly released |
+**The capability isn't missing. It's locked away, four ways:**
 
-So the capability is not missing. It is locked away, behind expertise in the
-first two rows, behind a border in the third, and behind a door that was never
-opened in the fourth, and the people it is locked away from are the ones
-asking. 3,171 questions pulled out of 19,122 comments on six NASA JPL videos
-say what they want to know, and the two largest technical themes are how long
-it would take and whether we could catch it. None of those people is going to
-install GMAT.
+- **Expertise.** [GMAT](https://software.nasa.gov/software/GSC-17177-1) (NASA)
+  is free and open source. It is an environment to work in, not a question you
+  can ask.
+- **Expertise, and a toolchain.**
+  [OITS](https://github.com/AdamHibberd/Optimum_Interplanetary_Trajectory)
+  (Project Lyra) is free and open source, and needs MATLAB, the SPICE toolkit,
+  and the NOMAD optimizer, plus knowing which bodies to sequence.
+- **A border.** [OTIS](https://software.nasa.gov/software/LEW-20403-1) (NASA
+  Glenn) is free and U.S. release only. NASA's own catalog entry limits
+  distribution to domestic United States use.
+- **A closed door.** TRACE (The Aerospace Corporation) is internal, and was
+  never publicly released.
 
-HITS is that capability with the barrier removed. It computes real intercept
+**And the people locked out are the ones asking.** 3,171 questions pulled out of
+19,122 comments on six NASA JPL videos, where the two largest technical themes
+are how long it would take and whether we could catch it. None of those people
+is going to install GMAT.
+
+**HITS is that capability with the barrier removed.** It computes real intercept
 trajectories over the hyperbolic orbits of all three interstellar objects
 humanity has found, 1I/'Oumuamua, 2I/Borisov and 3I/ATLAS, and says in plain
 language what such a mission would cost. Every number in an answer is checked
@@ -111,8 +116,8 @@ The six NASA JPL videos the demand was read from.
 ## Problem statement
 
 The claim is not that no software exists. It is the narrower and defensible
-one: no *accessible* tool exists. Every tool in the table at the top of this
-page is real, three of the four are free, and not one of them will answer a
+one: no *accessible* tool exists. All four tools listed at the top of this page
+are real, three of the four are free, and not one of them will answer a
 question put to it by somebody who does not already know how to ask.
 
 How the demand above was measured, with the extraction rule, the clustering
