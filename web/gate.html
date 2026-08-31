@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The check, run &middot; HITS</title>
+<meta name="description" content="The deterministic number check that runs before any HITS explanation is served, shown accepting a real figure and rejecting an invented one.">
+<style>
+  :root{
+    --bg:#080d1c; --surface:#101830; --line:#213056; --line-soft:#18213d;
+    --ink:#e9eefb; --muted:#93a1c4; --faint:#68769a; --accent:#4c8dff;
+    --validated:#4ad6a3; --reject:#f28a86;
+    --ok-bg:rgba(74,214,163,.10); --no-bg:rgba(242,138,134,.10);
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f5f7fc; --surface:#ffffff; --line:#d6ddec; --line-soft:#e7ebf5;
+      --ink:#111a30; --muted:#4c5a78; --faint:#7a88a6; --accent:#1f5fd0;
+      --validated:#0f9d6b; --reject:#c0473f;
+      --ok-bg:rgba(15,157,107,.09); --no-bg:rgba(192,71,63,.08);
+    }
+  }
+  *{ box-sizing:border-box; }
+  body{ margin:0; background:var(--bg); color:var(--ink); line-height:1.6;
+        font-family:"IBM Plex Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+  a{ color:var(--accent); text-underline-offset:3px; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:5px; }
+  .wrap{ max-width:780px; margin:0 auto; padding:2.6rem 1.25rem 3.5rem; }
+  .up{ font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+       font-size:.78rem; letter-spacing:.06em; color:var(--muted); text-decoration:none; }
+  h1{ font-size:1.6rem; font-weight:600; letter-spacing:-.01em; margin:1.2rem 0 .2rem; }
+  .who{ color:var(--faint); font-size:.9rem; margin:0 0 1.3rem; }
+  .gate{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:1.4rem 1.5rem; }
+  .intro{ color:var(--muted); max-width:70ch; margin:0 0 1.2rem; }
+  .row{ display:flex; gap:.85rem; align-items:flex-start; padding:1rem 1.1rem; border-radius:12px; border:1px solid var(--line); }
+  .row + .row{ margin-top:.7rem; }
+  .row.ok{ background:var(--ok-bg); border-color:color-mix(in srgb, var(--validated) 40%, var(--line)); }
+  .row.no{ background:var(--no-bg); border-color:color-mix(in srgb, var(--reject) 40%, var(--line)); }
+  .ic{ flex:none; width:1.5rem; height:1.5rem; margin-top:.05rem; }
+  .ok .ic{ color:var(--validated); } .no .ic{ color:var(--reject); }
+  .val{ font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size:1.05rem; font-weight:500; }
+  .say{ color:var(--muted); font-size:.92rem; margin-top:.2rem; }
+  .reason{ color:var(--faint); font-size:.85rem; margin-top:.35rem; }
+  .foot{ color:var(--faint); font-size:.85rem; margin-top:1.1rem; }
+  .limit{ color:var(--faint); font-size:.85rem; max-width:70ch; margin:1.6rem 0 0; }
+  .raw{ margin-top:1.4rem; font-size:.85rem; color:var(--faint); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="up" href="/">&larr; HITS</a>
+  <h1>The check, run</h1>
+  <p class="who" id="who">Loading.</p>
+
+  <div class="gate">
+    <p class="intro" id="intro">Here is the honesty check, shown on one number. HITS takes a real answer, quietly changes a single digit of one figure, and sends both through the same guard every answer has to pass.</p>
+
+    <div class="row ok">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      <div>
+        <div class="val" id="ok-val">loading</div>
+        <div class="say" id="ok-say">The real figure. Waved through, because it is one of the numbers the solver actually produced.</div>
+      </div>
+    </div>
+
+    <div class="row no">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      <div>
+        <div class="val" id="no-val">loading</div>
+        <div class="say">The same number with one digit changed. Caught and flagged as made up, because the solver never produced it.</div>
+        <div class="reason" id="no-reason"></div>
+      </div>
+    </div>
+
+    <p class="foot">No AI and no login are involved. The guard only checks each number against the solver's own results, and it never does any math of its own, so it cannot talk itself into letting a close-but-wrong number through.</p>
+  </div>
+
+  <p class="limit">One limit, stated plainly: the check certifies that every number came from the solver. It does not certify that the sentence around the number is true.</p>
+  <p class="raw">The same result as data: <a id="json-link" href="?format=json">?format=json</a></p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // The key is the one in the address bar, and the figures come from this same
+  // endpoint asked for as data. Nothing here is written into the page.
+  var url = location.pathname + "?format=json";
+  function set(id, t){ var e = document.getElementById(id); if(e) e.textContent = t; }
+
+  fetch(url).then(function(r){
+    if(!r.ok) throw new Error("HTTP " + r.status);
+    return r.json();
+  }).then(function(d){
+    var inj = d.injection;
+    set("who", d.designation + " · " + inj.label + ", the figure this exhibit fabricates against");
+    set("ok-val", inj.solver_value + " " + inj.unit);
+    set("no-val", inj.injected_token + " " + inj.unit);
+    var f = (d.fabricated.verdict.findings || [])[0];
+    if(f) set("no-reason", "Rejected as " + f.reason + ": " + f.note + ".");
+  })["catch"](function(){
+    set("who", "The check could not be loaded. The server could not be reached.");
+    set("ok-val", "unavailable");
+    set("no-val", "unavailable");
+  });
+})();
+</script>
+</body>
+</html>

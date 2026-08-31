@@ -230,6 +230,61 @@ def test_an_unknown_target_is_404_and_names_the_closed_set(client):
         assert "oumuamua" in detail and "borisov" in detail and "atlas" in detail
 
 
+def test_the_gate_demo_answers_a_browser_and_an_api_caller_from_one_url(client):
+    """
+    A reader following a link about honesty should not land on raw json, and a
+    judge scripting the same URL should not have to parse HTML. So the format
+    is negotiated: an explicit `?format=` wins, otherwise the Accept header
+    decides, and a caller that expresses no preference gets the data. That last
+    case is what keeps curl and every existing caller working unchanged.
+    """
+    data = client.get("/gate/demo/oumuamua")
+    assert data.status_code == 200
+    assert data.headers["content-type"].startswith("application/json")
+    assert data.json()["injection"]["solver_value"]
+
+    page = client.get("/gate/demo/oumuamua", headers={"accept": "text/html"})
+    assert page.status_code == 200
+    assert page.headers["content-type"].startswith("text/html")
+    assert "<!DOCTYPE html>" in page.text
+
+    # The two shapes are the same computation, and `?format=` overrides Accept
+    # in both directions.
+    forced_json = client.get("/gate/demo/oumuamua?format=json",
+                             headers={"accept": "text/html"})
+    assert forced_json.headers["content-type"].startswith("application/json")
+    assert forced_json.json() == data.json()
+
+    forced_html = client.get("/gate/demo/oumuamua?format=html")
+    assert forced_html.headers["content-type"].startswith("text/html")
+    assert forced_html.text == page.text
+
+    bad = client.get("/gate/demo/oumuamua?format=xml")
+    assert bad.status_code == 400
+
+    # An unknown object is a 404 in either shape, rather than a page that
+    # loads and then cannot fill itself in.
+    for headers in ({}, {"accept": "text/html"}):
+        r = client.get("/gate/demo/nonesuch", headers=headers)
+        assert r.status_code == 404
+
+
+def test_the_gate_view_writes_down_no_figure(client):
+    """
+    The readable view fetches its own numbers from `?format=json`, so the file
+    holds none. The section it mirrors on the landing page is checked the same
+    way by test_index_states_no_number, and for the same reason: an exhibit
+    built to show that no number reaches a reader ungrounded cannot be the one
+    place a number is typed in by hand.
+    """
+    page = client.get("/gate/demo/oumuamua", headers={"accept": "text/html"}).text
+    demo = client.get("/gate/demo/oumuamua?format=json").json()
+    assert demo["injection"]["solver_value"] not in page
+    assert demo["injection"]["injected_token"] not in page
+    for figure in ["393.34", "393.39", "1727.89", "2919.78", "19.8328", "13.96737"]:
+        assert figure not in page
+
+
 def test_index_states_no_number(client):
     """
     Every figure HITS shows is a gated one. A number written into the landing

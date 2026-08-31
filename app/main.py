@@ -42,7 +42,7 @@ import json
 import os
 from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse
 
 from agent import granite
@@ -69,6 +69,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EVIDENCE_PATH = os.path.join(REPO_ROOT, "data", "evidence.json")
 OG_BANNER_PATH = os.path.join(REPO_ROOT, "docs", "img", "og_banner.png")
 INDEX_PATH = os.path.join(REPO_ROOT, "web", "index.html")
+GATE_PAGE_PATH = os.path.join(REPO_ROOT, "web", "gate.html")
 
 app = FastAPI(title=TITLE, description=SUMMARY)
 
@@ -259,7 +260,11 @@ def evidence(eid: str) -> Dict[str, Any]:
 
 
 @app.get("/gate/demo/{object_key:path}")
-def gate_demo_endpoint(object_key: str) -> Dict[str, Any]:
+def gate_demo_endpoint(
+    object_key: str,
+    request: Request,
+    format: str = Query("", description="json or html, overriding what the caller accepts"),
+) -> Any:
     """
     Watch the number check accept a real figure and reject an invented one.
 
@@ -269,8 +274,40 @@ def gate_demo_endpoint(object_key: str) -> Dict[str, Any]:
     serves. No watsonx, no credential, no model: the verdict is a comparison
     against the manifest, and a reader can see the comparison being made rather
     than being told it happens.
+
+    ## Why this one endpoint answers in two shapes
+
+    The page links a reader here, and a reader who follows a link about honesty
+    and lands on a wall of json has been shown the machinery and told nothing.
+    So a browser gets the readable view and an API caller gets the data, from
+    the same URL and the same computation: `?format=` settles it outright, and
+    otherwise the caller's Accept header does. curl asks for anything and gets
+    json, which keeps every existing caller working.
+
+    The readable view is a committed file that fetches `?format=json` itself,
+    so the two cannot disagree: there is no second rendering of these figures
+    anywhere, and no number is written into the file that serves them.
+
+    The key is resolved before the format is, so an unknown object is a 404 in
+    either shape rather than a page that loads and then fails.
     """
-    return gate_demo(_frozen(object_key))
+    fi = _frozen(object_key)
+
+    fmt = format.strip().lower()
+    if fmt not in ("", "json", "html"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"format must be 'json' or 'html', not {format!r}",
+        )
+
+    if fmt == "json":
+        return gate_demo(fi)
+    wants_html = fmt == "html" or "text/html" in request.headers.get("accept", "")
+    if wants_html:
+        if not os.path.exists(GATE_PAGE_PATH):
+            raise HTTPException(status_code=404, detail="view not committed")
+        return FileResponse(GATE_PAGE_PATH, media_type="text/html; charset=utf-8")
+    return gate_demo(fi)
 
 
 @app.get("/chips")
