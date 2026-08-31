@@ -380,7 +380,7 @@
   function setScale(s){ root.style.setProperty("--scale", s); document.querySelectorAll("[data-scale]").forEach(function(b){ b.setAttribute("aria-pressed", String(b.getAttribute("data-scale")===String(s))); }); }
   document.querySelectorAll("[data-scale]").forEach(function(b){ b.addEventListener("click", function(){ setScale(b.getAttribute("data-scale")); }); });
 
-  var selected = "borisov";
+  var selected = "oumuamua";
   var objWrap = $("#objects");
   OBJECTS.forEach(function(o){
     var b = el("button","obj"); b.type="button"; b.setAttribute("data-key",o.key);
