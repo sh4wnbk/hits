@@ -32,7 +32,7 @@ computed by the same method and that no published intercept study exists to
 validate them against, because none does.
 
 **Status.** The solver, the three-object set, the groundedness gate, and the
-agent layer are built and tested (202 passed, 1 skipped, 1 xfailed). The API,
+agent layer are built and tested (204 passed, 1 skipped, 1 xfailed). The API,
 the web frontend, the judges endpoints, and the deployment are not built yet,
 and nothing below describes them as though they were.
 
@@ -44,9 +44,11 @@ and nothing below describes them as though they were.
 >
 > **HITS answers:**
 >
-> A transfer to the target exists for the departure asked about. Leaving Earth
-> on 2017-06-07 and arriving on 2018-06-07, the flight time is 365 days, or 1
-> year.
+> A trajectory connecting Earth to the target exists for the departure asked
+> about. Leaving Earth on 2017-06-07 and arriving on 2018-06-07, the flight time
+> is 365 days, or 1 year. That such a trajectory exists is geometry, and geometry
+> is nearly always obliging; what separates one departure from another is what it
+> costs to fly.
 >
 > Reaching it from an Earth-relative departure costs 393.34 km^2/s^2 of
 > characteristic energy, which is a hyperbolic excess speed of 19.8328 km/s once
@@ -59,7 +61,11 @@ and nothing below describes them as though they were.
 > What HITS settles here is the trajectory, not the launch vehicle. It computes
 > what the transfer costs and does not model launcher capability, so the
 > departure energy above is the input to a feasibility judgement rather than the
-> judgement itself.
+> judgement itself. Which means this answer reads the same way whatever the size
+> of that figure. A departure energy an existing launcher could supply, and a
+> departure energy far past anything ever flown, come back in identical
+> sentences, because HITS has no launcher model with which to tell them apart.
+> Nothing above should be read as HITS having found the mission flyable.
 >
 > All figures are patched-conic, two-body. HITS does not perform n-body
 > integration and does not model non-gravitational forces, so a figure is a
@@ -68,11 +74,20 @@ and nothing below describes them as though they were.
 
 Verbatim from a live run on 2026-08-30, `served_by: deterministic_floor`. That
 label is the interesting part. Granite was called three times and rejected three
-times, because it kept rewriting the date `2017-06-07` as "June 7, 2017", and a
-`7` that the solver never emitted is a number the gate will not pass. So the
-system served its deterministic floor instead: correct, grounded, and visibly
-credited to the template rather than to the model. Nothing in this repository
-serves an ungrounded number, including when the model is the thing at fault.
+times: it kept rewriting the date `2017-06-07` as "June 7, 2017", and a `7` the
+solver never emitted is a number the gate will not pass, and it kept renaming
+the eq. 4 quantity in a way that reads as a label wrapped around a figure. So
+the system served its deterministic floor instead: correct, grounded, and
+visibly credited to the template rather than to the model. Nothing in this
+repository serves an ungrounded number, including when the model is the thing
+at fault.
+
+The last two paragraphs are doing deliberate work. The same template answers
+for 2I/Borisov and 3I/ATLAS, whose departure energies are more than four and
+more than seven times this one, and it answers in identical sentences, because HITS has
+no launcher model and so has no way to tell an affordable figure from an absurd
+one. An answer that stayed silent about that would let a reader take the
+wording as reassurance. So the wording says what it is.
 
 ## The demand
 
@@ -272,7 +287,7 @@ solver runs unchanged and explanations are served by the deterministic floor.
 solver/   orbital mechanics, the three-object set, validation, manifest emitter
 verify/   extraction rule, groundedness gate, adversarial corpus loader
 agent/    Granite client, generate-and-gate loop, deterministic floor
-tests/    202 tests, including the corpus and the invariant proofs
+tests/    204 tests, including the corpus and the invariant proofs
 data/     comment corpora, cluster report, committed state vectors, Lyra PDF
 docs/     architecture, verification, manifest contract, process record
 specs/    mission, tech stack, roadmap

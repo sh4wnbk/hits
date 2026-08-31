@@ -37,6 +37,29 @@ costs; it does not model launch-vehicle capability, so the intercept template
 reports the cost and says plainly that the cost is the input to a feasibility
 judgement rather than the judgement itself. Inventing a capability threshold
 would be a generated number wearing a verdict's clothes.
+
+## Why the intercept answer says its own wording is scale-blind
+
+Refusing to judge is not the same as reading as though there were nothing to
+judge, and the difference only shows up once the same template is serving
+targets whose departure energies differ by a factor of several. 1I/'Oumuamua,
+2I/Borisov and 3I/ATLAS come back in identical sentences, and a reader with no
+feel for what a departure energy of a given size means has nothing in the prose
+to tell the cheap case from the ruinous one.
+
+Two words carried more than they should. "A transfer exists" put a near
+tautology in the grammar of a finding, since a connecting trajectory exists
+between almost any pair of positions at almost any flight time, and it landed
+several paragraphs before the qualifier that took it back. So the opening now
+says what the existence of a trajectory is worth, which is very little on its
+own, and the closing limit says outright that the wording does not change with
+the number.
+
+What the module still refuses to do is compare. A threshold separating a
+figure a launcher could supply from one it could not would be a launcher model,
+invented here, in the module forbidden to hold a number at all. Saying the
+prose is scale-blind is a true statement about the template. Saying which side
+of a line a particular figure falls on would not be.
 """
 
 from __future__ import annotations
@@ -112,11 +135,13 @@ def explain_intercept(manifest) -> str:
     })
 
     when = (
-        "A transfer to the target exists for the departure asked about. "
-        f"Leaving Earth on {v['departure']} and arriving on {v['arrival']}, "
-        f"the flight time is {v['tof_days']} "
+        "A trajectory connecting Earth to the target exists for the departure "
+        f"asked about. Leaving Earth on {v['departure']} and arriving on "
+        f"{v['arrival']}, the flight time is {v['tof_days']} "
         f"{_noun(v['tof_days'], 'day', 'days')}, or {v['tof_years']} "
-        f"{_noun(v['tof_years'], 'year', 'years')}."
+        f"{_noun(v['tof_years'], 'year', 'years')}. That such a trajectory "
+        "exists is geometry, and geometry is nearly always obliging; what "
+        "separates one departure from another is what it costs to fly."
     )
 
     cost = (
@@ -136,7 +161,13 @@ def explain_intercept(manifest) -> str:
         "What HITS settles here is the trajectory, not the launch vehicle. It "
         "computes what the transfer costs and does not model launcher "
         "capability, so the departure energy above is the input to a "
-        "feasibility judgement rather than the judgement itself."
+        "feasibility judgement rather than the judgement itself. Which means "
+        "this answer reads the same way whatever the size of that figure. A "
+        "departure energy an existing launcher could supply, and a departure "
+        "energy far past anything ever flown, come back in identical "
+        "sentences, because HITS has no launcher model with which to tell "
+        "them apart. Nothing above should be read as HITS having found the "
+        "mission flyable."
     )
 
     return "\n\n".join([when, cost, arrival, limit, FIDELITY])

@@ -137,6 +137,62 @@ def test_floor_answers_every_object_and_is_grounded(intercepts):
             f"{[(f.text, f.reason) for f in verdict.findings]}")
 
 
+# The sentences that do the honest work, which have to be there whatever the
+# departure energy turns out to be. Kept as data so the assertion below names
+# what is missing rather than reporting that a long string was absent.
+FRAMING = (
+    "That such a trajectory exists is geometry",
+    "what separates one departure from another is what it costs to fly",
+    "the input to a feasibility judgement rather than the judgement itself",
+    "this answer reads the same way whatever the size of that figure",
+    "come back in identical sentences",
+    "Nothing above should be read as HITS having found the mission flyable",
+)
+
+
+def test_framing_carries_to_every_scale(intercepts):
+    """
+    The question this test exists to answer: does the honest framing survive a
+    departure energy several times 'Oumuamua's?
+
+    It has to, because the template is scale-blind by construction and a reader
+    who cannot tell a cheap transfer from a ruinous one by the numbers has only
+    the prose to go on. If the qualifiers appeared for the cheap case and the
+    expensive case read as a finding, the expensive case is the one a judge
+    would misread.
+    """
+    for key, ir in intercepts.items():
+        text = explain_intercept(ir.manifest)
+        for sentence in FRAMING:
+            assert sentence in text, f"{key}: framing missing: {sentence!r}"
+
+
+def test_the_only_difference_between_objects_is_the_numbers(intercepts):
+    """
+    Strip every manifest rendering and the prose left over is the same prose.
+
+    This is the scale-blindness claim stated as an equality rather than as an
+    adjective. It is also why the closing limit says out loud that the wording
+    does not change with the figure: the wording provably does not.
+    """
+    skeletons = {}
+    for key, ir in intercepts.items():
+        text = explain_intercept(ir.manifest)
+        for e in sorted(ir.manifest.entries,
+                        key=lambda e: len(e.canonical), reverse=True):
+            text = text.replace(e.canonical, "<N>")
+        # Singular and plural nouns follow the rendering, not the framing.
+        text = text.replace("<N> day,", "<N> days,").replace(
+            "<N> year.", "<N> years.")
+        skeletons[key] = text
+
+    distinct = set(skeletons.values())
+    assert len(distinct) == 1, (
+        "the three answers do not share one skeleton, so the framing is not "
+        "the same at every scale:\n" + "\n\n".join(
+            f"--- {k} ---\n{v}" for k, v in skeletons.items()))
+
+
 def test_floor_states_no_feasibility_verdict(intercepts):
     """
     HITS has no launch-vehicle model, so an answer that said "feasible" or

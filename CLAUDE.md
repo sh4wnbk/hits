@@ -272,7 +272,17 @@ Three-object set built and validated (2026-08-30):
   nothing else.** Borisov and 3I/ATLAS are computed with the same method and
   checked against no external figure, because none exists. Do not let the
   three-object count borrow 'Oumuamua's validation.
-- Suite: 202 passed, 1 skipped, 1 xfailed, 0 failed.
+- The intercept template's framing was read back at 'Oumuamua's 393.34 and
+  3I/ATLAS's 2919.78 km^2/s^2. The feasibility disclaimer carried over verbatim;
+  the opening did not. "A transfer to the target exists" reads as a finding at
+  the cheap end and as a misleading one at the expensive end, since a connecting
+  trajectory exists between almost any pair of positions. The opening now says
+  what that existence is worth and the closing limit states that the wording
+  does not change with the size of the figure. **No threshold was added and none
+  should be:** a line separating an affordable departure energy from an absurd
+  one is a launcher model, and HITS has no launcher model. The template may say
+  it is scale-blind; it may not say which side of a line a figure falls on.
+- Suite: 204 passed, 1 skipped, 1 xfailed, 0 failed.
 
 Currently unbuilt, and therefore not to be described as working: Granite
 Guardian, every judges endpoint, the frontend, and the deployment.
