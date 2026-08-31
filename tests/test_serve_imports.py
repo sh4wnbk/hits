@@ -171,6 +171,51 @@ def test_the_three_answers_are_distinct(client):
     assert len(call_ids) == 3
 
 
+def test_a_committed_answer_is_served_and_a_missing_one_falls_to_the_floor(
+        client, monkeypatch):
+    """
+    The two branches of /explain, both of them, because the page depends on the
+    fall-through and nothing exercised it.
+
+    A frozen answer is served as it was frozen, `served_by` and `generated_at`
+    carried from the file rather than recomputed, and `source` says `cached` so
+    a reader can tell a watched generation from one made for them. With no file
+    the request falls to the gated floor and says so. The cache is stubbed
+    rather than written into data/answers/, so the test states the behaviour
+    without depending on whether a generation has been run yet.
+    """
+    from app import answers as answer_store
+    from app.main import answer_store as bound
+
+    frozen = answer_store.CachedAnswer(
+        object_key="oumuamua",
+        text="Frozen prose, standing in for a watched generation.",
+        served_by="granite_after_regen",
+        model_id="ibm/granite-4-h-small",
+        generated_at="2026-08-30T00:00:00Z",
+        call_id="stub",
+        verification_status=objects.VALIDATED,
+        regenerations=1,
+        verified_grounded=True,
+    )
+    monkeypatch.setattr(bound, "load", lambda key: frozen if key == "oumuamua" else None)
+
+    hit = client.get("/explain/oumuamua").json()
+    assert hit["source"] == "cached"
+    assert hit["text"] == frozen.text
+    assert hit["served_by"] == "granite_after_regen"
+    assert hit["model_id"] == "ibm/granite-4-h-small"
+    assert hit["generated_at"] == "2026-08-30T00:00:00Z"
+    assert hit["regenerations"] == 1
+    assert hit["grounded"] is True
+
+    miss = client.get("/explain/borisov").json()
+    assert miss["source"] == "live-no-cache"
+    assert miss["served_by"] == "deterministic_floor"
+    assert miss["floor_reason"] == "no watsonx credentials in the environment"
+    assert miss["grounded"] is True
+
+
 def test_an_unknown_target_is_404_and_names_the_closed_set(client):
     """
     A free-text designation is refused rather than resolved. The message hands
@@ -183,6 +228,61 @@ def test_an_unknown_target_is_404_and_names_the_closed_set(client):
         detail = r.json()["detail"]
         assert "free-text" in detail
         assert "oumuamua" in detail and "borisov" in detail and "atlas" in detail
+
+
+def test_the_gate_demo_answers_a_browser_and_an_api_caller_from_one_url(client):
+    """
+    A reader following a link about honesty should not land on raw json, and a
+    judge scripting the same URL should not have to parse HTML. So the format
+    is negotiated: an explicit `?format=` wins, otherwise the Accept header
+    decides, and a caller that expresses no preference gets the data. That last
+    case is what keeps curl and every existing caller working unchanged.
+    """
+    data = client.get("/gate/demo/oumuamua")
+    assert data.status_code == 200
+    assert data.headers["content-type"].startswith("application/json")
+    assert data.json()["injection"]["solver_value"]
+
+    page = client.get("/gate/demo/oumuamua", headers={"accept": "text/html"})
+    assert page.status_code == 200
+    assert page.headers["content-type"].startswith("text/html")
+    assert "<!DOCTYPE html>" in page.text
+
+    # The two shapes are the same computation, and `?format=` overrides Accept
+    # in both directions.
+    forced_json = client.get("/gate/demo/oumuamua?format=json",
+                             headers={"accept": "text/html"})
+    assert forced_json.headers["content-type"].startswith("application/json")
+    assert forced_json.json() == data.json()
+
+    forced_html = client.get("/gate/demo/oumuamua?format=html")
+    assert forced_html.headers["content-type"].startswith("text/html")
+    assert forced_html.text == page.text
+
+    bad = client.get("/gate/demo/oumuamua?format=xml")
+    assert bad.status_code == 400
+
+    # An unknown object is a 404 in either shape, rather than a page that
+    # loads and then cannot fill itself in.
+    for headers in ({}, {"accept": "text/html"}):
+        r = client.get("/gate/demo/nonesuch", headers=headers)
+        assert r.status_code == 404
+
+
+def test_the_gate_view_writes_down_no_figure(client):
+    """
+    The readable view fetches its own numbers from `?format=json`, so the file
+    holds none. The section it mirrors on the landing page is checked the same
+    way by test_index_states_no_number, and for the same reason: an exhibit
+    built to show that no number reaches a reader ungrounded cannot be the one
+    place a number is typed in by hand.
+    """
+    page = client.get("/gate/demo/oumuamua", headers={"accept": "text/html"}).text
+    demo = client.get("/gate/demo/oumuamua?format=json").json()
+    assert demo["injection"]["solver_value"] not in page
+    assert demo["injection"]["injected_token"] not in page
+    for figure in ["393.34", "393.39", "1727.89", "2919.78", "19.8328", "13.96737"]:
+        assert figure not in page
 
 
 def test_index_states_no_number(client):

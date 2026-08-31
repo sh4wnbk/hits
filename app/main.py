@@ -38,13 +38,12 @@ gate.
 
 from __future__ import annotations
 
-import html
 import json
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import FastAPI, HTTPException, Query, Request
+from fastapi.responses import FileResponse
 
 from agent import granite
 from agent.explain import explain
@@ -69,6 +68,8 @@ SUMMARY = (
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EVIDENCE_PATH = os.path.join(REPO_ROOT, "data", "evidence.json")
 OG_BANNER_PATH = os.path.join(REPO_ROOT, "docs", "img", "og_banner.png")
+INDEX_PATH = os.path.join(REPO_ROOT, "web", "index.html")
+GATE_PAGE_PATH = os.path.join(REPO_ROOT, "web", "gate.html")
 
 app = FastAPI(title=TITLE, description=SUMMARY)
 
@@ -259,7 +260,11 @@ def evidence(eid: str) -> Dict[str, Any]:
 
 
 @app.get("/gate/demo/{object_key:path}")
-def gate_demo_endpoint(object_key: str) -> Dict[str, Any]:
+def gate_demo_endpoint(
+    object_key: str,
+    request: Request,
+    format: str = Query("", description="json or html, overriding what the caller accepts"),
+) -> Any:
     """
     Watch the number check accept a real figure and reject an invented one.
 
@@ -269,8 +274,40 @@ def gate_demo_endpoint(object_key: str) -> Dict[str, Any]:
     serves. No watsonx, no credential, no model: the verdict is a comparison
     against the manifest, and a reader can see the comparison being made rather
     than being told it happens.
+
+    ## Why this one endpoint answers in two shapes
+
+    The page links a reader here, and a reader who follows a link about honesty
+    and lands on a wall of json has been shown the machinery and told nothing.
+    So a browser gets the readable view and an API caller gets the data, from
+    the same URL and the same computation: `?format=` settles it outright, and
+    otherwise the caller's Accept header does. curl asks for anything and gets
+    json, which keeps every existing caller working.
+
+    The readable view is a committed file that fetches `?format=json` itself,
+    so the two cannot disagree: there is no second rendering of these figures
+    anywhere, and no number is written into the file that serves them.
+
+    The key is resolved before the format is, so an unknown object is a 404 in
+    either shape rather than a page that loads and then fails.
     """
-    return gate_demo(_frozen(object_key))
+    fi = _frozen(object_key)
+
+    fmt = format.strip().lower()
+    if fmt not in ("", "json", "html"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"format must be 'json' or 'html', not {format!r}",
+        )
+
+    if fmt == "json":
+        return gate_demo(fi)
+    wants_html = fmt == "html" or "text/html" in request.headers.get("accept", "")
+    if wants_html:
+        if not os.path.exists(GATE_PAGE_PATH):
+            raise HTTPException(status_code=404, detail="view not committed")
+        return FileResponse(GATE_PAGE_PATH, media_type="text/html; charset=utf-8")
+    return gate_demo(fi)
 
 
 @app.get("/chips")
@@ -295,212 +332,6 @@ def list_chips() -> Dict[str, Any]:
 # The page
 # ---------------------------------------------------------------------------
 
-PAGE_CSS = """
-:root { --ink:#16181d; --dim:#5b6270; --line:#dfe2e8; --bg:#fbfbfc;
-        --card:#fff; --accent:#1a4fd8; --warn:#8a5a00; --warnbg:#fff8e6; }
-* { box-sizing: border-box; }
-body { margin:0; background:var(--bg); color:var(--ink);
-       font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif; }
-.wrap { max-width:52rem; margin:0 auto; padding:2rem 1.1rem 4rem; }
-header { margin-bottom:1.5rem; }
-h1 { font-size:1rem; font-weight:600; color:var(--dim); margin:0 0 .3rem;
-     letter-spacing:.01em; }
-.tagline { font-size:2rem; font-weight:700; margin:0 0 .6rem; }
-.lede { color:var(--dim); margin:0 0 .5rem; max-width:42rem; }
-h2 { font-size:1.05rem; margin:2rem 0 .3rem; }
-.sub { color:var(--dim); font-size:.87rem; margin:0 0 .9rem; }
-.cards { display:grid; gap:.9rem; grid-template-columns:repeat(auto-fit,minmax(15rem,1fr)); }
-.card { background:var(--card); border:1px solid var(--line); border-radius:8px;
-        padding:.9rem; }
-.card h3 { margin:0 0 .2rem; font-size:1.05rem; }
-.vs { font-size:.8rem; color:var(--dim); margin:.35rem 0 .6rem; }
-.vs.validated { color:#1a6b2f; }
-button { font:inherit; cursor:pointer; background:var(--accent); color:#fff;
-         border:0; border-radius:6px; padding:.45rem .8rem; }
-button.ghost { background:#eef1f6; color:var(--ink); }
-button[disabled] { opacity:.55; cursor:default; }
-.chips { display:flex; flex-wrap:wrap; gap:.5rem; }
-.chip { background:var(--card); border:1px solid var(--line); border-radius:999px;
-        padding:.4rem .85rem; font-size:.9rem; cursor:pointer; text-align:left; color:var(--ink); }
-.chip:hover { border-color:var(--accent); }
-.facet { border:1px solid var(--line); border-radius:8px; background:var(--card);
-         padding:.7rem .85rem; margin-bottom:.6rem; }
-.facet .label { font-weight:600; }
-.facet .ids { font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
-              color:var(--dim); margin-top:.2rem; }
-.prov { font-size:.82rem; color:var(--dim); margin-top:.4rem;
-        border-left:3px solid var(--line); padding-left:.6rem; }
-.note { font-size:.82rem; color:var(--warn); background:var(--warnbg);
-        border-radius:5px; padding:.4rem .6rem; margin-top:.4rem; }
-#out { margin-top:1rem; }
-.answer { background:var(--card); border:1px solid var(--line); border-radius:8px;
-          padding:1rem; white-space:pre-wrap; }
-.meta { font:12px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace; color:var(--dim);
-        border-top:1px solid var(--line); margin-top:.8rem; padding-top:.6rem;
-        white-space:pre-wrap; }
-footer { margin-top:3rem; padding-top:1rem; border-top:1px solid var(--line);
-         color:var(--dim); font-size:.85rem; }
-a { color:var(--accent); }
-"""
-
-
-def _page() -> str:
-    """
-    The chips page. Plain HTML, one inline stylesheet, one inline script.
-
-    No framework and no build step, deliberately: the accessibility gate says a
-    reader needs no setup, and it applies to the page's own delivery. There is
-    also no number in this template. Every figure a reader sees arrives from
-    /explain, which serves gated text and nothing else.
-    """
-    fis = [load(k) for k in objects.KEYS]
-    cards = []
-    for fi in fis:
-        cached = answer_store.load(fi.key)
-        cls = "vs validated" if fi.is_validated else "vs"
-        badge = "cached" if cached else "live"
-        cards.append(f"""
-      <div class="card">
-        <h3>{html.escape(fi.designation)}</h3>
-        <div class="{cls}">{html.escape(fi.verification_status)}</div>
-        <button onclick="ask('{fi.key}')">Can we catch it?</button>
-        <button class="ghost" onclick="ask('{fi.key}',1)">Regenerate live</button>
-        <div class="ids" style="margin-top:.4rem;font-size:11px;color:#5b6270">
-          answer: {badge}</div>
-      </div>""")
-
-    facets = []
-    for f in chips.OBJECT_FACETS:
-        prov = ""
-        if f.mined:
-            prov = (f'<div class="prov">Asked as: &ldquo;{html.escape(f.mined)}'
-                    f'&rdquo; <span style="opacity:.75">({html.escape(f.mined_source)})</span></div>')
-        note = f'<div class="note">{html.escape(f.note)}</div>' if f.note else ""
-        facets.append(f"""
-      <div class="facet">
-        <div class="label">{html.escape(f.label)}</div>
-        <div class="ids">{html.escape(", ".join(f.entry_ids))}</div>
-        {prov}{note}
-      </div>""")
-
-    ev = []
-    for c in chips.EVIDENCE_CHIPS:
-        ev.append(f'<button class="chip" onclick="eq(\'{c.eid}\')">'
-                  f'{html.escape(c.label)}</button>')
-
-    return f"""<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{html.escape(TITLE)}</title>
-<meta name="description" content="{html.escape(SUMMARY)}">
-<meta property="og:type" content="website">
-<meta property="og:title" content="{html.escape(TITLE)}">
-<meta property="og:description" content="{html.escape(SUMMARY)}">
-<meta property="og:image" content="{PUBLIC_URL}/static/og_banner.png">
-<meta property="og:url" content="{PUBLIC_URL}/">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{html.escape(TITLE)}">
-<meta name="twitter:description" content="{html.escape(SUMMARY)}">
-<meta name="twitter:image" content="{PUBLIC_URL}/static/og_banner.png">
-<style>{PAGE_CSS}</style>
-</head>
-<body>
-<div class="wrap">
-
-<header>
-  <h1>{html.escape(TITLE)}</h1>
-  <p class="tagline">{TAGLINE}</p>
-  <p class="lede">{html.escape(SUMMARY)}</p>
-</header>
-
-<noscript>
-  <div class="note" style="margin-bottom:1.5rem">
-    <strong>This page uses JavaScript to fetch answers, and it is switched
-    off.</strong> HITS computes what it would cost to send a probe to one of the
-    three known interstellar objects: 1I/'Oumuamua, 2I/Borisov and 3I/ATLAS. A
-    deterministic solver works out the trajectory, and every number in the
-    written explanation is checked against the solver's own output before it is
-    shown, so the explanation cannot contain a figure the solver did not
-    produce. The answers are readable without JavaScript as plain JSON at
-    <code>/explain/oumuamua</code>, <code>/explain/borisov</code> and
-    <code>/explain/atlas</code>, the evidence answers at <code>/evidence/E1</code>
-    through <code>/evidence/E4</code>, and the number check can be watched
-    accepting a real figure and rejecting an invented one at
-    <code>/gate/demo/oumuamua</code>. The source and the validation are at
-    <a href="{REPO_URL}">{REPO_URL}</a>.
-  </div>
-</noscript>
-
-<h2>The three interstellar objects</h2>
-<p class="sub">Three, because three is how many humanity has found. Each card
-says what backs its numbers.</p>
-<div class="cards">{"".join(cards)}</div>
-
-<div id="out"></div>
-
-<h2>What an object answer covers</h2>
-<p class="sub">{html.escape(chips.CORPUS_NOTE)}</p>
-{"".join(facets)}
-
-<h2>About the tool itself</h2>
-<p class="sub">Answered from committed sources rather than computed, and each
-answer names them.</p>
-<div class="chips">{"".join(ev)}</div>
-
-<footer>
-  Patched-conic, two-body. HITS does not perform n-body integration and does not
-  model non-gravitational forces. It reports what a transfer costs and does not
-  model launch-vehicle capability, so it does not say whether a mission is
-  flyable. &middot; <a href="{REPO_URL}">Source and validation</a>
-</footer>
-</div>
-
-<script>
-const out = document.getElementById('out');
-function esc(s){{ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }}
-function busy(m){{ out.innerHTML = '<div class="answer">'+esc(m)+'</div>'; }}
-
-async function ask(key, live){{
-  busy(live ? 'Calling Granite now. This can take a few seconds.' : 'Loading.');
-  try {{
-    const r = await fetch('/explain/'+key+(live?'?live=1':''));
-    const d = await r.json();
-    const meta = [
-      'served_by:      '+d.served_by,
-      'source:         '+d.source,
-      'grounded:       '+d.grounded,
-      'model_id:       '+(d.model_id || '(none)'),
-      'generated_at:   '+(d.generated_at || '(this request)'),
-      'regenerations:  '+d.regenerations,
-      'guardian:       '+d.advisory,
-      d.floor_reason ? 'floor_reason:   '+d.floor_reason : null,
-      'verification:   '+d.verification_status
-    ].filter(Boolean).join('\\n');
-    out.innerHTML = '<div class="answer">'+esc(d.text)+
-      '<div class="meta">'+esc(meta)+'</div></div>';
-  }} catch(e) {{ busy('Request failed: '+e); }}
-}}
-
-async function eq(eid){{
-  busy('Loading.');
-  try {{
-    const r = await fetch('/evidence/'+eid);
-    if (!r.ok) {{ busy('Not answered yet.'); return; }}
-    const d = await r.json();
-    const meta = 'asked as:  "'+d.mined_from+'"  ('+d.mined_source+')\\n'+
-                 'sources:   '+d.sources.join('\\n           ');
-    out.innerHTML = '<div class="answer"><strong>'+esc(d.question)+'</strong>\\n\\n'+
-      esc(d.text)+'<div class="meta">'+esc(meta)+'</div></div>';
-  }} catch(e) {{ busy('Request failed: '+e); }}
-}}
-</script>
-</body>
-</html>
-"""
-
-
 @app.get("/static/og_banner.png")
 def og_banner() -> FileResponse:
     """
@@ -515,6 +346,20 @@ def og_banner() -> FileResponse:
     return FileResponse(OG_BANNER_PATH, media_type="image/png")
 
 
-@app.get("/", response_class=HTMLResponse)
-def index() -> str:
-    return _page()
+@app.get("/")
+def index() -> FileResponse:
+    """
+    The page, served as the file it is committed as.
+
+    One self-contained document: its stylesheet, its script and its two
+    photographs are inside it, so the page a reader gets is the page in the
+    repository, byte for byte, and there is no build step between the two. It
+    is served rather than generated because a template that assembles HTML in
+    Python is a second place for the page to be edited, and the two drift.
+
+    Its numbers come from the endpoints below it at run time. Nothing on the
+    page is computed here.
+    """
+    if not os.path.exists(INDEX_PATH):
+        raise HTTPException(status_code=404, detail="page not committed")
+    return FileResponse(INDEX_PATH, media_type="text/html; charset=utf-8")
