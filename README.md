@@ -59,17 +59,17 @@ and nothing below describes them as though they were.
 >
 > All figures are patched-conic, two-body. HITS does not perform n-body integration and does not model non-gravitational forces, so a figure is a faithful record of what the solver computed rather than a claim that it is right to the precision it is quoted at.
 
-Verbatim from a live run on 2026-08-30, `served_by: deterministic_floor`.
 Granite generates the explanation, the gate checks every numeric token in it
-against the solver's manifest, and a rejected candidate is regenerated with
-the offending tokens fed back; since the gate learned to read dates and unit
-spellings whole, Granite cleared it ten times in fifteen, five live runs on
-each of the three objects. The floor is the version this README shows, because
-it is the clearer prose and the one path that reproduces offline, without
-credentials, byte for byte, and every response carries `served_by`, so a
-templated answer is never mis-credited to the model. The gate certifies
-grounding and not truth: it checks where a number came from, never whether the
-sentence around it is true.
+against the solver's manifest, and a rejected candidate is regenerated with the
+offending tokens fed back; only if that still fails does the deterministic
+floor answer instead, and `served_by` names whichever path did. Since the gate
+learned to read dates and unit spellings whole, Granite cleared it ten times in
+fifteen, five live runs on each of the three objects. The block above is
+verbatim from a run on 2026-08-30 that fell through to the floor,
+`served_by: deterministic_floor`, and the floor is what is quoted here because
+it is the one path a reader reproduces offline, without credentials, byte for
+byte. The gate certifies grounding and not truth: it checks where a number came
+from, never whether the sentence around it is true.
 
 ## The demand
 
