@@ -2,18 +2,38 @@
 
 *Can we catch it? Expert-level intercept analysis, open to everyone.*
 
-Someone watches a JPL video about an interstellar object passing through the
-solar system, and asks the obvious question: could we send something after it?
-The answer is a real calculation that professionals run every day, and there is
-nowhere for that person to get it. They are not going to install GMAT.
+The intercept math exists. It has existed at NASA and in aerospace tools since
+1964, most of it is free, and some of it is a download away. What it is not is
+reachable.
 
-HITS is an accessibility layer over NASA data services that answers that one
-question, and refuses to answer it with a number it did not compute.
+| Tool | Status | What stands between you and an answer |
+|---|---|---|
+| [GMAT](https://software.nasa.gov/software/GSC-17177-1) (NASA) | Free, open source | Mission-design expertise. It is an environment to work in, not a question you can ask |
+| [OITS](https://github.com/AdamHibberd/Optimum_Interplanetary_Trajectory) (Project Lyra) | Free, open source | MATLAB, the SPICE toolkit, and the NOMAD optimizer, plus knowing which bodies to sequence |
+| OTIS (NASA Glenn) | Free, export-controlled | ITAR. Not releasable to, or usable by, anyone who is not a United States person |
+| TRACE (The Aerospace Corporation) | Internal | Never publicly released |
 
-**Status.** The solver, the groundedness gate, and the agent layer are built
-and tested (192 passed, 1 skipped, 1 xfailed). The API, the web frontend, the
-judges endpoints, and the deployment are not built yet, and nothing below
-describes them as though they were.
+So the capability is not missing. It is locked away, behind expertise in three
+of those rows and behind citizenship in the fourth, and the people it is locked
+away from are the ones asking. 3,171 questions pulled out of 19,122 comments on
+six NASA JPL videos say what they want to know, and the two largest technical
+themes are how long it would take and whether we could catch it. None of those
+people is going to install GMAT.
+
+HITS is that capability with the barrier removed. It computes real intercept
+trajectories over the hyperbolic orbits of all three interstellar objects
+humanity has found, 1I/'Oumuamua, 2I/Borisov and 3I/ATLAS, and says in plain
+language what such a mission would cost. Every number in an answer is checked
+against solver output before it is shown, and every answer carries a field
+saying what backs it: 'Oumuamua's says its figures were validated against
+Project Lyra's published study, and Borisov's and 3I/ATLAS's say they were
+computed by the same method and that no published intercept study exists to
+validate them against, because none does.
+
+**Status.** The solver, the three-object set, the groundedness gate, and the
+agent layer are built and tested (202 passed, 1 skipped, 1 xfailed). The API,
+the web frontend, the judges endpoints, and the deployment are not built yet,
+and nothing below describes them as though they were.
 
 ---
 
@@ -77,29 +97,27 @@ The six NASA JPL videos the demand was read from.
 
 ## Problem statement
 
-The capability to compute these trajectories has existed at NASA and in
-aerospace tools since 1964. It has simply never been reachable by the students,
-teachers, and journalists asking the questions.
-
-| Tool | Status | Barrier |
-|---|---|---|
-| GMAT (NASA) | Free, open source | Mission-design expertise required |
-| OITS (Project Lyra) | Open source | Orbital mechanics knowledge plus code setup |
-| OTIS (NASA) | Restricted | Distribution limited to domestic United States use |
-| TRACE (The Aerospace Corporation) | Internal | Never publicly released |
-
 The claim is not that no software exists. It is the narrower and defensible
-one: no *accessible* tool exists. How the demand above was measured, with the
-extraction rule, the clustering parameters, and the stated limits, is in
-`docs/EVIDENCE.md`; the corpora and the cluster report are in `/data`.
+one: no *accessible* tool exists. Every tool in the table at the top of this
+page is real, three of the four are free, and not one of them will answer a
+question put to it by somebody who does not already know how to ask.
+
+How the demand above was measured, with the extraction rule, the clustering
+parameters, and the stated limits, is in `docs/EVIDENCE.md`; the corpora and
+the cluster report are in `/data`.
 
 ## Solution description
 
-HITS takes an interstellar target from NASA's small-body catalogs, computes
-real intercept trajectories over its hyperbolic orbit, and says in plain
-language what such a mission would cost. One URL, no clone, no orbital
-mechanics, and every number in the answer is checked against solver output
-before it is shown.
+HITS takes one of the three interstellar objects, computes a real intercept
+trajectory over its hyperbolic orbit, and says in plain language what such a
+mission would cost. One URL, no clone, no orbital mechanics, and every number
+in the answer is checked against solver output before it is shown.
+
+The three are a committed set and not a text field. A typed designation would
+need a live Horizons call at request time, which would put a judge's re-run at
+the mercy of the network and end the guarantee that the same numbers come back
+every time. `solver/objects.py` holds the set, and asking for anything else
+raises rather than guessing.
 
 What it is not is load-bearing, because it is what keeps the claim narrow.
 HITS is not a replacement for GMAT and answers one question rather than many.
@@ -171,7 +189,14 @@ the process discipline both tools worked under.
 
 The solver reproduces five published quantities from Project Lyra's
 'Oumuamua study (Hein et al. 2019, Acta Astronautica 161, 552-561). The
-largest disagreement is 4.92%.
+largest disagreement is 4.92%. Every row below is 1I/'Oumuamua, and there is
+no equivalent table for the other two objects because there is nothing to put
+in it: no intercept study has been published for 2I/Borisov or 3I/ATLAS. They
+are computed by the same method, over state vectors fetched down the same path
+and frame-checked against the elements Horizons reports for the same body at
+the same epoch, and validated against nothing. Each object carries that
+distinction as a `verification_status` field rather than as a footnote, so a
+reader who sees only one answer still sees what backs it.
 
 | Quantity | HITS | Published | Difference |
 |---|---|---|---|
@@ -243,10 +268,10 @@ solver runs unchanged and explanations are served by the deterministic floor.
 ## Repository layout
 
 ```
-solver/   orbital mechanics, validation, manifest emitter
+solver/   orbital mechanics, the three-object set, validation, manifest emitter
 verify/   extraction rule, groundedness gate, adversarial corpus loader
 agent/    Granite client, generate-and-gate loop, deterministic floor
-tests/    191 tests, including the corpus and the invariant proofs
+tests/    202 tests, including the corpus and the invariant proofs
 data/     comment corpora, cluster report, committed state vectors, Lyra PDF
 docs/     architecture, verification, manifest contract, process record
 specs/    mission, tech stack, roadmap
