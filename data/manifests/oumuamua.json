@@ -1,0 +1,237 @@
+{
+  "object": {
+    "key": "oumuamua",
+    "designation": "1I/'Oumuamua",
+    "horizons_id": "1I",
+    "discovery_year": 2017
+  },
+  "verification_status": "computed and validated against published figures (Hein et al. 2019)",
+  "verification_basis": "Hein et al. 2019, Acta Astronautica 161, 552-561, DOI 10.1016/j.actaastro.2018.12.042",
+  "transfer_basis": "Project Lyra's Sample A: a 2017 departure on a flight of about one year, the case Hein et al. 2019 publish an arrival relative velocity for.",
+  "manifest": {
+    "manifest_version": "1.0.0",
+    "call_id": "ff398f20-9efb-4f3f-a51f-cc418a57dc78",
+    "emitted_utc": "2026-08-31T16:24:01Z",
+    "producer": "solve",
+    "inputs": {
+      "object_key": "oumuamua",
+      "designation": "1I/'Oumuamua",
+      "earth_state_key": "earth_sample_ab_launch",
+      "target_state_key": "oumuamua_sample_a_arrival",
+      "earth_state_epoch": "2017-06-07 12:00:00.000",
+      "target_state_epoch": "2018-06-07 12:00:00.000",
+      "retrieved_utc": "2026-08-27T19:52:27Z"
+    },
+    "fidelity_note": "Patched-conic, two-body. No n-body integration and no non-gravitational forces. A manifest entry records what the solver computed, which is not a claim that the number is correct to the precision it is quoted at.",
+    "solver_git_sha": "4134fa9cd8b30ef69a6f4da3fa0c35f3f1d590a5",
+    "entries": [
+      {
+        "id": "solve.c3",
+        "label": "Departure C3",
+        "value": 393.34,
+        "precision": 2,
+        "unit": "km^2/s^2",
+        "frame": "earth_relative",
+        "kind": "computed",
+        "renderings": [
+          "393.34",
+          "393.3",
+          "393"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.c3_km2_s2",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.dv_depart",
+        "label": "Departure hyperbolic excess speed",
+        "value": 19.8328,
+        "precision": 5,
+        "unit": "km/s",
+        "frame": "earth_relative",
+        "kind": "computed",
+        "renderings": [
+          "19.8328",
+          "19.833",
+          "19.83",
+          "19.8"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.dv_depart_km_s",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.v_arr",
+        "label": "Local encounter relative velocity",
+        "value": 13.71605,
+        "precision": 5,
+        "unit": "km/s",
+        "frame": "target_relative",
+        "kind": "computed",
+        "renderings": [
+          "13.71605",
+          "13.716",
+          "13.72",
+          "13.7"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.v_arr_km_s",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.v_inf2",
+        "label": "Arrival relative velocity, eq.4 asymptotic",
+        "value": 13.96737,
+        "precision": 5,
+        "unit": "km/s",
+        "frame": "target_relative",
+        "kind": "computed",
+        "renderings": [
+          "13.96737",
+          "13.9674",
+          "13.967",
+          "13.97"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.v_inf2_km_s",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.tof_days",
+        "label": "Flight time",
+        "value": 365.0,
+        "precision": 2,
+        "unit": "d",
+        "frame": "n_a",
+        "kind": "computed",
+        "renderings": [
+          "365",
+          "365.0"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.tof_days",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.tof_years",
+        "label": "Flight time in years",
+        "value": 1.0,
+        "precision": 2,
+        "unit": "yr",
+        "frame": "n_a",
+        "kind": "derived",
+        "renderings": [
+          "1",
+          "1.0"
+        ],
+        "citation": "",
+        "provenance": "derived: solver.solve.SolveResult.tof_days / 365.25",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.departure.jd",
+        "label": "Departure epoch (TDB Julian Date)",
+        "value": 2457912.0,
+        "precision": 1,
+        "unit": "JD",
+        "frame": "n_a",
+        "kind": "epoch",
+        "renderings": [
+          "2457912.0"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.departure_epoch_jd",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.departure.iso",
+        "label": "Departure epoch (calendar date, TDB)",
+        "value": null,
+        "precision": 0,
+        "unit": "1",
+        "frame": "n_a",
+        "kind": "epoch",
+        "renderings": [
+          "2017-06-07",
+          "June 7, 2017"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.departure_epoch_jd",
+        "text_value": "2017-06-07",
+        "value_type": "date"
+      },
+      {
+        "id": "solve.departure.year",
+        "label": "Departure epoch (year)",
+        "value": 2017.0,
+        "precision": 0,
+        "unit": "calendar_year",
+        "frame": "n_a",
+        "kind": "epoch",
+        "renderings": [
+          "2017"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.departure_epoch_jd",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.arrival.jd",
+        "label": "Arrival epoch (TDB Julian Date)",
+        "value": 2458277.0,
+        "precision": 1,
+        "unit": "JD",
+        "frame": "n_a",
+        "kind": "epoch",
+        "renderings": [
+          "2458277.0"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.arrival_epoch_jd",
+        "text_value": "",
+        "value_type": "number"
+      },
+      {
+        "id": "solve.arrival.iso",
+        "label": "Arrival epoch (calendar date, TDB)",
+        "value": null,
+        "precision": 0,
+        "unit": "1",
+        "frame": "n_a",
+        "kind": "epoch",
+        "renderings": [
+          "2018-06-07",
+          "June 7, 2018"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.arrival_epoch_jd",
+        "text_value": "2018-06-07",
+        "value_type": "date"
+      },
+      {
+        "id": "solve.arrival.year",
+        "label": "Arrival epoch (year)",
+        "value": 2018.0,
+        "precision": 0,
+        "unit": "calendar_year",
+        "frame": "n_a",
+        "kind": "epoch",
+        "renderings": [
+          "2018"
+        ],
+        "citation": "",
+        "provenance": "solver.solve.SolveResult.arrival_epoch_jd",
+        "text_value": "",
+        "value_type": "number"
+      }
+    ]
+  }
+}
