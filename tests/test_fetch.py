@@ -27,16 +27,41 @@ def state_vectors():
     return load_state_vectors(DATA_PATH)
 
 
-def test_json_loads_six_entries(state_vectors):
-    """Exactly the six PROVENANCE.md keys must be present (revision plan v2)."""
-    expected_keys = {
-        "oumuamua_perihelion",
-        "earth_sample_ab_launch",
-        "oumuamua_sample_a_arrival",
-        "oumuamua_sample_b_arrival",
-        "earth_c3_grid",
-        "oumuamua_c3_grid",
-    }
+# The six keys the Lyra validation reads (PROVENANCE.md, revision plan v2).
+LYRA_KEYS = {
+    "oumuamua_perihelion",
+    "earth_sample_ab_launch",
+    "oumuamua_sample_a_arrival",
+    "oumuamua_sample_b_arrival",
+    "earth_c3_grid",
+    "oumuamua_c3_grid",
+}
+
+# The four keys the two unvalidated intercepts read (data/fetch_objects.py).
+INTERCEPT_KEYS = {
+    "earth_borisov_departure",
+    "borisov_arrival",
+    "earth_atlas_departure",
+    "atlas_arrival",
+}
+
+
+# Every committed entry that is one pinned epoch rather than a window. The two
+# intercept objects are single states for the same reason samples A and B are:
+# the transfer they belong to is one departure and one arrival, not a search.
+SINGLE_STATE_KEYS = (LYRA_KEYS - {"earth_c3_grid", "oumuamua_c3_grid"}) | INTERCEPT_KEYS
+
+
+def test_json_loads_expected_entries(state_vectors):
+    """
+    Exactly the Lyra validation keys plus the intercept keys, and nothing else.
+
+    Kept as an equality rather than a subset check on purpose. A committed
+    state vector nothing reads is a state vector nobody is checking, and the
+    Lyra six have to stay named individually so a later fetch cannot quietly
+    drop one and leave the suite green.
+    """
+    expected_keys = LYRA_KEYS | INTERCEPT_KEYS
     assert set(state_vectors.keys()) == expected_keys, (
         f"Key mismatch.\n  Expected: {sorted(expected_keys)}\n"
         f"  Got:      {sorted(state_vectors.keys())}"
@@ -60,8 +85,7 @@ def test_windows_are_lists(state_vectors):
 
 def test_single_states_are_not_lists(state_vectors):
     """Pinned single-epoch entries must be StateVector instances, not lists."""
-    for key in ["oumuamua_perihelion", "earth_sample_ab_launch",
-                "oumuamua_sample_a_arrival", "oumuamua_sample_b_arrival"]:
+    for key in sorted(SINGLE_STATE_KEYS):
         val = state_vectors[key]
         from solver.fetch import StateVector as _SV
         assert isinstance(val, _SV), f"{key} should be a single StateVector, got {type(val)}"
@@ -142,8 +166,7 @@ def test_frame_check_inclination(state_vectors):
 def test_frame_annotation(state_vectors):
     """Every committed state vector must carry ECLIPJ2000 / Sun annotation."""
     # Single-epoch entries
-    for key in ["oumuamua_perihelion", "earth_sample_ab_launch",
-                "oumuamua_sample_a_arrival", "oumuamua_sample_b_arrival"]:
+    for key in sorted(SINGLE_STATE_KEYS):
         sv = state_vectors[key]
         assert sv.frame == "ECLIPJ2000", f"{key}: frame={sv.frame}"
         assert sv.center == "Sun", f"{key}: center={sv.center}"

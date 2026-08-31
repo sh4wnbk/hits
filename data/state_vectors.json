@@ -20206,5 +20206,89 @@
         ]
       }
     ]
+  },
+  "earth_borisov_departure": {
+    "type": "single",
+    "body": "399",
+    "role": "2I/Borisov intercept departure (Earth)",
+    "epoch_tdb_jd": 2462573.5,
+    "epoch_iso": "2030-03-13 00:00:00.000",
+    "frame": "ECLIPJ2000",
+    "center": "Sun",
+    "retrieved_utc": "2026-08-31T00:27:12Z",
+    "horizons_id": "399",
+    "position_km": [
+      -147233101.02172402,
+      20602002.13623107,
+      -383.28302184399223
+    ],
+    "velocity_km_s": [
+      -4.60108924585151,
+      -29.613038845732955,
+      0.0031043326336792636
+    ]
+  },
+  "borisov_arrival": {
+    "type": "single",
+    "body": "2I",
+    "role": "2I/Borisov intercept arrival",
+    "epoch_tdb_jd": 2469878.5,
+    "epoch_iso": "2050-03-13 00:00:00.000",
+    "frame": "ECLIPJ2000",
+    "center": "Sun",
+    "retrieved_utc": "2026-08-31T00:27:12Z",
+    "horizons_id": "2I",
+    "position_km": [
+      1479320196.9511108,
+      -27355270248.5803,
+      -15208259139.04425
+    ],
+    "velocity_km_s": [
+      1.873471844595538,
+      -28.394306026039462,
+      -15.5185396326075
+    ]
+  },
+  "earth_atlas_departure": {
+    "type": "single",
+    "body": "399",
+    "role": "3I/ATLAS intercept departure (Earth)",
+    "epoch_tdb_jd": 2462764.5,
+    "epoch_iso": "2030-09-20 00:00:00.000",
+    "frame": "ECLIPJ2000",
+    "center": "Sun",
+    "retrieved_utc": "2026-08-31T00:27:13Z",
+    "horizons_id": "399",
+    "position_km": [
+      150009820.01823127,
+      -8753036.349625729,
+      -123.27536726417021
+    ],
+    "velocity_km_s": [
+      1.260919184683998,
+      29.625635439770715,
+      -0.0010916043377662277
+    ]
+  },
+  "atlas_arrival": {
+    "type": "single",
+    "body": "3I",
+    "role": "3I/ATLAS intercept arrival",
+    "epoch_tdb_jd": 2470069.5,
+    "epoch_iso": "2050-09-20 00:00:00.000",
+    "frame": "ECLIPJ2000",
+    "center": "Sun",
+    "retrieved_utc": "2026-08-31T00:27:13Z",
+    "horizons_id": "3I",
+    "position_km": [
+      -4150937036.5325575,
+      45466303920.84056,
+      -2816142690.6972337
+    ],
+    "velocity_km_s": [
+      -4.971185508177498,
+      57.702611287046274,
+      -3.589530945826006
+    ]
   }
 }
