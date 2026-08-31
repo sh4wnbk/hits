@@ -16,6 +16,8 @@ Corpus format and authorship split: docs/CORPUS.md.
   tests/corpus/grounded.jsonl     accept cases, authored white-box here
 """
 
+import os
+
 import pytest
 
 from verify.corpus import (
@@ -232,6 +234,67 @@ def test_the_gate_reads_its_unit_spellings_from_the_manifest():
     assert exemptions.UNIT_SYNONYMS is source
     assert exemptions.UNIT_LOOKAHEAD_CHARS > max(
         len(sp) for sps in source.values() for sp in sps)
+
+
+DATE_CASES = [
+    ("2030-09-20", True, "the ISO form, canonical"),
+    ("September 20, 2030", True, "the human form, the other accepted rendering"),
+    ("March 20, 2030", False, "a date the solver never emitted, whose 20 and "
+                              "2030 are both grounded for unrelated reasons"),
+    ("20 September 2030", False, "a third spelling of the right date"),
+    ("Sep 20, 2030", False, "an abbreviated spelling of the right date"),
+]
+
+
+@pytest.mark.parametrize("written,expected,why", DATE_CASES,
+                         ids=[c[0] for c in DATE_CASES])
+def test_a_date_is_matched_whole_or_not_at_all(written, expected, why):
+    """
+    The gate limit recorded in CLAUDE.md, closed and then watched staying
+    closed.
+
+    "September 20, 2030" used to pass on this manifest by accident: matched in
+    pieces, its 20 is the twenty-year flight time and its 2030 is the departure
+    year, both real renderings, so a wrong date could read as a right one. A
+    date is now one token, looked up whole.
+
+    Recognition is wider than acceptance on purpose. The manifest accepts two
+    forms; the tokenizer recognises every date shape it can, so a third
+    spelling arrives as one unmatched phrase rather than as digits that happen
+    to be grounded elsewhere. Widening recognition only ever makes the gate
+    stricter.
+    """
+    from solver.fetch import load_state_vectors
+    from solver.intercept import intercept
+
+    check = _gate()
+    manifest = intercept("atlas", load_state_vectors(
+        os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                     "data", "state_vectors.json"))).manifest
+    index = manifest.index()
+    assert "20" in index and "2030" in index, (
+        "this test is only meaningful while both fragments are independently "
+        "grounded, which is what made the accident possible")
+
+    verdict = check(f"The probe departs on {written}.", manifest)
+    assert verdict.grounded is expected, (
+        f"{written} ({why}): grounded={verdict.grounded}, "
+        f"findings={[(f.text, f.reason) for f in verdict.findings]}")
+    if not expected:
+        assert any(f.text == written for f in verdict.findings), (
+            "the whole date should be named as the offending token, not one "
+            "of its digits")
+
+
+def test_ordinary_prose_about_a_year_is_not_swallowed_as_a_date():
+    """
+    The cost of widening recognition, bounded. "The June 2027 launch" is
+    ordinary writing about a grounded year, so no shape matches a month and a
+    year without a day between them.
+    """
+    from verify.corpus_ingest import all_tokens
+    assert [t[0] for t in all_tokens("The June 2027 launch cost 1400 km^2/s^2.")] == [
+        "2027", "1400"]
 
 
 def test_gate_does_no_arithmetic():

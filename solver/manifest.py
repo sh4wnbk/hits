@@ -184,6 +184,41 @@ def _with_integral_decimal(ladder: List[str], value: float, unit: str) -> List[s
 
 
 # ---------------------------------------------------------------------------
+# Date renderings
+# ---------------------------------------------------------------------------
+
+MONTHS = ("January", "February", "March", "April", "May", "June", "July",
+          "August", "September", "October", "November", "December")
+
+
+def date_renderings(iso: str) -> List[str]:
+    """
+    The closed set of forms a calendar date may be written as: ISO first, then
+    one human form.
+
+    Two, and exactly two. A date used to render as itself and nothing else,
+    which made every readable spelling of a correct date a rejection: Granite
+    wrote "June 7, 2017" for `2017-06-07`, the ISO pattern stopped matching,
+    and the date fragmented into a bare `7` the explanation never wrote as a
+    quantity. The prompt forbade the human form, and forbidding the way people
+    write dates in order to protect a string match is the tail wagging the dog.
+
+    It is a closed set rather than a parser. "7 June 2017", "Jun 7 2017" and
+    "07/06/2017" are not accepted, and that is deliberate: an open set of date
+    spellings is a fuzzy match wearing a table's clothes. There is one human
+    form, it is emitted here, and an explanation uses it or uses the ISO form.
+
+    This also closes the fragmentation limit recorded in CLAUDE.md, but only
+    together with the tokenizer treating a human date as one token. Emitted
+    here and matched in pieces, "September 20, 2030" would still pass on a
+    manifest whose `20` and `2030` are grounded separately, which is the
+    accident that made a wrong date look right.
+    """
+    year, month, day = iso.split("-")
+    return [iso, f"{MONTHS[int(month) - 1]} {int(day)}, {year}"]
+
+
+# ---------------------------------------------------------------------------
 # Entry and Manifest
 # ---------------------------------------------------------------------------
 
@@ -233,8 +268,11 @@ class ManifestEntry:
                 f"{self.value!r}, which is the placeholder this field exists to "
                 "avoid")
             assert self.text_value, f"{self.id}: a date with no text_value"
-            assert self.renderings == [self.text_value], (
-                f"{self.id}: a date renders as itself and nothing else")
+            assert self.renderings == date_renderings(self.text_value), (
+                f"{self.id}: a date renders as the closed set "
+                f"{date_renderings(self.text_value)}, not {self.renderings}. "
+                "The set is closed on purpose: an open one is a fuzzy match "
+                "wearing a table's clothes")
 
     @property
     def is_number(self) -> bool:
@@ -435,7 +473,8 @@ def _epoch_entries(prefix: str, label: str, jd_tdb: float,
               precision=1, provenance=provenance,
               renderings=[f"{jd_tdb:.1f}"]),
         entry(f"{prefix}.iso", f"{label} (calendar date, TDB)", None, "1",
-              "epoch", precision=0, provenance=provenance, renderings=[iso],
+              "epoch", precision=0, provenance=provenance,
+              renderings=date_renderings(iso),
               text_value=iso, value_type="date"),
         entry(f"{prefix}.year", f"{label} (year)", float(year), "calendar_year",
               "epoch", precision=0, provenance=provenance, renderings=[str(year)]),
@@ -676,7 +715,7 @@ def _source_entries(retrieval_date: str) -> List[ManifestEntry]:
         out.append(entry("source.horizons.retrieval_date",
                          "Horizons retrieval date", None, "1", "metadata",
                          precision=0, provenance="StateVector.retrieved_utc",
-                         renderings=[retrieval_date[:10]],
+                         renderings=date_renderings(retrieval_date[:10]),
                          text_value=retrieval_date[:10], value_type="date"))
     return out
 

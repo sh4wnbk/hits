@@ -52,6 +52,38 @@
         "retrieved_utc": "2026-08-27T19:52:52Z",
         "frame": "ECLIPJ2000",
         "center": "Sun"
+      },
+      "earth_borisov_departure": {
+        "n_states": 1,
+        "epoch_first_jd": 2462573.5,
+        "epoch_last_jd": 2462573.5,
+        "retrieved_utc": "2026-08-31T00:27:12Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      },
+      "borisov_arrival": {
+        "n_states": 1,
+        "epoch_first_jd": 2469878.5,
+        "epoch_last_jd": 2469878.5,
+        "retrieved_utc": "2026-08-31T00:27:12Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      },
+      "earth_atlas_departure": {
+        "n_states": 1,
+        "epoch_first_jd": 2462764.5,
+        "epoch_last_jd": 2462764.5,
+        "retrieved_utc": "2026-08-31T00:27:13Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
+      },
+      "atlas_arrival": {
+        "n_states": 1,
+        "epoch_first_jd": 2470069.5,
+        "epoch_last_jd": 2470069.5,
+        "retrieved_utc": "2026-08-31T00:27:13Z",
+        "frame": "ECLIPJ2000",
+        "center": "Sun"
       }
     }
   },
@@ -322,7 +354,8 @@
       "frame": "n_a",
       "kind": "epoch",
       "renderings": [
-        "2027-06-21"
+        "2027-06-21",
+        "June 21, 2027"
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_y2027_departure_jd",
@@ -537,7 +570,8 @@
       "frame": "n_a",
       "kind": "epoch",
       "renderings": [
-        "2018-06-04"
+        "2018-06-04",
+        "June 4, 2018"
       ],
       "citation": "",
       "provenance": "solver.validate.C3Result.c3_floor_departure_jd",
@@ -683,7 +717,8 @@
       "frame": "n_a",
       "kind": "epoch",
       "renderings": [
-        "2018-01-01"
+        "2018-01-01",
+        "January 1, 2018"
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.departure_jds[0]",
@@ -731,7 +766,8 @@
       "frame": "n_a",
       "kind": "epoch",
       "renderings": [
-        "2032-12-13"
+        "2032-12-13",
+        "December 13, 2032"
       ],
       "citation": "",
       "provenance": "solver.grid.GridResult.departure_jds[-1]",
@@ -989,7 +1025,8 @@
       "frame": "n_a",
       "kind": "epoch",
       "renderings": [
-        "2017-06-07"
+        "2017-06-07",
+        "June 7, 2017"
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
@@ -1037,7 +1074,8 @@
       "frame": "n_a",
       "kind": "epoch",
       "renderings": [
-        "2018-06-07"
+        "2018-06-07",
+        "June 7, 2018"
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
@@ -1294,7 +1332,8 @@
       "frame": "n_a",
       "kind": "epoch",
       "renderings": [
-        "2017-06-07"
+        "2017-06-07",
+        "June 7, 2017"
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.launch_epoch_jd",
@@ -1342,7 +1381,8 @@
       "frame": "n_a",
       "kind": "epoch",
       "renderings": [
-        "2037-06-07"
+        "2037-06-07",
+        "June 7, 2037"
       ],
       "citation": "",
       "provenance": "solver.validate.ArrivalResult.arrival_epoch_jd",
@@ -1406,7 +1446,8 @@
       "frame": "n_a",
       "kind": "metadata",
       "renderings": [
-        "2026-08-27"
+        "2026-08-27",
+        "August 27, 2026"
       ],
       "citation": "",
       "provenance": "StateVector.retrieved_utc",

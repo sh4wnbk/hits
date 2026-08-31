@@ -21,8 +21,8 @@ import pytest
 
 from solver.fetch import load_state_vectors
 from solver.manifest import (
-    Manifest, ManifestEntry, build_renderings, from_validation_results,
-    from_solve_result, UNITS, FRAMES, KINDS,
+    Manifest, ManifestEntry, build_renderings, date_renderings,
+    from_validation_results, from_solve_result, UNITS, FRAMES, KINDS,
 )
 from solver.solve import SolveResult, solve
 from solver.validate import (
@@ -268,7 +268,14 @@ def test_date_entries_carry_their_date_and_no_invented_number(manifest):
     for e in dated:
         assert e.value is None, f"{e.id} carries an invented numeric value {e.value}"
         assert e.text_value, f"{e.id} has no text_value"
-        assert e.renderings == [e.text_value]
+        assert e.renderings == date_renderings(e.text_value), (
+            f"{e.id}: a date renders as the closed set and nothing else")
+        assert e.renderings[0] == e.text_value, (
+            f"{e.id}: the ISO form is canonical; the human form is the "
+            "alternate, not the other way round")
+        assert len(e.renderings) == 2, (
+            f"{e.id}: the set of date forms is closed at two. An open set of "
+            "date spellings is a fuzzy match wearing a table's clothes")
         assert len(e.text_value) == 10 and e.text_value[4] == "-", (
             f"{e.id}: {e.text_value!r} is not a full ISO date")
 
@@ -338,6 +345,9 @@ REVIEWED_COLLISIONS = {
     "10166": "every grid cell solved, so n_cells equals n_solved; equal values",
     "2457912.0": "samples A and B share one launch instant (PROVENANCE.md)",
     "2017-06-07": "as above",
+    "June 7, 2017": "as above, in the human rendering of the same shared "
+                    "launch date. The collision is the ISO one restated, not a "
+                    "new ambiguity: both forms name one instant",
     "2017": "as above",
     "0.64": "Sample B's eq.4 asymptotic velocity (0.64166) and its local "
             "encounter velocity (0.64351) coincide at two significant digits. "

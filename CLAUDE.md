@@ -260,13 +260,18 @@ Phase 2 agent layer built and validated (2026-08-29):
   answer is a recital of one figure per paragraph with no plain-language lead
   and none of the feasibility framing, and it adds loose interpretive glosses
   the solver never made.
-- **New gate limit, found live and not yet fixed: a reformatted date can pass.**
-  A grounded 3I/ATLAS answer contained "September 20, 2030". It passed because
-  `20` is `solve.tof_years` and `2030` is `solve.departure.year`, both real
-  renderings in that manifest. The prompt's no-month-name rule is therefore not
-  enforceable by membership alone whenever a date's fragments happen to be
-  grounded elsewhere. This belongs with the accepted limits in
-  `tests/corpus/known_limits.jsonl` and is recorded here until it is.
+- **That gate limit is now closed (2026-08-30).** A grounded 3I/ATLAS answer had
+  contained "September 20, 2030", passing because `20` is `solve.tof_years` and
+  `2030` is `solve.departure.year`. A date is now a single token: the tokenizer
+  recognises date shapes and the phrase is looked up whole, so
+  "March 20, 2030" is one fabricated token rather than two grounded digits.
+  **Recognition is wider than acceptance and the two must not be conflated.**
+  The manifest accepts two forms, ISO and "June 7, 2018". The tokenizer
+  recognises more shapes than that on purpose, so an unaccepted spelling
+  arrives as one unmatched phrase instead of fragmenting. Widening recognition
+  only ever makes the gate stricter. A bare `Month YYYY` is deliberately not
+  recognised, because "the June 2027 launch" is correct prose about a grounded
+  year.
 - **The earlier record, kept because it is what the runs showed then.** Later the same day, six live
   attempts across two manifest shapes were all rejected and all served
   `deterministic_floor`. On a solve manifest Granite rewrites `2017-06-07` as

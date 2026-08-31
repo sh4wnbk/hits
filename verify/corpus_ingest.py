@@ -151,6 +151,8 @@ def _sentence_boundaries(text: str) -> List[int]:
         out.append(m.end())
     return out
 
+from solver.manifest import MONTHS  # noqa: E402
+
 UNIT_PATTERNS = (
     ("km^2/s^2", ("km^2/s^2", "km2/s2", "km²/s²")),
     ("km/s", ("km/s", "km/s^2", "kilometres per second", "kilometers per second")),
@@ -224,6 +226,42 @@ def repair_spans(raw: Dict[str, Any]) -> Tuple[Dict[str, Any], bool, Optional[st
 # ---------------------------------------------------------------------------
 
 ISO_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
+
+# A human date is ONE token, for the same reason an ISO date is. Matched in
+# pieces, "September 20, 2030" reduces to a 20 and a 2030, and on a manifest
+# where both are grounded for unrelated reasons (a twenty-year flight time, a
+# 2030 departure year) a date the solver never emitted passes. That accident
+# was observed live and recorded in CLAUDE.md as a gate limit; treating the
+# whole phrase as the token is what closes it, because the phrase is then
+# looked up against solver.manifest.date_renderings and either is one or is not.
+#
+# The month names come from the manifest, so the form the tokenizer recognises
+# and the form the manifest emits cannot drift apart.
+#
+# Recognition is deliberately WIDER than acceptance, and the two must not be
+# confused. The manifest accepts exactly two forms, ISO and "June 7, 2018".
+# The tokenizer recognises every date SHAPE it can, so that a spelling the
+# manifest does not accept arrives at the gate as one unmatched phrase instead
+# of as a handful of digits that happen to be grounded elsewhere. Widening
+# recognition can only make the gate stricter: it converts a pair of
+# accidentally-grounded fragments into a single rejection, and it can never
+# turn a rejection into a pass.
+#
+# Every pattern requires a month name, a day, and a four-digit year. A bare
+# "Month YYYY" is deliberately absent: "the June 2027 launch" is ordinary prose
+# about a grounded year, and swallowing it would reject correct writing.
+_MONTH = "|".join(MONTHS)
+_MONTH_ABBR = "|".join(m[:3] for m in MONTHS)
+
+DATE_SHAPES = (
+    # The accepted human form: June 7, 2018
+    re.compile(r"\b(?:" + _MONTH + r") \d{1,2}, \d{4}\b"),
+    # Recognised so it can be rejected whole: 7 June 2018
+    re.compile(r"\b\d{1,2} (?:" + _MONTH + r") \d{4}\b"),
+    # Recognised so it can be rejected whole: Jun 7, 2018 / Jun. 7 2018
+    re.compile(r"\b(?:" + _MONTH_ABBR + r")\.? \d{1,2},? \d{4}\b"),
+)
+
 NUMBER = re.compile(r"(?<![\w.])\d[\d,]*(?:\.\d+)?(?![\w])")
 
 # Every spelling of every unit, longest first, so km^2/s^2 is masked before
@@ -261,17 +299,28 @@ def all_tokens(text: str) -> List[Tuple[str, int, int]]:
     The single tokenizer. The extraction rule and the manifest lookup both use
     it, so they cannot disagree about what counts as a number.
 
-    Three traps it closes. Units are masked first, so the digits inside
+    Four traps it closes. Units are masked first, so the digits inside
     km^2/s^2 are not numbers. An ISO date is one token, so 2018-06-04 does not
-    also yield a bare 06 that no explanation wrote. And a digit fused to a word
-    character is part of an identifier, not a quantity, which is what keeps C3,
-    1I, J2000 and v_inf2 out.
+    also yield a bare 06 that no explanation wrote. A human date is one token
+    for the same reason and a sharper one: in pieces, "September 20, 2030"
+    passes wherever 20 and 2030 happen to be grounded separately, which is a
+    wrong date reading as a right one. And a digit fused to a word character is
+    part of an identifier, not a quantity, which is what keeps C3, 1I, J2000
+    and v_inf2 out.
     """
     masked = _mask_units(text)
-    iso = [(m.start(), m.end()) for m in ISO_DATE.finditer(masked)]
-    out = [(m.group(), m.start(), m.end()) for m in ISO_DATE.finditer(masked)]
+    patterns = (ISO_DATE,) + DATE_SHAPES
+    spans = {}
+    for pattern in patterns:
+        for m in pattern.finditer(masked):
+            # Longest wins where shapes overlap, so "June 7, 2018" is not also
+            # reported as the abbreviated "Jun 7, 2018" sitting inside it.
+            if not any(a <= m.start() and m.end() <= b for a, b in spans):
+                spans[(m.start(), m.end())] = m.group()
+    dates = list(spans)
+    out = [(text_, a, b) for (a, b), text_ in spans.items()]
     for m in NUMBER.finditer(masked):
-        if any(a <= m.start() < b for a, b in iso):
+        if any(a <= m.start() < b for a, b in dates):
             continue
         out.append((m.group().replace(",", ""), m.start(), m.end()))
     return sorted(out, key=lambda t: t[1])

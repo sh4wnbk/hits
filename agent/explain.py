@@ -155,10 +155,10 @@ Do not cite a figure, equation, table or page number. Reference numbers are
 checked against the source citations and a wrong one is treated as a fabricated
 number wearing a label.
 
-Write a date exactly as it appears in the list, in the form it is given. Do
-not reformat one into month-name form: "2027-06-21" written as "June 21, 2027"
-puts a 21 into the text that the solver never emitted, and it is rejected like
-any other number that is not on the list.
+Write a date in one of the forms the list gives for it. Each date is listed
+twice, as "2027-06-21" and as "June 21, 2027", and either is accepted exactly as
+shown. A third spelling is not: "21 June 2027" and "Jun 21, 2027" are rejected
+like any other string that is not on the list.
 
 Do not say which of two values is larger, and do not say whether a check
 passed, failed, or exceeded its tolerance. You were given numbers, not their
