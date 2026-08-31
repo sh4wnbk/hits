@@ -421,9 +421,20 @@ def plot_validation_comparison_png(
 
     heading = "DIFFERENCE FROM THE PUBLISHED FIGURE"
     d.text((left * S, 132 * S), heading, font=f_panel, fill=_PNG_INK)
-    d.text(((left + d.textlength(heading, font=f_panel) / S + 18) * S, 133 * S),
-           "solid bar, against the pale track of the tolerance declared for it",
-           font=f_sub, fill=_PNG_MUTED)
+
+    # Two swatches rather than a sentence describing them. The encoding is the
+    # one thing a reader has to hold to read any row, so it is shown in the
+    # same ink the rows are drawn in.
+    lx = left + d.textlength(heading, font=f_panel) / S + 26
+    for fill, outline, text in (
+        (_PNG_BAR,   None,      "difference from published"),
+        (_PNG_TRACK, _PNG_TICK, "tolerance allowed"),
+    ):
+        d.rectangle([lx * S, 134 * S, (lx + 24) * S, 148 * S],
+                    fill=fill, outline=outline, width=S)
+        lx += 32
+        d.text((lx * S, 133 * S), text, font=f_sub, fill=_PNG_INK)
+        lx += d.textlength(text, font=f_sub) / S + 28
 
     # Gridlines behind the rows, so a shared axis can actually be read
     bottom = top + len(rows) * (row_h + row_gap) - row_gap + 16

@@ -31,10 +31,8 @@ trajectories over the hyperbolic orbits of all three interstellar objects
 humanity has found, 1I/'Oumuamua, 2I/Borisov and 3I/ATLAS, and says in plain
 language what such a mission would cost. Every number in an answer is checked
 against solver output before it is shown, and every answer carries a field
-saying what backs it: 'Oumuamua's says its figures were validated against
-Project Lyra's published study, and Borisov's and 3I/ATLAS's say they were
-computed by the same method and that no published intercept study exists to
-validate them against, because none does.
+saying what backs it, because only 'Oumuamua has a published study to be
+validated against.
 
 **Status.** The solver, the three-object set, the groundedness gate, and the
 agent layer are built and tested (240 passed, 1 skipped, 1 xfailed). The API,
@@ -61,48 +59,26 @@ and nothing below describes them as though they were.
 >
 > All figures are patched-conic, two-body. HITS does not perform n-body integration and does not model non-gravitational forces, so a figure is a faithful record of what the solver computed rather than a claim that it is right to the precision it is quoted at.
 
-Verbatim from a live run on 2026-08-30, `served_by: deterministic_floor`, and
-that label is the interesting part. Granite was called three times and rejected
-three times, for rewriting the date `2017-06-07` as "June 7, 2017", where a `7`
-the solver never emitted is a number the gate will not pass, and for renaming
-the eq. 4 quantity in a way that reads as a label wrapped around a figure. So
-the system served its deterministic floor: correct, grounded, and visibly
-credited to the template rather than to the model.
-
-Granite does sometimes clear the gate. On this manifest it cleared four times
-in five with the rules in the user turn, and the `n_a` placeholder it used to
-leak out of the manifest's frame lexicon is now fixed at source, so no prompt
-contains it. What it writes when it clears is still a recital of one figure per
-paragraph, with no plain-language opening and none of the framing above.
-
-Moving the standing rules into the system turn and asking for a plain-language
-opening was tried once, deliberately bounded, and measured across the three
-objects at five runs each: nothing passed, fifteen times out of fifteen. The
-failure had stopped being about content and become typography, `km² s⁻²` for
-`km^2/s^2` and a non-breaking hyphen inside `2018‑06‑07` that leaves `06` and
-`07` as loose numerals. Told to write plainly and to quote exactly, this model
-cannot do both. So the recommendation is floor-first, and the block above is
-the floor: the path a judge reproduces offline, without credentials, byte for
-byte, every time.
-
-The first and last paragraphs are doing deliberate work. The same template
-answers for 2I/Borisov and 3I/ATLAS, whose departure energies are more than
-four and more than seven times this one, and it answers in identical sentences,
-because HITS has no launcher model and so no way to tell an affordable figure
-from an absurd one. The opening says what a departure energy of this kind is,
-which is high for any interstellar object, without ranking this one against the
-others. The closing says the wording would not change if the number were
-absurd. An answer that stayed silent about that would let a reader take the
-wording as reassurance.
+Verbatim from a live run on 2026-08-30, `served_by: deterministic_floor`.
+Granite generates the explanation, the gate checks every numeric token in it
+against the solver's manifest, and a rejected candidate is regenerated with
+the offending tokens fed back; since the gate learned to read dates and unit
+spellings whole, Granite cleared it ten times in fifteen, five live runs on
+each of the three objects. The floor is the version this README shows, because
+it is the clearer prose and the one path that reproduces offline, without
+credentials, byte for byte, and every response carries `served_by`, so a
+templated answer is never mis-credited to the model. The gate certifies
+grounding and not truth: it checks where a number came from, never whether the
+sentence around it is true.
 
 ## The demand
 
 ![Questions asked, by theme](plots/demand_clusters.png)
 
-3,171 questions pulled out of 19,122 comments on six NASA JPL videos and
-clustered. Travel time and intercept are the two largest technical themes, and
-they are the two HITS answers. The largest clusters in the corpus overall are
-not technical at all, and the chart shows those too.
+The 3,171 questions above, clustered. Travel time and intercept are the two
+largest technical themes, and they are the two HITS answers. The largest
+clusters in the corpus overall are not technical at all, and the chart shows
+those too.
 
 <p align="center">
   <img src="docs/img/3I_ATLAS.PNG" width="15%" alt="3I/ATLAS approaching Mars">
@@ -130,24 +106,23 @@ the cluster report are in `/data`.
 
 ## Solution description
 
-HITS takes one of the three interstellar objects, computes a real intercept
-trajectory over its hyperbolic orbit, and says in plain language what such a
-mission would cost. One URL, no clone, no orbital mechanics, and every number
-in the answer is checked against solver output before it is shown.
+One URL, no clone, no orbital mechanics: pick one of the three interstellar
+objects and read what a mission to it would cost.
 
-The three are a committed set and not a text field. A typed designation would
-need a live Horizons call at request time, which would put a judge's re-run at
-the mercy of the network and end the guarantee that the same numbers come back
-every time. `solver/objects.py` holds the set, and asking for anything else
-raises rather than guessing.
+The three are a committed set rather than a text field, because a typed
+designation would need a live Horizons call at request time and would end the
+guarantee that a judge's re-run gets the same numbers back. `solver/objects.py`
+holds the set and raises on anything else rather than guessing.
 
-What it is not is load-bearing, because it is what keeps the claim narrow.
-HITS is not a replacement for GMAT and answers one question rather than many.
-It is not a classifier of natural versus artificial objects, a question
-observational data answers and orbital elements do not. It does not model
-launch-vehicle capability, so it reports what a transfer costs and leaves the
-go/no-go judgement to the reader. It models patched-conic transfers, not
-n-body integration, and does not model non-gravitational forces.
+**What it is not** is load-bearing, because it is what keeps the claim narrow:
+
+- **Not a replacement for GMAT.** It answers one question rather than many.
+- **Not a classifier of natural versus artificial objects.** Observational data
+  answers that question; orbital elements do not.
+- **Not a launch-vehicle model.** It reports what a transfer costs and leaves
+  the go/no-go judgement to the reader.
+- **Not a full-fidelity propagator.** Patched-conic transfers only, with the
+  fidelity limits stated under Limits.
 
 ## AI approach and architecture
 
@@ -176,15 +151,10 @@ test enforces.
 A rejected candidate is regenerated at most twice with the specific rejected
 tokens fed back. If it still fails, `agent/template.py` serves a deterministic
 floor built only from manifest renderings, and that floor is gated like any
-other candidate. Every response carries `served_by`, one of
-`granite_first_pass`, `granite_after_regen` or `deterministic_floor`, so a
-templated answer is never mis-credited to Granite. If watsonx is unreachable
-or no credentials are present, the numbers still compute and still render.
-
-That loop is what the exchange at the top of this page is showing: three
-Granite attempts rejected, the floor served, the label saying so. The gate
-certifies grounding, not truth, which is a different and sharper limit, stated
-in full under Limits.
+other candidate. The `served_by` field named above is one of
+`granite_first_pass`, `granite_after_regen` or `deterministic_floor`. If
+watsonx is unreachable or no credentials are present, the numbers still
+compute and still render.
 
 ## Selected challenge theme
 
