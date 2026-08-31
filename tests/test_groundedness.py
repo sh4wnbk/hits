@@ -243,6 +243,8 @@ DATE_CASES = [
                               "2030 are both grounded for unrelated reasons"),
     ("20 September 2030", False, "a third spelling of the right date"),
     ("Sep 20, 2030", False, "an abbreviated spelling of the right date"),
+    ("September 20 2030", False, "the accepted form with its comma dropped, "
+                                 "which is what Granite actually writes"),
 ]
 
 

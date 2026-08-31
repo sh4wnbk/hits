@@ -254,8 +254,12 @@ _MONTH = "|".join(MONTHS)
 _MONTH_ABBR = "|".join(m[:3] for m in MONTHS)
 
 DATE_SHAPES = (
-    # The accepted human form: June 7, 2018
-    re.compile(r"\b(?:" + _MONTH + r") \d{1,2}, \d{4}\b"),
+    # The accepted human form, "June 7, 2018", and the same form without its
+    # comma. Only the comma'd spelling is a manifest rendering; the bare one is
+    # recognised so that "March 13 2030", which Granite writes, is rejected as
+    # one wrong date instead of fragmenting into a 13 and a 2030 that are
+    # grounded for unrelated reasons. That was this pattern's original gap.
+    re.compile(r"\b(?:" + _MONTH + r") \d{1,2},? \d{4}\b"),
     # Recognised so it can be rejected whole: 7 June 2018
     re.compile(r"\b\d{1,2} (?:" + _MONTH + r") \d{4}\b"),
     # Recognised so it can be rejected whole: Jun 7, 2018 / Jun. 7 2018

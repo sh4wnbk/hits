@@ -37,7 +37,7 @@ computed by the same method and that no published intercept study exists to
 validate them against, because none does.
 
 **Status.** The solver, the three-object set, the groundedness gate, and the
-agent layer are built and tested (208 passed, 1 skipped, 1 xfailed). The API,
+agent layer are built and tested (240 passed, 1 skipped, 1 xfailed). The API,
 the web frontend, the judges endpoints, and the deployment are not built yet,
 and nothing below describes them as though they were.
 
@@ -293,7 +293,7 @@ solver runs unchanged and explanations are served by the deterministic floor.
 solver/   orbital mechanics, the three-object set, validation, manifest emitter
 verify/   extraction rule, groundedness gate, adversarial corpus loader
 agent/    Granite client, generate-and-gate loop, deterministic floor
-tests/    208 tests, including the corpus and the invariant proofs
+tests/    240 tests, including the corpus and the invariant proofs
 data/     comment corpora, cluster report, committed state vectors, Lyra PDF
 docs/     architecture, verification, manifest contract, process record
 specs/    mission, tech stack, roadmap

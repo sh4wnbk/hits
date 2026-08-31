@@ -260,6 +260,25 @@ Phase 2 agent layer built and validated (2026-08-29):
   answer is a recital of one figure per paragraph with no plain-language lead
   and none of the feasibility framing, and it adds loose interpretive glosses
   the solver never made.
+- **Gate upgrade measured 2026-08-30: three-object pass rate 0/15 to 10/15.**
+  Typographic canonicalization, word forms for every unit, and a two-form
+  closed set of date renderings. Measured live, five runs per object, on the
+  same restructured prompt that had scored 0/15: 1I/'Oumuamua 5/5
+  `granite_after_regen`, 3I/ATLAS 5/5 `granite_first_pass`, 2I/Borisov 0/5,
+  rejected every time on a bare `13` from writing "March 13 2030" without its
+  comma. Recognition of the comma-less shape was added after that measurement
+  and its live effect is **unmeasured**, because the watsonx account hit
+  `token_quota_reached` (HTTP 403) during the re-run. Do not quote a number for
+  it. The 10/15 figure is the one that was watched.
+- **A 403 quota failure serves the floor with `regens=0` and no findings.**
+  That is the transport degrade path, not a gate rejection, and the two look
+  similar in a summary table. Read `floor_reason` before concluding anything
+  about grounding from a run of floors.
+- **Still open, recorded rather than chased: an ordinal date spelling.**
+  "the 7th of June, 2018" grounds, because `7th` carries a letter suffix and is
+  not tokenized as a number, leaving only a grounded `2018`. It is the same
+  fragmentation class as the closed limit below, in a shape the date patterns
+  do not recognise.
 - **That gate limit is now closed (2026-08-30).** A grounded 3I/ATLAS answer had
   contained "September 20, 2030", passing because `20` is `solve.tof_years` and
   `2030` is `solve.departure.year`. A date is now a single token: the tokenizer
