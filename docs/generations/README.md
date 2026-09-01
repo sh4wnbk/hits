@@ -1,6 +1,6 @@
 # Generations, 2026-08-31
 
-The raw Granite output behind the Phase 3 rows in `docs/BOB_USAGE.md` and the
+The raw Granite output behind the Phase 3 rows in `BOB_USAGE.md` and the
 "Where the AI can fall short" list in the README.
 
 Those two documents say what the model got wrong. This directory is the

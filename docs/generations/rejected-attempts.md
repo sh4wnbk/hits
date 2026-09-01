@@ -11,7 +11,7 @@ but not a copy of a file, because no file existed.
 
 Some attempts are gone entirely. The first floored borisov run of the evening,
 three attempts, predates the change that made the script print rejected prose,
-so only its tokens survive, in `docs/BOB_USAGE.md`. That absence is the reason
+so only its tokens survive, in `BOB_USAGE.md`. That absence is the reason
 the change was made.
 
 Model for every run below: `ibm/granite-4-h-small`, us-south.

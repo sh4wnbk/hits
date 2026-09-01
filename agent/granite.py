@@ -41,7 +41,7 @@ gate is what catches the second.
 ## What is and is not confirmed
 
 Confirmed on this account: region us-south, and ibm/granite-4-h-small servable.
-Confirmed by a live call: see docs/BOB_USAGE.md for the run and its date.
+Confirmed by a live call: see BOB_USAGE.md for the run and its date.
 
 Not confirmed: ibm/granite-4-1-8b-instruct, the previous default, 404s on this
 account and has been removed. WATSONX_MODEL_ID and WATSONX_URL still override

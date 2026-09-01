@@ -187,7 +187,7 @@ sight of the gate it attacks. Claude Code took over at the Phase 1/2 boundary
 for the groundedness gate and the agent layer.
 
 Every commit here is authored by one human committer, so git carries no tool
-authorship and the record of which tool did what is `docs/BOB_USAGE.md`,
+authorship and the record of which tool did what is `BOB_USAGE.md`,
 written session by session as the work happened. `docs/HARNESS.md` describes
 the process discipline both tools worked under.
 
@@ -308,7 +308,9 @@ solver runs unchanged and explanations are served by the deterministic floor.
 solver/   orbital mechanics, the three-object set, validation, manifest emitter
 verify/   extraction rule, groundedness gate, adversarial corpus loader
 agent/    Granite client, generate-and-gate loop, deterministic floor
-tests/    242 tests, including the corpus and the invariant proofs
+app/      the web service, cached answers, chips, gate exhibit
+web/      the page and the gate view, one self-contained file each
+tests/    347 tests, including the corpus and the invariant proofs
 data/     comment corpora, cluster report, committed state vectors, Lyra PDF
 docs/     architecture, verification, manifest contract, process record
 specs/    mission, tech stack, roadmap
@@ -329,6 +331,7 @@ plots/    C3 porkchop slice, demand clusters, validation comparison
 - `docs/CONVENTIONS.md`
 - `docs/GLOSSARY.md`
 - `docs/IBM_STACK.md`
-- `docs/BOB_USAGE.md`
+- `BOB_USAGE.md`
+- `BOB_BRIEF_CORPUS.md`
 - `docs/HARNESS.md`
-- `CLAUDE.md`
+- `docs/CLAUDE.md`

@@ -1,7 +1,7 @@
 """
 tests/test_corpus_raw.py — the raw-submission schema, on its own terms.
 
-docs/BOB_BRIEF_CORPUS.md asks Bob for attack_shape and why, and asks it not to
+BOB_BRIEF_CORPUS.md asks Bob for attack_shape and why, and asks it not to
 assign a reason code. Nothing in the tree could load such a file, so the first
 submission was written against the canonical loader instead: Bob found
 expect_reason there and filled it in, and the corpus came back shaped by the
@@ -100,7 +100,7 @@ def test_raw_validator_references_no_reason_code():
 
 
 def test_attack_shapes_are_the_briefs_nine():
-    """Spelled as docs/BOB_BRIEF_CORPUS.md spells them."""
+    """Spelled as BOB_BRIEF_CORPUS.md spells them."""
     assert ATTACK_SHAPES == (
         "fabricate", "nudge", "wrong unit", "wrong frame", "disguise",
         "misattribute", "inflate", "spell out", "malform")

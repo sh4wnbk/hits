@@ -816,7 +816,7 @@ def redacted_for_corpus_authoring(m: Manifest) -> Dict[str, Any]:
 
     So `renderings` and `precision` are withheld, and the numbers, units,
     frames, kinds, labels, and citations are given in full. That is the solver's
-    public output, which is exactly what the brief in docs/BOB_BRIEF_CORPUS.md
+    public output, which is exactly what the brief in BOB_BRIEF_CORPUS.md
     says the author gets.
     """
     return {

@@ -12,7 +12,7 @@ a person rather than a program, it says so.
 
 IBM Bob was the primary development tool for Phase 1, the part of this
 repository that computes. Across three sessions on 2026-08-27, logged step by
-step in `docs/BOB_USAGE.md`, Bob built the dependency baseline, the Horizons
+step in `BOB_USAGE.md`, Bob built the dependency baseline, the Horizons
 fetch and the committed state vectors, the Lambert wrapper over hyperbolic
 targets, the solve and grid surface, the validation suite against Hein et al.
 2019, and the C3 porkchop slice. It then produced the Phase 2 adversarial
@@ -23,11 +23,11 @@ Claude Code took over at the Phase 1/2 boundary and built the layer that
 interprets: the manifest emitter, the groundedness gate, the corpus ingest,
 the deterministic explanation floor, and the generate-and-gate loop. The
 handoff is recorded at the boundary rather than reconstructed after it, in the Phase 2
-tool-handoff entry of `docs/BOB_USAGE.md`.
+tool-handoff entry of `BOB_USAGE.md`.
 
 Every commit in this repository is authored by one human committer. Git
 carries no tool authorship and cannot be made to carry it retroactively, so
-the Bob-primary claim rests on `docs/BOB_USAGE.md` as a session log written as
+the Bob-primary claim rests on `BOB_USAGE.md` as a session log written as
 the work happened. That is a weaker form of evidence than a signature and a
 stronger one than a claim made at submission time, and it is stated this way
 because the alternative, backfilling authorship into commit metadata, would be
@@ -83,7 +83,7 @@ own rows rather than folded into the stub result.
 The reject cases are worth something only if their author could not see the
 answer key, so the independence is structural rather than promised.
 
-Bob wrote against `docs/BOB_BRIEF_CORPUS.md`, seeing the solver's public
+Bob wrote against `BOB_BRIEF_CORPUS.md`, seeing the solver's public
 outputs through the redacted manifest view and the printed validation rows,
 and never the gate's source, the exemption table, the rendering ladder, or the
 normalization rules. Three files keep that boundary visible in the tree:
@@ -152,7 +152,7 @@ imports it, so it is out of the file and the install is `--no-deps`.
 
 What CI still does not gate is the credentialed half. No watsonx call and no
 Horizons call happens in a CI run, so the live Granite path is proven by dated
-runs in `docs/BOB_USAGE.md` and never by a green build. Nor does anything
+runs in `BOB_USAGE.md` and never by a green build. Nor does anything
 check documents against the module tree: this file, and every other, is
 maintained by hand, which is why they carry explicit unbuilt markers rather
 than relying on a reader to notice.

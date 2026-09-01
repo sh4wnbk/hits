@@ -91,7 +91,7 @@ def test_reject_corpus_meets_its_bar():
     cases = load_cases(ADVERSARIAL_FILE)
     assert len(cases) >= MIN_REJECT_CASES, (
         f"{len(cases)} reject cases, need {MIN_REJECT_CASES}. "
-        f"Brief: docs/BOB_BRIEF_CORPUS.md")
+        f"Brief: BOB_BRIEF_CORPUS.md")
     assert all(c.author == "bob" for c in cases), (
         "reject cases are authored black-box by Bob; the independence is what "
         "makes a rejection worth something")
