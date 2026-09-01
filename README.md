@@ -145,16 +145,11 @@ holds the set and raises on anything else rather than guessing.
 
 ## AI approach and architecture
 
-```mermaid
-flowchart LR
-  H["JPL Horizons\nvia astroquery"] --> S
-  SBDB["Small-Body Database\ndesignation only"] -.-> S
-  S["solver/\nhapsira Lambert, grids"] --> M["solver/manifest.py\nevery citable number"]
-  M --> A["agent/\nGranite explains"]
-  M --> V["verify/\ngroundedness gate"]
-  A --> V
-  V --> R["grounded explanation\nor deterministic floor"]
-```
+![Data flows from JPL Horizons via astroquery, and from the Small-Body Database for the designation only, into solver/ running hapsira Lambert solves over grids. The solver emits solver/manifest.py, every citable number, which feeds both agent/ where Granite explains and verify/ the groundedness gate. The agent's output also goes to the gate, which emits either a grounded explanation or the deterministic floor.](docs/img/architecture.jpg)
+
+<sub>Rendered from `docs/img/architecture.mmd`, kept beside it so the diagram
+stays editable. It is a picture rather than a mermaid block because GitHub
+renders mermaid client-side and that rendering fails for some readers.</sub>
 
 The solver computes and the model interprets. That split is enforced by
 ordering: the solver runs first and completes, the agent receives structured
