@@ -263,6 +263,11 @@ the date it was computed.
   cannot be verified, the template serves, which is the system working rather
   than failing.
 
+The raw model output behind every claim above is committed in
+`docs/generations/`, along with the drafts the gate refused. None of it is
+served, and running the gate over it is a two-line script that directory's
+README gives you.
+
 The gate has standing limits of its own, and they are written down because a
 gate whose limits are unstated invites the belief that it has none. It cannot
 see a real number attached to the wrong result within one manifest; two such

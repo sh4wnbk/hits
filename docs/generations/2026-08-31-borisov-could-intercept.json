@@ -1,0 +1,12 @@
+{
+  "object_key": "borisov",
+  "text": "The solver shows that a spacecraft could intercept the interstellar object 2I/Borisov by departing Earth on 2030-03-13, traveling for about 20\u202fyears, and arriving at the comet on 2050-03-13. The departure maneuver would require a C\u2083 of roughly 1727.89\u202fkm\u00b2\u202fs\u207b\u00b2 (the \u201cdeparture C\u2083\u201d) and would give the spacecraft a hyperbolic excess speed of about 41.56787\u202fkm\u202fs\u207b\u00b9 relative to Earth. Once it reaches the comet\u2019s vicinity, the spacecraft would be moving at roughly 16.89188\u202fkm\u202fs\u207b\u00b9 relative to 2I/Borisov, which is the local encounter speed. The flight time works out to about 7305\u202fdays, or roughly 20\u202fyears, between launch and arrival. All of these numbers come from a patched\u2011conic, two\u2011body calculation that does not include any n\u2011body effects or non\u2011gravitational forces.",
+  "served_by": "granite_after_regen",
+  "model_id": "ibm/granite-4-h-small",
+  "generated_at": "2026-09-01T01:14:30Z",
+  "call_id": "800a1198-8515-41a6-95e1-889e7e5b76ab",
+  "verification_status": "computed with the same method; no published intercept study exists to validate against",
+  "regenerations": 1,
+  "verified_grounded": true,
+  "advisory": "unavailable"
+}

@@ -1,0 +1,12 @@
+{
+  "object_key": "oumuamua",
+  "text": "This computed trajectory shows that a spacecraft could reach the interstellar object 1I/'Oumuamua in about one year, departing Earth on June 7, 2017 and arriving at the object on June 7, 2018. The departure C\u2083 from Earth is 393.34 km\u00b2/s\u00b2, which corresponds to a hyperbolic excess speed of 19.8328 km/s relative to Earth. When the spacecraft reaches 1I/'Oumuamua, its relative velocity with respect to the object will be 13.71605 km/s in the target-relative frame. The total flight time for this patched-conic, two-body trajectory is 365 days, or approximately one year.",
+  "served_by": "granite_first_pass",
+  "model_id": "ibm/granite-4-h-small",
+  "generated_at": "2026-09-01T01:32:16Z",
+  "call_id": "ff398f20-9efb-4f3f-a51f-cc418a57dc78",
+  "verification_status": "computed and validated against published figures (Hein et al. 2019)",
+  "regenerations": 0,
+  "verified_grounded": true,
+  "advisory": "unavailable"
+}
