@@ -162,7 +162,7 @@ can see, and the manifest carries no pass/fail entry for the model to quote
 instead of reasoning its way to one. This is a real limit and belongs beside
 the result, not after it.
 
-## Phase 3 — The Page, and the Answers Behind It (2026-08-31)
+## Phase 3: The Page, and the Answers Behind It (2026-08-31)
 
 Claude Code throughout. Two sessions in one evening: the deployed page and its
 endpoints, then the object answers the page serves. The second is the one worth
@@ -184,7 +184,14 @@ cannot catch.
 
 **Live calls this session:** six, all `ibm/granite-4-h-small` on us-south, all
 on the borisov, oumuamua and atlas intercept manifests. Two floored, four
-grounded. Every grounded one claimed feasibility. None is committed.
+grounded. Every grounded one claimed feasibility. None is served.
+
+**The raw output is in `docs/generations/`**, four generations as files plus the
+refused drafts transcribed from run output, including all three 3I/ATLAS
+attempts. Every row above about what the model wrote can be checked against it,
+and `tests/test_generations.py` asserts the gate still says what this log says
+it says. The one that invented a source paper is now rejected by the rule it
+prompted, which is worth running rather than reading.
 
 **What the gate caught, watched, in one evening:** an interstellar object called
 a planet (caught by review, not by the gate, and fixed in the prompt); a

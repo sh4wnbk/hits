@@ -1,0 +1,12 @@
+{
+  "object_key": "borisov",
+  "text": "The solver's output shows that a spacecraft could intercept the interstellar object 2I/Borisov in a patched-conic, two-body trajectory with no n-body integration or non-gravitational forces. The mission would depart Earth on March 13, 2030, with a departure C3 of 1727.89 km\u00b2/s\u00b2 and a hyperbolic excess speed of 41.56787 km/s relative to Earth. The flight time to reach 2I/Borisov would be 7305 days, or approximately 20 years, arriving on March 13, 2050. At arrival, the spacecraft would have a relative velocity of 16.89188 km/s with respect to the object, which is close to the asymptotic value of 16.93682 km/s reported in the source paper.",
+  "served_by": "granite_first_pass",
+  "model_id": "ibm/granite-4-h-small",
+  "generated_at": "2026-09-01T01:18:58Z",
+  "call_id": "800a1198-8515-41a6-95e1-889e7e5b76ab",
+  "verification_status": "computed with the same method; no published intercept study exists to validate against",
+  "regenerations": 0,
+  "verified_grounded": true,
+  "advisory": "unavailable"
+}
