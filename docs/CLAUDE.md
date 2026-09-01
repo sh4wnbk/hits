@@ -101,7 +101,7 @@ under Conditional and nowhere else.
 **Small branches, conventional prefixes, one concern each.** Commit history is
 read by judges.
 
-**Record each tool session as it happens** in `docs/BOB_USAGE.md`, since it
+**Record each tool session as it happens** in `BOB_USAGE.md`, since it
 cannot be reconstructed later. Bob drove Phase 1 and authored the Phase 2
 adversarial corpus black-box; Claude Code authored the Phase 2 gate and the
 agent layer above it. Which tool did what is a claim judges can check only if
@@ -317,7 +317,7 @@ Phase 2 agent layer built and validated (2026-08-29):
   byte-identical, so feeding the rejected tokens back changed nothing. Do not
   describe the Granite path as working: what is demonstrably working is the
   gate refusing it and the floor serving correct grounded prose. Runs recorded
-  in `docs/BOB_USAGE.md`.
+  in `BOB_USAGE.md`.
 - **The gate has three live catches on record beyond the typography set, and
   one class it cannot catch (2026-08-31).** Caught: an interstellar object
   described as "a target planet", found by review, fixed in the prompt rather
@@ -333,7 +333,7 @@ Phase 2 agent layer built and validated (2026-08-29):
   the standing rules in the system turn and was contradicted on all four
   generations that followed it: borisov twice, oumuamua once, and every atlas
   attempt. Do not iterate on the wording again without a reason; it was tried, and
-  the runs are in `docs/BOB_USAGE.md`. All three objects ship the floor because
+  the runs are in `BOB_USAGE.md`. All three objects ship the floor because
   of this.
 - **Canonicalization widened 2026-08-31: middle dots and no-break spaces.**
   `km²·s⁻²` and `km·s⁻¹` had reached the gate as a wrong-unit plus a loose

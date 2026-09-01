@@ -35,7 +35,7 @@ boundary, per `docs/CONVENTIONS.md`.
 
 | Component | Role | Verifiable at |
 |---|---|---|
-| IBM Bob | Primary development tool | `docs/BOB_USAGE.md` |
+| IBM Bob | Primary development tool | `BOB_USAGE.md` |
 | Granite (via watsonx) | Reasoning layer: interprets solver output under the groundedness gate | `agent/granite.py`, live 2026-08-30 |
 
 Granite Guardian and Granite embeddings were both planned and neither is

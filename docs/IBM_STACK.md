@@ -6,8 +6,8 @@ was left out is in `specs/tech-stack.md`.
 
 | Component | Role | Location | Verify |
 |---|---|---|---|
-| IBM Bob | Primary development tool | `docs/BOB_USAGE.md` | Session records with dates and what changed |
-| Granite (watsonx) | Reasoning layer: interprets solver output under the groundedness gate | `agent/explain.py`, `agent/granite.py` | `tests/test_explain_proof.py` drives every path with a stub; a served response carries `served_by` and, when Granite produced it, `model_id`. Live on 2026-08-30 against `ibm/granite-4-h-small` on us-south, logged in `docs/BOB_USAGE.md` |
+| IBM Bob | Primary development tool | `BOB_USAGE.md` | Session records with dates and what changed |
+| Granite (watsonx) | Reasoning layer: interprets solver output under the groundedness gate | `agent/explain.py`, `agent/granite.py` | `tests/test_explain_proof.py` drives every path with a stub; a served response carries `served_by` and, when Granite produced it, `model_id`. Live on 2026-08-30 against `ibm/granite-4-h-small` on us-south, logged in `BOB_USAGE.md` |
 
 ## Not wired
 

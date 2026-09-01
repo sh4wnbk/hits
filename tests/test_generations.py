@@ -2,7 +2,7 @@
 tests/test_generations.py — the committed Granite output stays checkable.
 
 docs/generations/ holds the raw model output behind the claims in
-docs/BOB_USAGE.md and the README's "Where the AI can fall short" list. Its
+BOB_USAGE.md and the README's "Where the AI can fall short" list. Its
 README tells a reader to run the gate over those files and says what they will
 see: three still grounded, and the one that invented a source paper now
 rejected by the rule it prompted.
@@ -46,7 +46,7 @@ EXPECTED = {
 def test_the_evidence_is_still_there():
     assert {os.path.basename(f) for f in FILES} == set(EXPECTED), (
         "docs/generations/ no longer matches what its README and "
-        "docs/BOB_USAGE.md describe")
+        "BOB_USAGE.md describe")
 
 
 @pytest.mark.parametrize("path", FILES, ids=os.path.basename)

@@ -29,7 +29,7 @@ GROUNDED_FILE = os.path.join(CORPUS_DIR, "grounded.jsonl")
 WHITEBOX_FILE = os.path.join(CORPUS_DIR, "adversarial_whitebox.jsonl")
 
 # What Bob writes, black-box. Validated by load_raw_submission() below, which
-# knows nothing about reason codes. See docs/BOB_BRIEF_CORPUS.md.
+# knows nothing about reason codes. See BOB_BRIEF_CORPUS.md.
 RAW_SUBMISSION_FILE = os.path.join(CORPUS_DIR, "bob_submission.raw.jsonl")
 
 # Closed vocabulary (docs/CORPUS.md). A case outside it fails to load rather
@@ -192,7 +192,7 @@ def load_manifest_for(case: Case):
 # The raw submission: Bob's schema, on its own terms
 # ---------------------------------------------------------------------------
 #
-# Everything below validates docs/BOB_BRIEF_CORPUS.md's schema and nothing else.
+# Everything below validates BOB_BRIEF_CORPUS.md's schema and nothing else.
 # It deliberately knows no reason codes. The brief asks Bob to describe the
 # SHAPE of an attack and why the token is wrong, in its own words, and to leave
 # the gate's vocabulary alone; translation into that vocabulary is the ingest
@@ -230,7 +230,7 @@ RAW_FIELDS = frozenset({
 
 
 class RawSubmissionError(ValueError):
-    """A raw submission that does not satisfy docs/BOB_BRIEF_CORPUS.md."""
+    """A raw submission that does not satisfy BOB_BRIEF_CORPUS.md."""
 
 
 @dataclass(frozen=True)

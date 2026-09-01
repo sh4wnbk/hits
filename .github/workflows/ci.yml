@@ -10,7 +10,7 @@ name: ci
 #
 # What it cannot gate is the credentialed half: the live Granite endpoint and
 # the quality of what it returns. Those are reported with their date in
-# docs/BOB_USAGE.md and are never mixed into a CI result.
+# BOB_USAGE.md and are never mixed into a CI result.
 
 on:
   push:
