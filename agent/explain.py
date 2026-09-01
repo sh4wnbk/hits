@@ -134,7 +134,12 @@ the result means. Then give the detail underneath it. Do not open with a list,
 a heading, or a restatement of the request.
 
 Refer to the target by the name the question gives it, and do not assume it is
-a planet."""
+a planet.
+
+Do not say whether the mission could or could not be flown, and do not say a
+probe could reach the target. This system computes what a transfer costs and
+models no launch vehicle, so the cost is the input to that judgement and not
+the judgement. Report the cost and stop there."""
 
 QUOTE_ONLY_RULE = """\
 QUOTE-ONLY RULE. Write no number that does not appear verbatim in the list of

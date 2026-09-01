@@ -352,6 +352,23 @@ def test_the_prompt_says_what_the_target_is():
     assert "do not assume it is\na planet" in agent_explain.SYSTEM_RULES
 
 
+def test_the_framing_forbids_a_feasibility_verdict():
+    """
+    HITS models no launch vehicle, so it has nothing with which to say a
+    mission is flyable, and the deterministic floor says exactly that: the
+    departure energy is the input to a feasibility judgement rather than the
+    judgement itself.
+
+    A grounded Granite answer had opened "The solver shows that a spacecraft
+    could intercept 2I/Borisov", which is that judgement being made anyway. The
+    gate cannot catch it: every number in the sentence was real and the claim
+    around them was not one the solver made. So it is a standing rule, in the
+    system turn, where the other things the model may not assert already live.
+    """
+    assert "could or could not be flown" in agent_explain.SYSTEM_RULES
+    assert "models no launch vehicle" in agent_explain.SYSTEM_RULES
+
+
 def test_a_manifest_with_no_designation_still_gets_a_question(manifest):
     """
     A validate manifest is a summary of five comparisons, not a transfer to an
