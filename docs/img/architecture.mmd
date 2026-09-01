@@ -1,0 +1,8 @@
+flowchart LR
+  H["JPL Horizons\nvia astroquery"] --> S
+  SBDB["Small-Body Database\ndesignation only"] -.-> S
+  S["solver/\nhapsira Lambert, grids"] --> M["solver/manifest.py\nevery citable number"]
+  M --> A["agent/\nGranite explains"]
+  M --> V["verify/\ngroundedness gate"]
+  A --> V
+  V --> R["grounded explanation\nor deterministic floor"]
