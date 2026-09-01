@@ -318,6 +318,38 @@ Phase 2 agent layer built and validated (2026-08-29):
   describe the Granite path as working: what is demonstrably working is the
   gate refusing it and the floor serving correct grounded prose. Runs recorded
   in `docs/BOB_USAGE.md`.
+- **The gate has three live catches on record beyond the typography set, and
+  one class it cannot catch (2026-08-31).** Caught: an interstellar object
+  described as "a target planet", found by review, fixed in the prompt rather
+  than the gate, because the prompt had never said what the object was. Caught:
+  a computed figure credited to "the source paper" for 2I/Borisov, which has no
+  published study at all, found by review and then closed by a deterministic
+  rule that fired live on the next call. Caught: a spelled-out "twenty", and a
+  middle dot that tore an exponent off its unit.
+- **Not caught, four times in one evening: the feasibility claim.** Every
+  grounded Granite answer of 2026-08-31 said the mission could be flown ("could
+  intercept", "could reach", "could fly from Earth to"). HITS models no launch
+  vehicle and cannot make that claim. An instruction forbidding it was added to
+  the standing rules in the system turn and was contradicted on the next two
+  runs. Do not iterate on the wording again without a reason; it was tried, and
+  the runs are in `docs/BOB_USAGE.md`. All three objects ship the floor because
+  of this.
+- **Canonicalization widened 2026-08-31: middle dots and no-break spaces.**
+  `km²·s⁻²` and `km·s⁻¹` had reached the gate as a wrong-unit plus a loose
+  exponent digit, and `March 13, 2030` written with U+00A0 left a bare `13`.
+  One closed table of six space characters and three multiplication dots, all
+  mapped to an ASCII space. Folding the dot is what makes it work: `km²·s⁻²`
+  becomes `km^2 s^-2`, already declared. U+00D7 is deliberately excluded, and a
+  space between digit groups is deliberately not closed up, so `1 727.89` stays
+  rejected: a rule that joins adjacent digits can assemble a value the model
+  never wrote.
+- **A rule that flags the floor takes away the last thing there is to serve.**
+  `agent/explain.py` gates the floor like any candidate and raises
+  `FloorUngrounded` if it fails. The floor says "the quantity the mission-design
+  literature compares against", which names a body of work without sourcing a
+  figure to it, and the source-attribution pattern was shaped around that near
+  miss. Test any new gate rule against the floor for all three objects before
+  believing it.
 - The gate certifies grounding, not truth. The first live explanation carried
   only manifest renderings and still said the 2027 C3 comparison "exceeds the
   solver's tolerance of 20%" when 4.92% is inside 20%. Every number was
@@ -375,8 +407,27 @@ Three-object set built and validated (2026-08-30):
   entry, because a name is not a computed quantity.
 - Suite: 208 passed, 1 skipped, 1 xfailed, 0 failed.
 
+Phase 3 built and deployed (2026-08-31):
+- The page is live at https://hits-f3s4.onrender.com, served as the committed
+  `web/index.html`, one self-contained file. `GET /` returns the file byte for
+  byte; there is no template assembling HTML in Python any more.
+- Endpoints live: `/health`, `/objects`, `/explain/{key}`, `/evidence/{eid}`,
+  `/gate/demo/{key}`, `/chips`. `/gate/demo/{key}` answers a browser in prose
+  and a caller in json from the same URL, negotiated by `?format=` then Accept.
+- No number is written into the page. Object answers come from `/explain`,
+  evidence answers from `/evidence`, and the two figures in the gate exhibit
+  from `/gate/demo/oumuamua`, enforced by `test_index_states_no_number`.
+- **All three objects ship the deterministic floor**, frozen in `data/answers/`
+  by an explicit `--floor` path, `served_by=deterministic_floor` with an empty
+  `model_id`. Not because Granite was unavailable: it answered, and the floor
+  is better. See the feasibility guardrail below.
+- `tests/test_answers.py` re-gates every committed answer against its committed
+  manifest. It had been claimed in `app/answers.py`'s docstring since that file
+  was written and did not exist.
+- Suite: 337 passed, 1 skipped, 1 xfailed.
+
 Currently unbuilt, and therefore not to be described as working: Granite
-Guardian, every judges endpoint, the frontend, and the deployment.
+Guardian, and the judges endpoints beyond `/gate/demo`.
 
 ## Provenance and reproducibility
 
