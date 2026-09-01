@@ -101,7 +101,6 @@
   .facet-detail{ margin:0 0 1rem; padding:.9rem 1.1rem; border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:0 10px 10px 0; background:var(--surface); }
   .facet-detail .asked{ color:var(--ink); font-size:.92rem; margin:0; }
   .facet-detail .src{ color:var(--faint); font-size:.82rem; margin:.35rem 0 0; }
-  .facet-detail .ids{ font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace; color:var(--faint); font-size:.78rem; margin:.5rem 0 0; }
   .facet-detail .note{ color:var(--warm); font-size:.88rem; margin:.6rem 0 0; }
   .answer{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:1.4rem 1.5rem; }
   .answer .head{ display:flex; align-items:center; gap:.6rem; margin-bottom:.9rem; padding-bottom:.9rem; border-bottom:1px solid var(--line-soft); }
@@ -406,8 +405,10 @@
   // endpoint exists so the page and the API cannot drift, and a hardcoded list
   // beside it was two copies of the same four questions waiting to disagree.
   //
-  // Each one opens to show the comment it was mined from, the manifest entries
-  // it maps to, and the note where it has one. That material is committed and
+  // Each one opens to show the comment it was mined from and the note where it
+  // has one. The entry ids it maps to stay in /chips for a caller who wants
+  // them, and off the page, where they read as jargon. That material is
+  // committed and
   // served already, and it was the part a reader could not see: "What would it
   // cost to launch?" sits beside a figure in km^2/s^2, and the note saying the
   // cost is launch energy rather than money was one click away and never shown.
@@ -427,9 +428,6 @@
     if (f.mined) {
       box.appendChild(el("p", "asked", "Asked as: \u201c" + f.mined + "\u201d"));
       box.appendChild(el("p", "src", "From " + f.mined_source + ", in the comment corpus."));
-    }
-    if (f.entry_ids && f.entry_ids.length) {
-      box.appendChild(el("p", "ids", "Answered from: " + f.entry_ids.join(", ")));
     }
     if (f.note) box.appendChild(el("p", "note", f.note));
     facetDetail.appendChild(box);
