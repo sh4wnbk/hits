@@ -1,0 +1,12 @@
+{
+  "object_key": "oumuamua",
+  "text": "Catching 1I/'Oumuamua would mean leaving Earth with 393.34 km^2/s^2 of launch energy, a very high-energy departure, and then flying for 1 year to reach it. Every interstellar object is high-energy to chase, because none of them is in orbit around the Sun and all of them are leaving it at speed. What follows is the size of that cost, worked out, and not a judgement on whether it could be met.\n\nA trajectory connecting Earth to the target exists for the departure asked about. Leaving Earth on 2017-06-07 and arriving on 2018-06-07, the flight time is 365 days, or 1 year. That such a trajectory exists is geometry, and geometry is nearly always obliging; what separates one departure from another is what it costs to fly.\n\nReaching it from an Earth-relative departure costs 393.34 km^2/s^2 of characteristic energy, which is a hyperbolic excess speed of 19.8328 km/s once clear of Earth.\n\nThe probe would meet the target at 13.71605 km/s in the target-relative frame, which is the speed it passes at. Its asymptotic arrival relative velocity, the quantity the mission-design literature compares against, is 13.96737 km/s.\n\nWhat HITS settles here is the trajectory, not the launch vehicle. It computes what the transfer costs and does not model launcher capability, so the departure energy above is the input to a feasibility judgement rather than the judgement itself. Which means this answer reads the same way whatever the size of that figure. A departure energy an existing launcher could supply, and a departure energy far past anything ever flown, come back in identical sentences, because HITS has no launcher model with which to tell them apart. Nothing above should be read as HITS having found the mission flyable.\n\nAll figures are patched-conic, two-body. HITS does not perform n-body integration and does not model non-gravitational forces, so a figure is a faithful record of what the solver computed rather than a claim that it is right to the precision it is quoted at.",
+  "served_by": "deterministic_floor",
+  "model_id": "",
+  "generated_at": "2026-09-01T01:38:43Z",
+  "call_id": "ff398f20-9efb-4f3f-a51f-cc418a57dc78",
+  "verification_status": "computed and validated against published figures (Hein et al. 2019)",
+  "regenerations": 0,
+  "verified_grounded": true,
+  "advisory": "unavailable"
+}
