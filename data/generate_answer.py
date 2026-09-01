@@ -121,15 +121,26 @@ def generate(key: str) -> int:
     print(e.text)
     print(RULE)
 
-    # Every attempt the gate refused, with the tokens it refused them for. This
-    # is the diagnostic that matters on a floored run and it is printed on a
-    # successful one too, because a pass on the second attempt is worth seeing.
+    # Every attempt the gate refused, with the tokens it refused them for, and
+    # the prose those tokens sat in. This is the diagnostic that matters on a
+    # floored run and it is printed on a successful one too, because a pass on
+    # the second attempt is worth seeing.
+    #
+    # The text is printed and not just the tokens because the tokens alone do
+    # not say what went wrong. A run that floored on a bare `13` and a
+    # `wrong-unit` on `km` was diagnosable only by reconstructing candidate
+    # spellings offline afterwards and matching their findings; the prose would
+    # have said it outright. A rejected attempt is the only record of what the
+    # model actually wrote, and it is discarded when this process exits.
     for a in e.attempts:
         if a.error:
             print(f"attempt {a.index}: transport error: {a.error}")
         elif a.findings:
             print(f"attempt {a.index}: rejected on "
                   f"{[(f.text, f.reason) for f in a.findings]}")
+            print(f"attempt {a.index} text:")
+            print(a.text)
+            print()
         else:
             print(f"attempt {a.index}: grounded")
     print(RULE)
