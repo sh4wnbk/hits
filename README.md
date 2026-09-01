@@ -1,3 +1,11 @@
+![Can we catch it? HITS, the Hyperbolic Intercept and Trajectory Solver: flight time, cost, pass velocity, launch window, every number checked](docs/img/can_we_catch_it.jpg)
+
+<sub>1I/'Oumuamua, artist's impression:
+[ESO / M. Kornmesser](https://www.eso.org/public/images/eso1737a/), CC BY 4.0.
+Earth: Apollo 17, NASA, public domain. "Validated against Project Lyra" is the
+'Oumuamua pictured: it is the one object with a published study to be checked
+against, and 2I/Borisov and 3I/ATLAS have none.</sub>
+
 # HITS | Hyperbolic Intercept & Trajectory Solver
 
 *Can we catch it? Expert-level intercept analysis, open to everyone.*
