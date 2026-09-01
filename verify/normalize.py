@@ -39,9 +39,20 @@ readable as the guarantee it makes.
 
 ## The tables are closed
 
-Both are enumerated. There is no general "strip anything unusual" rule, because
+All three are enumerated. There is no general "strip anything unusual" rule, because
 that is how a normalizer starts quietly repairing text into a match. A glyph
-that is not in DASHES or SUPERSCRIPTS survives untouched and is rejected.
+that is not in DASHES, SPACES or SUPERSCRIPTS survives untouched and is
+rejected.
+
+## What is deliberately not repaired
+
+A digit group separated by a space, `1 727.89` for `1727.89`, stays rejected.
+Removing that space would be the first rewrite here that changes where one
+number ends and the next begins, and a rule that joins adjacent digits is a
+rule that can assemble a value the model did not write. The SI thousands
+separator is a real convention and this is a real rejection of it; the trade is
+deliberate, because the alternative is a normalizer with an opinion about
+arithmetic.
 """
 
 from __future__ import annotations
@@ -77,6 +88,34 @@ SUPERSCRIPTS = {
 
 SUPERSCRIPT_RUN = re.compile("[" + "".join(SUPERSCRIPTS) + "]+")
 
+# Space characters that stand in for the ASCII space, and the multiplication
+# dots that stand in for it between two units.
+#
+# Both were seen live on 2026-08-31, in one borisov run that floored on three
+# attempts. `km²·s⁻²` and `km·s⁻¹` reached the gate as a wrong-unit on `km^2`
+# and `km` plus a loose `2` and a loose `1`, which is the exponent being torn
+# off its unit. And `March 13, 2030` written with U+00A0 stopped matching the
+# rendering it is, leaving a bare `13` reported as a fabricated number.
+#
+# Folding the dot to a space is what makes the rest work: `km²·s⁻²` becomes
+# `km^2 s^-2`, which EXPONENT_FORMS already knows is `km^2/s^2`. No new entry
+# was needed there, because the multiplicative spelling was already declared.
+#
+# The multiplication sign U+00D7 is deliberately absent. It appears between
+# numbers as well as between units, and folding it would silently join or split
+# quantities rather than repair a glyph.
+SPACES = {
+    "\u00a0": " ",   # NO-BREAK SPACE
+    "\u202f": " ",   # NARROW NO-BREAK SPACE
+    "\u2007": " ",   # FIGURE SPACE
+    "\u2009": " ",   # THIN SPACE
+    "\u2002": " ",   # EN SPACE
+    "\u2003": " ",   # EM SPACE
+    "\u00b7": " ",   # MIDDLE DOT
+    "\u22c5": " ",   # DOT OPERATOR
+    "\u2219": " ",   # BULLET OPERATOR
+}
+
 # Multiplicative unit typography to the solidus form the manifest declares.
 # Applied after the character maps, so the input here is already caret form.
 # Ordered longest first: "km^2 s^-2" must be seen before "s^-2" alone could be.
@@ -93,7 +132,7 @@ EXPONENT_FORMS = (
     ("km^2/s^2", "km^2/s^2"),
 )
 
-_DASH_MAP = str.maketrans(DASHES)
+_GLYPH_MAP = str.maketrans({**DASHES, **SPACES})
 
 
 def _plain_exponents(text: str) -> str:
@@ -114,7 +153,7 @@ def canonicalize(text: str) -> str:
     unchanged, which is why the whole existing corpus is unaffected by this
     step.
     """
-    out = _plain_exponents(text.translate(_DASH_MAP))
+    out = _plain_exponents(text.translate(_GLYPH_MAP))
     for typographic, canonical in EXPONENT_FORMS:
         out = out.replace(typographic, canonical)
     return out

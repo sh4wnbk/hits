@@ -10,7 +10,8 @@ guarantee is gone and no test above it means anything.
 
 import pytest
 
-from verify.normalize import canonicalize, DASHES, SUPERSCRIPTS, EXPONENT_FORMS
+from verify.normalize import (canonicalize, DASHES, SPACES, SUPERSCRIPTS,
+                              EXPONENT_FORMS)
 
 
 # ---------------------------------------------------------------------------
@@ -25,6 +26,15 @@ from verify.normalize import canonicalize, DASHES, SUPERSCRIPTS, EXPONENT_FORMS
     # U+2011 NON-BREAKING HYPHEN inside an ISO date, which is what broke the
     # date into a bare 06 and 07 the explanation never wrote as quantities.
     ("2018‑06‑07", "2018-06-07"),
+    # Seen live, verbatim, on 2026-08-31, in one borisov run that floored on
+    # all three attempts. The middle dot tears the exponent off its unit: the
+    # gate saw a wrong-unit on km^2 and a loose 2 beside it.
+    ("1727.89 km\u00b7s\u207b\u00b9", "1727.89 km/s"),
+    ("1727.89 km\u00b2\u00b7s\u207b\u00b2", "1727.89 km^2/s^2"),
+    ("41.56787 km\u22c5s\u207b\u00b9", "41.56787 km/s"),
+    # U+00A0 between the parts of a date, which stopped the phrase matching the
+    # rendering it is and left a bare 13 reported as fabricated.
+    ("March 13,\u00a02030", "March 13, 2030"),
     # Already canonical, untouched.
     ("393.34 km^2/s^2 on 2018-06-07", "393.34 km^2/s^2 on 2018-06-07"),
 ])
@@ -94,5 +104,45 @@ def test_an_unlisted_glyph_survives_and_is_not_quietly_repaired():
 def test_the_tables_are_enumerated_not_generated():
     """Every entry is a literal a reviewer can read in a diff."""
     assert all(v == "-" for v in DASHES.values())
+    assert all(v == " " for v in SPACES.values())
     assert set(SUPERSCRIPTS.values()) == set("0123456789-")
     assert all(canon.count("/") == 1 for _, canon in EXPONENT_FORMS)
+
+
+def test_the_multiplication_sign_is_not_folded():
+    """
+    U+00D7 sits between numbers as often as between units, so folding it would
+    move the boundary between two quantities rather than repair a glyph. It is
+    absent from the table on purpose and the absence is asserted, because a
+    later hand adding it would look like completeness.
+    """
+    assert "\u00d7" not in SPACES
+    assert canonicalize("3 \u00d7 10") == "3 \u00d7 10"
+
+
+def test_a_space_between_digits_is_not_closed_up():
+    """
+    The one repair deliberately not made. `1 727.89` is the SI thousands
+    spelling of a real rendering and it stays rejected, because a rule that
+    joins adjacent digit groups is a rule that can assemble a value the model
+    never wrote. Asserted for the narrow spaces too: they are folded to an
+    ASCII space and stop there.
+    """
+    assert canonicalize("1 727.89") == "1 727.89"
+    assert canonicalize("1\u202f727.89") == "1 727.89"
+    assert canonicalize("1\u00a0727.89") == "1 727.89"
+
+
+def test_no_fabricated_value_enters_through_any_typography():
+    """
+    The property the whole widening rests on. Canonicalization changes glyphs,
+    never digits, so a value the solver never emitted is the same wrong string
+    afterwards in every spelling this module knows.
+    """
+    real, fake = "1727.89", "1727.99"
+    forms = ["{v} km^2/s^2", "{v} km\u00b2\u00b7s\u207b\u00b2",
+             "{v} km\u22c5s\u207b\u00b9", "{v}\u00a0km\u00b2/s\u00b2"]
+    for form in forms:
+        assert canonicalize(form.format(v=fake)) != canonicalize(
+            form.format(v=real))
+        assert fake in canonicalize(form.format(v=fake))

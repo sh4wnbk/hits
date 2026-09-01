@@ -102,6 +102,34 @@ LABELLED_PUBLISHED = re.compile(
 )
 
 
+# Attribution to a source, as opposed to labelling a value published. The two
+# are different sentences: "labelled as a published benchmark" asserts a kind,
+# and "reported in the source paper" asserts an origin. Only the first was ever
+# checked, so a computed figure credited to a paper passed the gate.
+#
+# This fires only against a manifest that declares no published entry at all,
+# which is why it can be this broad without touching correct comparative prose.
+# Where a published entry exists, comparing a computed value against it and
+# naming the paper is exactly what the answer is supposed to do.
+#
+# The deterministic floor is the constraint that shaped the pattern. It says
+# "the quantity the mission-design literature compares against", which names
+# the literature without attributing a figure to it, and a pattern that flagged
+# it would make the floor fail its own gate and leave nothing safe to serve.
+# The verb and the preposition are what separate the two, and they are required.
+SOURCE_ATTRIBUTION = re.compile(
+    r"\b(?:reported|published|quoted|cited|given|found|stated|noted|appears?|"
+    r"appearing|taken|drawn|described)\b[^.;:]{0,30}?\b(?:in|by|from)\b\s+"
+    r"(?:the\s+|a\s+|an\s+|this\s+|its\s+|their\s+)?"
+    r"(?:source\s+|published\s+|original\s+|reference\s+|prior\s+)?"
+    r"(?:paper|papers|study|studies|literature|reference|references|source|"
+    r"sources|publication|publications|article|articles)\b"
+    r"|\baccording to\b[^.;:]{0,40}?\b(?:paper|study|literature|source|"
+    r"publication|article)\b",
+    re.IGNORECASE,
+)
+
+
 @dataclass(frozen=True)
 class Finding:
     text: str
@@ -165,7 +193,43 @@ def check_attribution(text: str, manifest) -> List[Finding]:
                          f"({sorted(e.id for e in entries)[0]}), labelled as a "
                          "published figure"))
 
+    findings.extend(_unsourced_attributions(text, manifest))
     return findings
+
+
+def _unsourced_attributions(text: str, manifest) -> List[Finding]:
+    """
+    A source credited by a manifest that has no source.
+
+    2I/Borisov and 3I/ATLAS have no published intercept study, and that absence
+    is the whole content of their verification status. A Granite answer about
+    Borisov nonetheless closed with "the asymptotic value of 16.93682 km/s
+    reported in the source paper". Every number in it was grounded; the paper
+    does not exist.
+
+    The check above could not see it. It asks whether a token is labelled as
+    published, and that sentence labels nothing: it states an origin. Widening
+    that pattern to catch the phrasing was measured and would flag correct
+    comparative prose, where a computed figure is set against a real published
+    one in the same sentence.
+
+    So the question asked here is not about the phrasing but about the
+    manifest. Where the solver declared no published entry, no figure in the
+    answer has a source to be reported in, and any sentence claiming one is
+    false whatever its wording. Where a published entry does exist, this says
+    nothing at all and the two clauses above do the work.
+
+    The finding is on the phrase rather than on a number, because the fabricated
+    thing is the attribution. There is no token to name: the figure was real.
+    """
+    if any(e.kind == "published" for e in manifest.entries):
+        return []
+    return [
+        Finding(text=m.group(), reason="unsourced-attribution", start=m.start(),
+                note="this manifest declares no published entry, so no figure "
+                     "in it was reported in a source")
+        for m in SOURCE_ATTRIBUTION.finditer(text)
+    ]
 
 
 # ---------------------------------------------------------------------------

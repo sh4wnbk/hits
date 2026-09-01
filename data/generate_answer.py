@@ -42,6 +42,23 @@ client and no value is echoed, logged, or written here.
     python data/generate_answer.py borisov
 
 Exit status is 0 only if a Granite answer passed the gate and was written.
+
+## Freezing the floor on purpose
+
+    python data/generate_answer.py borisov --floor
+
+A floored run still writes nothing, and that stays true. This is the other
+thing: a decision, taken by a person, that the deterministic answer is the one
+to ship for an object. 2I/Borisov was the first, because Granite kept opening
+"a spacecraft could intercept" and HITS models no launch vehicle and cannot say
+that; the floor says the same figures without the verdict.
+
+It needs no credential, makes no call, and reproduces byte for byte offline,
+which is most of the argument for it. The file records
+`served_by=deterministic_floor` with an empty `model_id`, so nothing about it
+can be mistaken for a generation. The refusal above and this flag are not in
+tension: one stops a floor being written when a Granite answer was wanted, the
+other writes one when the floor is what was wanted.
 """
 
 from __future__ import annotations
@@ -52,18 +69,87 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from agent import granite
+from agent import granite, template
 from agent.explain import explain
 from app.answers import CachedAnswer, save
 from solver import objects
+from verify.groundedness import check
 from solver.frozen import load
 
 RULE = "-" * 72
+
+# The question turn, which is where the target's identity enters.
+#
+# A prompt that never named the object left Granite to infer what it was, and
+# on 2I/Borisov it inferred "a target planet": a grounded answer, every figure
+# from the manifest, describing the wrong kind of body. The designation is not
+# a number and is not in the manifest's permitted numbers, so naming it here
+# costs the gate nothing. It is stated per object rather than as a standing
+# rule because the standing rules are the same on every call and this is the
+# one thing that is not.
+QUESTION = ("Explain this computed intercept of {designation}, an interstellar "
+            "object and not a planet, in plain language to someone with no "
+            "mission-design training.")
 
 
 def _fail(message: str) -> int:
     print(f"\nFAILED: {message}")
     return 1
+
+
+def freeze_floor(key: str) -> int:
+    """
+    Write the deterministic answer for one object, as a decision.
+
+    Gated before it is written, the same way agent/explain.py gates it before
+    serving it, because the floor is not trusted for being the floor. No client
+    is constructed and no credential is read: this path cannot reach watsonx
+    even where the environment would allow it.
+    """
+    try:
+        objects.get(key)
+    except KeyError as exc:
+        return _fail(str(exc))
+
+    frozen = load(key)
+    text = template.explain(frozen.manifest)
+    verdict = check(text, frozen.manifest)
+
+    print(RULE)
+    print(f"object          {key} ({frozen.designation})")
+    print(f"call_id         {frozen.call_id}")
+    print("path            deterministic floor, frozen on purpose")
+    print("model           none, and no credential is read on this path")
+    print(RULE)
+    print(f"grounded        {verdict.grounded}")
+    print(f"guardian        {verdict.advisory}")
+    print(RULE)
+    print(text)
+    print(RULE)
+
+    if not verdict.grounded:
+        return _fail(
+            f"the floor for {key} does not pass its own gate, so there is "
+            "nothing safe to write: "
+            + "; ".join(f"{f.reason} {f.text!r}" for f in verdict.findings))
+
+    answer = CachedAnswer(
+        object_key=key,
+        text=text,
+        served_by="deterministic_floor",
+        model_id="",
+        generated_at=datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        call_id=frozen.call_id,
+        verification_status=frozen.verification_status,
+        regenerations=0,
+        verified_grounded=True,
+        advisory=verdict.advisory,
+    )
+    path = save(answer)
+    print(f"WROTE {path}")
+    print(f"      served_by {answer.served_by}, model_id empty, "
+          f"generated_at {answer.generated_at}")
+    return 0
 
 
 def generate(key: str) -> int:
@@ -91,7 +177,11 @@ def generate(key: str) -> int:
     print("calling Granite once. The gate may regenerate internally up to twice.")
     print(RULE)
 
-    e = explain(frozen.manifest, client=client)
+    question = QUESTION.format(designation=frozen.designation)
+    print(f"question        {question}")
+    print(RULE)
+
+    e = explain(frozen.manifest, client=client, question=question)
 
     print(f"served_by       {e.served_by}")
     print(f"grounded        {e.grounded}")
@@ -104,15 +194,26 @@ def generate(key: str) -> int:
     print(e.text)
     print(RULE)
 
-    # Every attempt the gate refused, with the tokens it refused them for. This
-    # is the diagnostic that matters on a floored run and it is printed on a
-    # successful one too, because a pass on the second attempt is worth seeing.
+    # Every attempt the gate refused, with the tokens it refused them for, and
+    # the prose those tokens sat in. This is the diagnostic that matters on a
+    # floored run and it is printed on a successful one too, because a pass on
+    # the second attempt is worth seeing.
+    #
+    # The text is printed and not just the tokens because the tokens alone do
+    # not say what went wrong. A run that floored on a bare `13` and a
+    # `wrong-unit` on `km` was diagnosable only by reconstructing candidate
+    # spellings offline afterwards and matching their findings; the prose would
+    # have said it outright. A rejected attempt is the only record of what the
+    # model actually wrote, and it is discarded when this process exits.
     for a in e.attempts:
         if a.error:
             print(f"attempt {a.index}: transport error: {a.error}")
         elif a.findings:
             print(f"attempt {a.index}: rejected on "
                   f"{[(f.text, f.reason) for f in a.findings]}")
+            print(f"attempt {a.index} text:")
+            print(a.text)
+            print()
         else:
             print(f"attempt {a.index}: grounded")
     print(RULE)
@@ -150,12 +251,20 @@ def generate(key: str) -> int:
 
 
 def main(argv) -> int:
-    if len(argv) != 2:
+    args = list(argv[1:])
+    floor = "--floor" in args
+    if floor:
+        args.remove("--floor")
+    if len(args) != 1:
         print(__doc__.strip().splitlines()[0])
-        print(f"\nusage: python data/generate_answer.py <object_key>")
+        print(f"\nusage: python data/generate_answer.py <object_key> [--floor]")
         print(f"       object_key is one of {list(objects.KEYS)}")
+        print("       --floor freezes the deterministic answer instead of "
+              "calling Granite")
         return 2
-    return generate(argv[1])
+    if floor:
+        return freeze_floor(args[0])
+    return generate(args[0])
 
 
 if __name__ == "__main__":

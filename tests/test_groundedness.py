@@ -299,6 +299,80 @@ def test_ordinary_prose_about_a_year_is_not_swallowed_as_a_date():
         "2027", "1400"]
 
 
+def test_a_source_is_not_credited_by_a_manifest_that_has_none():
+    """
+    The hole this closes, found live on 2026-08-31.
+
+    A Granite answer about 2I/Borisov closed with "the asymptotic value of
+    16.93682 km/s reported in the source paper". Every figure in it was
+    grounded and the gate passed it. There is no source paper: no published
+    intercept study of Borisov exists, which is precisely what its
+    verification status says, and all three intercept manifests declare zero
+    published entries.
+
+    The existing check asks whether a token is labelled as published. That
+    sentence labels nothing; it states an origin, which is a different claim
+    and was unchecked.
+    """
+    from solver.frozen import load
+
+    check = _gate()
+    for key in ("oumuamua", "borisov", "atlas"):
+        m = load(key).manifest
+        assert not any(e.kind == "published" for e in m.entries), key
+        for phrase in (
+                "the asymptotic value of 20 years reported in the source paper",
+                "20 years, quoted in the paper",
+                "according to the published study, 20 years",
+                "20 years, taken from the literature",
+                "20 years, as given in the reference"):
+            verdict = check(phrase, m)
+            assert not verdict.grounded, (key, phrase)
+            assert any(f.reason == "unsourced-attribution"
+                       for f in verdict.findings), (key, phrase)
+
+
+def test_naming_a_source_is_correct_where_the_manifest_has_one():
+    """
+    The other half, and the reason the rule is scoped to the manifest rather
+    than written as a phrase blocklist. A validate manifest carries published
+    entries, comparing a computed figure against one is the entire point of
+    that shape, and naming the paper it came from is correct prose.
+
+    A pattern broad enough to catch the Borisov failure flags this sentence
+    when it is applied unconditionally. That was measured before the rule was
+    written, and it is why the question asked is about the manifest.
+    """
+    check = _gate()
+    manifest = load_manifest_for(load_all()[0])
+    assert any(e.kind == "published" for e in manifest.entries)
+    correct = ("The computed 13.96737 km/s is compared against the 13.6 km/s "
+               "reported in the paper.")
+    assert check(correct, manifest).grounded
+
+
+def test_the_floor_survives_the_source_rule():
+    """
+    Load-bearing rather than tidy. agent/explain.py gates the deterministic
+    floor like any candidate and raises FloorUngrounded if it fails, so a rule
+    that flagged the floor would take away the last thing there is to serve.
+
+    The floor says "the quantity the mission-design literature compares
+    against", which names the literature without attributing a figure to it.
+    That near miss is what shaped the pattern: a verb and a preposition are
+    required, so naming a body of work is not the same as sourcing a number to
+    it.
+    """
+    from agent import template
+    from solver.frozen import load
+
+    check = _gate()
+    for key in ("oumuamua", "borisov", "atlas"):
+        m = load(key).manifest
+        verdict = check(template.explain(m), m)
+        assert verdict.grounded, (key, verdict.findings)
+
+
 def test_gate_does_no_arithmetic():
     """
     The guarantee, made checkable instead of promised.
