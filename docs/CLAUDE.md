@@ -447,8 +447,11 @@ Guardian, and the judges endpoints beyond `/gate/demo`.
   Horizons being reachable
 - Horizons data updates as observations accumulate; numbers carry the date
   they were computed
-- Docker is the reproducibility boundary. A judge re-running validation gets
-  identical numbers, not whatever their local astropy produces
+- Reproducibility rests on pinned versions plus committed ephemerides and
+  manifests, not on a container. This said "Docker is the reproducibility
+  boundary" until 2026-08-31, when it was noticed that no Dockerfile has ever
+  existed in this repository. The deployment is `runtime: python` with pip.
+  Do not describe a containerized environment as though one is there
 - The evidence corpus, cluster report, and mining scripts stay in `/data`.
   Claims in the problem statement must resolve to files that exist
 
