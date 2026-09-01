@@ -330,8 +330,9 @@ Phase 2 agent layer built and validated (2026-08-29):
   grounded Granite answer of 2026-08-31 said the mission could be flown ("could
   intercept", "could reach", "could fly from Earth to"). HITS models no launch
   vehicle and cannot make that claim. An instruction forbidding it was added to
-  the standing rules in the system turn and was contradicted on the next two
-  runs. Do not iterate on the wording again without a reason; it was tried, and
+  the standing rules in the system turn and was contradicted on all four
+  generations that followed it: borisov twice, oumuamua once, and every atlas
+  attempt. Do not iterate on the wording again without a reason; it was tried, and
   the runs are in `docs/BOB_USAGE.md`. All three objects ship the floor because
   of this.
 - **Canonicalization widened 2026-08-31: middle dots and no-break spaces.**
