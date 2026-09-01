@@ -287,6 +287,17 @@ Phase 2 agent layer built and validated (2026-08-29):
   and its live effect is **unmeasured**, because the watsonx account hit
   `token_quota_reached` (HTTP 403) during the re-run. Do not quote a number for
   it. The 10/15 figure is the one that was watched.
+- **The keepalive workflow does not keep the instance warm, and the run history
+  is the evidence.** `.github/workflows/keepalive.yml` pings `/health` on a
+  ten-minute cron. It landed on main at 16:58 on 2026-08-31, first fired at
+  20:32, and had not fired again by 23:33: one run where the schedule predicts
+  about thirty-nine. The workflow is correct and passed in 28 seconds when it
+  ran; GitHub throttles high-frequency `schedule` events and documents them as
+  best-effort. Do not write that the deployment is kept warm by CI. The cold
+  start it was meant to prevent is real and was measured at 22.98 seconds on
+  `/health`. Whatever actually keeps the instance awake has to be external to
+  GitHub, and until one is running the first visitor after a quiet period pays
+  that cold start.
 - **A 403 quota failure serves the floor with `regens=0` and no findings.**
   That is the transport degrade path, not a gate rejection, and the two look
   similar in a summary table. Read `floor_reason` before concluding anything
