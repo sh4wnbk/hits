@@ -50,27 +50,61 @@ technologies, and because the reasoning layer needs a model regardless.
 
 | Component | Role |
 |---|---|
-| FastAPI | Solver API and judges endpoints |
-| Python 3.12 | Runtime. 3.12.3 on the development host. poliastro is what fails on 3.12, and hapsira replaced it |
-| Docker | Reproducible environment, so a judge re-running validation gets identical numbers |
-| GitHub Actions | CI gates plus a keepalive cron against the host's sleep timer |
+| FastAPI | The service. `/health`, `/objects`, `/explain/{key}`, `/evidence/{eid}`, `/gate/demo/{key}`, `/chips`, and the page at `/` |
+| Python 3.12 | Runtime. 3.12.3 on the development host and pinned to the same on the deployment. poliastro is what fails on 3.12, and hapsira replaced it |
+| GitHub Actions | CI gates the full suite on every push. It also carries a keepalive cron, which does not work; see Hosting |
 
 ## Frontend
 
-Decided at build time, constrained by the accessibility non-negotiable: one
-URL, no build step for the user, works on a phone. Ships with a human-readable
-noscript block and Open Graph tags so the link renders as a card when pasted.
+No framework and no build step. `web/index.html` is one self-contained
+document: its stylesheet, its script and its two photographs are inline, so the
+page a reader gets is the file in the repository, byte for byte. FastAPI serves
+it with `FileResponse`. `web/gate.html` is the same shape for the readable view
+of the number check.
+
+That is the accessibility non-negotiable applied to the page's own delivery.
+One URL, nothing to install, works on a phone. Its only outbound request is a
+Google Fonts stylesheet for IBM Plex, behind a real fallback stack.
+
+It carries a day and night toggle, four text-size steps, a human-readable
+noscript block naming the endpoints a reader can reach without JavaScript, and
+Open Graph tags so the link renders as a card when pasted.
+
+No number is written into it. Object answers come from `/explain/{key}`,
+evidence answers from `/evidence/{eid}`, and the accepted and rejected figures
+in the gate exhibit from `/gate/demo/oumuamua`.
+`tests/test_serve_imports.py::test_index_states_no_number` fails if a solver
+figure is ever typed in.
 
 ## Hosting
 
-Replit Core (annual, available) or Render. Free-tier cloud is avoided not on
-cost but on cold starts and configuration surface, neither of which a judge
-will wait through. Containerization keeps a move to AWS or GCP open, and
-`docs/DEPLOY.md` documents that path without spending August on it.
+Render, free plan, from `render.yaml` as a Blueprint. Live at
+`https://hits-f3s4.onrender.com`, deploying from `main`.
 
-Install-test the scientific stack on the chosen host in week one. Compiled
-astropy and numpy dependencies are where hosted environments tend to fail, and
-discovering that in week four is fatal.
+The plan chosen was the one this document set out to avoid, and the reason it
+became viable is worth stating, because it inverts the note that used to be
+here. The old worry was that compiled astropy and numpy dependencies are where
+hosted environments fail, so the scientific stack had to be install-tested on
+the host early. The deployment now never installs it. `requirements-serve.txt`
+names fastapi, uvicorn and requests and nothing else: the solver ran at build
+time and its output is committed to `data/manifests/`, so the web process reads
+json. That is what makes a free instance viable at all, and
+`tests/test_serve_imports.py` fails if a handler ever reaches for the solver at
+request time.
+
+No `WATSONX_*` value is set on the deployment. With the credentials absent
+`agent/explain.py` serves the deterministic floor and reports
+`served_by=deterministic_floor`, which is the path that reproduces with no
+account and no network.
+
+The cold start the free plan was avoided for is real and was not designed away.
+A free instance sleeps after inactivity and the next request pays it: measured
+at 22.98 seconds on `/health`. The keepalive Action was meant to prevent that
+and does not fire often enough to, one run where a ten-minute cron predicts
+about thirty-nine, which is recorded in the workflow's own comment. An external
+pinger is what the job needs, and it is not in this repository.
+
+A move to AWS or GCP would need a container, and there is no Dockerfile here.
 
 ## Rejected
 
@@ -80,7 +114,9 @@ discovering that in week four is fatal.
 | poliastro | Archived 2023, incompatible with current Python |
 | Docling | Heavy dependency chain for a one-time PDF ingest. The Lyra and OITS papers are parsed once and committed as text |
 | MLflow / Weights & Biases | Experiment tracking with no experiments. Revisit only if the surrogate model is built |
-| AWS / GCP | Cold starts and setup surface with no judge-visible benefit |
+| AWS / GCP | Setup surface with no judge-visible benefit. The cold-start argument that was also made here did not survive contact with the free Render plan, which has one |
+| Docker | Listed here as a reproducibility boundary until 2026-08-31, when it was noticed that no Dockerfile was ever written. The deployment is `runtime: python` with pip, and reproducibility rests on pinned versions plus committed ephemerides and manifests instead |
+| Replit Core | The alternative host. Render was chosen and shipped; carrying a second one in the stack was a decision the document had not made |
 | Continue plus local Granite via Ollama | A second AI coding assistant dilutes the Bob usage story, and the hardware would make it slow |
 | Granite Speech | Speech-to-text only, input rather than output. Voice reply would be the browser SpeechSynthesis API, and is a flourish behind the solver |
 | Context Forge, Granite Nano | Real components, no job in this architecture |
