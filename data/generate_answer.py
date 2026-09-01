@@ -60,6 +60,19 @@ from solver.frozen import load
 
 RULE = "-" * 72
 
+# The question turn, which is where the target's identity enters.
+#
+# A prompt that never named the object left Granite to infer what it was, and
+# on 2I/Borisov it inferred "a target planet": a grounded answer, every figure
+# from the manifest, describing the wrong kind of body. The designation is not
+# a number and is not in the manifest's permitted numbers, so naming it here
+# costs the gate nothing. It is stated per object rather than as a standing
+# rule because the standing rules are the same on every call and this is the
+# one thing that is not.
+QUESTION = ("Explain this computed intercept of {designation}, an interstellar "
+            "object and not a planet, in plain language to someone with no "
+            "mission-design training.")
+
 
 def _fail(message: str) -> int:
     print(f"\nFAILED: {message}")
@@ -91,7 +104,11 @@ def generate(key: str) -> int:
     print("calling Granite once. The gate may regenerate internally up to twice.")
     print(RULE)
 
-    e = explain(frozen.manifest, client=client)
+    question = QUESTION.format(designation=frozen.designation)
+    print(f"question        {question}")
+    print(RULE)
+
+    e = explain(frozen.manifest, client=client, question=question)
 
     print(f"served_by       {e.served_by}")
     print(f"grounded        {e.grounded}")

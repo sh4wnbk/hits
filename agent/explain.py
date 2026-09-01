@@ -131,7 +131,10 @@ do not produce figures of your own.
 
 Open with a single plain-language sentence a non-scientist can read, saying what
 the result means. Then give the detail underneath it. Do not open with a list,
-a heading, or a restatement of the request."""
+a heading, or a restatement of the request.
+
+Refer to the target by the name the question gives it, and do not assume it is
+a planet."""
 
 QUOTE_ONLY_RULE = """\
 QUOTE-ONLY RULE. Write no number that does not appear verbatim in the list of
@@ -229,6 +232,33 @@ def _rejection_block(rejected: Sequence[Finding], previous: str) -> str:
 SYSTEM_RULES = "\n\n".join([SYSTEM_FRAMING, QUOTE_ONLY_RULE])
 
 
+def _default_question(manifest) -> str:
+    """
+    The question asked when a caller does not supply one, naming the target.
+
+    A prompt that never says what the target is leaves the model to guess, and
+    Granite guessed "a target planet" for 2I/Borisov on a run that was
+    otherwise grounded. The designation is in the manifest header the solver
+    emitted, so a caller who asks nothing still gets a prompt that knows what
+    it is describing.
+
+    This is identity, not a quantity. It travels in the question turn and never
+    in the permitted numbers, and the gate is untouched by it: the tokenizer
+    already treats a digit fused to a letter as an identifier, so "2I" is not a
+    number an explanation could be accused of quoting.
+    """
+    designation = ""
+    inputs = getattr(manifest, "inputs", None)
+    if isinstance(inputs, dict):
+        designation = str(inputs.get("designation", "") or "")
+    if not designation:
+        return ("Explain this result in plain language to someone with no "
+                "mission-design training.")
+    return (f"Explain this computed intercept of {designation}, an "
+            "interstellar object and not a planet, in plain language to "
+            "someone with no mission-design training.")
+
+
 def build_prompt(manifest, question: str = "",
                  rejected: Sequence[Finding] = (),
                  previous: str = "") -> str:
@@ -238,9 +268,7 @@ def build_prompt(manifest, question: str = "",
     The rules are not here. They are in SYSTEM_RULES and travel in the system
     turn. Regeneration differs from a first attempt only by the feedback block.
     """
-    asked = question or (
-        "Explain this result in plain language to someone with no "
-        "mission-design training.")
+    asked = question or _default_question(manifest)
     parts = [
         f"THE QUESTION: {asked}",
         f"SOLVER CALL: {manifest.producer}, call_id {manifest.call_id}",

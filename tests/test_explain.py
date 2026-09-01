@@ -328,6 +328,86 @@ def test_the_question_reaches_the_prompt(manifest):
     assert "Can we catch it?" in prompt
 
 
+def test_the_prompt_says_what_the_target_is():
+    """
+    The bug this closes: with nothing in the prompt saying what the object was,
+    Granite called 2I/Borisov "a target planet" on a run that was otherwise
+    grounded. Every figure came from the manifest and the body was the wrong
+    kind of body, which is exactly the class of error the gate cannot catch,
+    because it checks numbers and this is a noun.
+
+    The designation is in the manifest header the solver emitted, so a caller
+    who asks no question still gets a prompt that knows its subject.
+    """
+    from solver.frozen import load
+
+    for key in ("oumuamua", "borisov", "atlas"):
+        m = load(key).manifest
+        designation = m.inputs["designation"]
+        prompt = agent_explain.build_prompt(m)
+        assert designation in prompt, key
+        assert "interstellar object" in prompt
+        assert "not a planet" in prompt
+
+    assert "do not assume it is\na planet" in agent_explain.SYSTEM_RULES
+
+
+def test_a_manifest_with_no_designation_still_gets_a_question(manifest):
+    """
+    A validate manifest is a summary of five comparisons, not a transfer to an
+    object, and its header carries no designation. The default question falls
+    back rather than naming an empty string, so the shape that has no target is
+    not handed a sentence claiming it has one.
+    """
+    assert "designation" not in manifest.inputs
+    prompt = agent_explain.build_prompt(manifest)
+    assert "THE QUESTION:" in prompt
+    assert "interstellar object" not in prompt
+    assert "None" not in prompt.splitlines()[0]
+
+
+def test_the_targets_identity_is_not_a_permitted_number():
+    """
+    Identity enters through the question turn and nowhere else. If a
+    designation ever appeared among the permitted numbers, the gate would be
+    accepting "2I" as a quotable figure, which is the one fix that was off the
+    table: it would let a bare 2 through wherever the tokenizer split it.
+    """
+    from solver.frozen import load
+
+    for key in ("oumuamua", "borisov", "atlas"):
+        m = load(key).manifest
+        permitted = agent_explain.permitted_numbers(m)
+        assert m.inputs["designation"] not in permitted
+        for fragment in ("1I", "2I", "3I", "Borisov", "Oumuamua", "ATLAS",
+                         "planet", "interstellar"):
+            assert fragment not in permitted, (key, fragment)
+
+
+def test_a_designation_is_never_a_number_the_gate_can_be_asked_about(manifest):
+    """
+    The check that made this fix safe to ship without touching verify/.
+
+    Naming the object in the prompt is only free if the name cannot be mistaken
+    for a quoted figure. It cannot: the tokenizer refuses a digit fused to a
+    word character, which is what already keeps C3, J2000 and v_inf2 out, and
+    a designation is the same shape. Asserted here as well as in
+    tests/test_extract.py because that test reads a corpus case and this one
+    states the rule for all three objects, including the slash form no corpus
+    case contains.
+    """
+    from verify.extract import extract
+    from verify.groundedness import check
+
+    for designation in ("1I/'Oumuamua", "2I/Borisov", "3I/ATLAS"):
+        text = (f"The probe reaches {designation}, an interstellar object and "
+                "not a planet, and the flight time is 20 years.")
+        tokens = [t.text for t in extract(text)]
+        assert tokens == ["20"], (designation, tokens)
+        for stray in ("1", "2", "3"):
+            assert stray not in tokens
+
+
 # ---------------------------------------------------------------------------
 # The wire shape
 # ---------------------------------------------------------------------------
