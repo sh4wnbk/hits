@@ -50,6 +50,12 @@ REJECT_REASONS = (
     # A value from this manifest attributed to the wrong side of the
     # published/computed seam. Produced by verify.groundedness.check_attribution.
     "attribution-mismatch",
+    # A source credited by a manifest that declares no published entry at all.
+    # Kept separate from attribution-mismatch because it is decided differently:
+    # that one reads the kind of the entry a token matched, this one reads
+    # whether the manifest has any published entry to be reporting from, and it
+    # names no token because the fabricated thing is the sentence, not a figure.
+    "unsourced-attribution",
 )
 
 AUTHORS = ("bob", "claude-code")
