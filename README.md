@@ -26,18 +26,29 @@ reachable.
 are how long it would take and whether we could catch it. None of those people
 is going to install GMAT.
 
-**HITS is that capability with the barrier removed.** It computes real intercept
-trajectories over the hyperbolic orbits of all three interstellar objects
-humanity has found, 1I/'Oumuamua, 2I/Borisov and 3I/ATLAS, and says in plain
-language what such a mission would cost. Every number in an answer is checked
-against solver output before it is shown, and every answer carries a field
-saying what backs it, because only 'Oumuamua has a published study to be
-validated against.
+**HITS is that capability with the barrier removed.** It answers one question,
+"can we catch it?", for the three interstellar objects humanity has found:
+1I/'Oumuamua, 2I/Borisov and 3I/ATLAS. It computes the cost of reaching each
+one and checks every number against the solver before showing it. Most tools in
+this space monitor a data feed and describe it. HITS computes a trajectory and
+validates it. For 1I/'Oumuamua, the one object with a published study, its
+numbers are held against Project Lyra's: the largest gap is 6.94%, and every
+quantity is inside the tolerance declared for it before the comparison ran.
+Borisov and ATLAS are computed the same way, with no published figure to check
+against, and HITS says so on every answer rather than in a footnote.
 
-**Status.** The solver, the three-object set, the groundedness gate, and the
-agent layer are built and tested (240 passed, 1 skipped, 1 xfailed). The API,
-the web frontend, the judges endpoints, and the deployment are not built yet,
-and nothing below describes them as though they were.
+The check is not a claim, it runs.
+[`/gate/demo/oumuamua`](https://hits-f3s4.onrender.com/gate/demo/oumuamua)
+shows the gate accept a real figure and reject a fabricated one, with no model
+involved.
+
+**Status.** The solver, the three-object set, the groundedness gate, the agent
+layer, the API and the page are built and tested (337 passed, 1 skipped, 1
+xfailed), and deployed at
+[hits-f3s4.onrender.com](https://hits-f3s4.onrender.com). Granite Guardian and
+the judges page at `/judges` are not built, and nothing below describes them as
+though they were. All three object answers currently ship the deterministic
+template; `served_by` on every answer says which path wrote it.
 
 ---
 
@@ -215,31 +226,56 @@ which is the next build. Until it ships, the mapping is this section and
 
 ## Limits
 
-HITS models patched-conic transfers. It does not perform n-body integration,
-does not model solar radiation pressure or other non-gravitational forces, and
-has no launch-vehicle model, so delta-v is a requirement rather than a
-capability match. Horizons ephemerides update as observations accumulate, so
-numbers carry the date they were computed.
+**What HITS does not do:**
+
+- Reports cost, not feasibility. It computes what a transfer would take, not
+  whether a launcher could fly it, because it has no launch-vehicle model.
+- Patched-conic and two-body. No n-body integration, no solar radiation
+  pressure, no other non-gravitational forces.
+- Validated for 'Oumuamua only. Borisov and ATLAS are computed, not validated,
+  because no intercept study of either has been published.
+
+Horizons ephemerides update as observations accumulate, so every number carries
+the date it was computed.
+
+**Where the AI can fall short, and what happens when it does:**
+
+- The gate checks numbers, not meaning. It proves every figure came from the
+  solver. It cannot tell whether the sentence around a figure is true. The
+  first live run returned an explanation carrying only manifest renderings that
+  still said the 2027 C3 comparison "exceeds the solver's tolerance of 20%"
+  when 4.92% is inside it.
+- The model can write a wrong word the gate cannot see. It has called an
+  interstellar object "a target planet", and once credited a computed figure to
+  a "source paper" that does not exist for that object. Both were caught by
+  review. The first was closed by naming the object in the prompt, which
+  prevents rather than detects it; the second by a deterministic rule, which
+  now rejects a source credited by a manifest that declares no published entry.
+  The general class has neither.
+- The model tends to imply feasibility, "a probe could reach it", even when
+  told not to. That instruction is in the standing rules and was contradicted
+  on the next four generations. The gate cannot see it, so nothing rejects it
+  automatically; the answers were read, and the template was shipped instead.
+- The model's plain-language rewrite is often thinner than the template,
+  dropping a caveat or a figure that the template states.
+- Every answer is labelled. `served_by` says whether the model or the template
+  wrote it, and it is never collapsed into a boolean. When a generated draft
+  cannot be verified, the template serves, which is the system working rather
+  than failing.
 
 The gate has standing limits of its own, and they are written down because a
 gate whose limits are unstated invites the belief that it has none. It cannot
 see a real number attached to the wrong result within one manifest; two such
 cases are held as accepted limits in `tests/corpus/known_limits.jsonl` rather
 than counted as catches. It cannot say what kind of wrong a number is, because
-telling a near-miss from an invention means arithmetic it is forbidden, so
-both are rejected as `fabricated-number`. Granite Guardian is not wired in and
-every verdict reports its advisory field as unavailable.
-
-Most importantly, a grounded explanation is not necessarily a correct one. The
-first live run on 2026-08-30 returned an explanation carrying only manifest
-renderings that still said the 2027 C3 comparison "exceeds the solver's
-tolerance of 20%" when 4.92% is inside it. Every number was grounded and the
-claim about them was false. Membership and attribution do not check a
-comparative assertion.
+telling a near-miss from an invention means arithmetic it is forbidden, so both
+are rejected as `fabricated-number`. Granite Guardian is not wired in and every
+verdict reports its advisory field as unavailable.
 
 ## Run it
 
-The deployment is not built. Today HITS runs locally, and the validation runs
+HITS is deployed at [hits-f3s4.onrender.com](https://hits-f3s4.onrender.com),
+which needs no clone and no credentials. To run it locally, the validation runs
 offline against committed state vectors with no credentials and no network.
 
 ```
