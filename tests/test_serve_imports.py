@@ -25,6 +25,11 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HEAVY = ("numpy", "astropy", "hapsira", "scipy")
 
+# agent/explain.py's three exits, verbatim. Named here so a test asserting the
+# service served *something legitimate* cannot be satisfied by a value the
+# explanation layer would never produce.
+SERVED_BY = ("granite_first_pass", "granite_after_regen", "deterministic_floor")
+
 # Serving dependencies, skipped rather than failed where only the solver stack
 # is installed. The solver suite has to stay runnable without them: they are in
 # requirements-serve.txt precisely because they are not solver dependencies.
@@ -62,13 +67,19 @@ from solver import objects
 c = TestClient(app)
 codes = [c.get("/health").status_code, c.get("/objects").status_code]
 served = []
+sources = []
+grounded = []
 for k in objects.KEYS:
     r = c.get("/explain/" + k)
     codes.append(r.status_code)
-    served.append(r.json()["served_by"])
+    body = r.json()
+    served.append(body["served_by"])
+    sources.append(body["source"])
+    grounded.append(body["grounded"])
 
 heavy = sorted({m.split('.')[0] for m in sys.modules if m.split('.')[0] in %r})
 print(json.dumps({"heavy": heavy, "codes": codes, "served_by": served,
+                  "source": sources, "grounded": grounded,
                   "n_modules": len(sys.modules)}))
 """ % (HEAVY,)
 
@@ -98,7 +109,14 @@ def test_answering_every_object_pulls_in_no_scientific_stack():
     """
     out = _run(SERVING_PROBE)
     assert out["codes"] == [200] * 5, out["codes"]
-    assert out["served_by"] == ["deterministic_floor"] * 3, out["served_by"]
+    # Whether an object answers from a committed generation or from the floor
+    # is a deployment fact that changes as answers are frozen, and it is not
+    # what this test is about. What must hold either way is that three answers
+    # were served, each by a named path, without the solver being imported.
+    assert len(out["served_by"]) == 3, out["served_by"]
+    assert all(s in SERVED_BY for s in out["served_by"]), (
+        f"unknown served_by in {out['served_by']}; the closed set is {SERVED_BY}")
+    assert all(out["grounded"]), out["grounded"]
     assert out["heavy"] == [], (
         f"serving pulled in {out['heavy']}, so a handler is reaching the "
         "solver at request time rather than reading a committed manifest.")
@@ -141,23 +159,68 @@ def test_objects_lists_three_with_their_verification_status(client):
         assert "no published intercept study" in by_key[key]["verification_status"]
 
 
-def test_explain_serves_the_gated_floor_for_every_object(client):
+def test_explain_serves_a_grounded_answer_for_every_object(client):
     """
-    Three grounded answers with no credential and no network. `served_by` is
-    asserted alongside `grounded`, because CLAUDE.md forbids a no-credentials
-    result being mis-credited to the credentialed system, and the field is
-    where that is either kept or lost.
+    Three grounded answers with no credential and no network.
+
+    This asserted `deterministic_floor` for all three until answers were
+    frozen, which was right while none existed and wrong the moment one did:
+    an object with a committed generation answers from it, and a test demanding
+    the floor would have failed CI for the cache working as designed.
+
+    What is asserted instead is what must hold however an object answers.
+    `served_by` names one of the three exits, never something outside them,
+    because CLAUDE.md forbids a no-credentials result being mis-credited to the
+    credentialed system and this field is where that is kept or lost. `source`
+    says whether the prose was frozen earlier or produced for this request, so
+    the two are never conflated. And the answer is grounded, is about the object
+    asked for, and states its fidelity limit.
+
+    The floor's own path keeps a test of its own below, driven by an empty
+    cache rather than by the absence of one.
     """
     for key in objects.KEYS:
         r = client.get(f"/explain/{key}")
         assert r.status_code == 200
         body = r.json()
         assert body["object"] == key
-        assert body["served_by"] == "deterministic_floor"
-        assert body["floor_reason"] == "no watsonx credentials in the environment"
+        assert body["served_by"] in SERVED_BY, body["served_by"]
+        assert body["source"] in ("cached", "live", "live-no-cache"), body["source"]
         assert body["grounded"] is True
         assert body["designation"] in body["text"]
         assert "patched-conic" in body["text"].lower()
+
+        # A cached answer carries the record of the generation that made it; a
+        # floor carries none and says why instead. Neither may borrow the
+        # other's fields.
+        if body["source"] == "cached":
+            assert body["generated_at"], key
+            assert body["floor_reason"] == "", key
+        else:
+            assert body["served_by"] == "deterministic_floor", key
+            assert body["floor_reason"] == (
+                "no watsonx credentials in the environment"), key
+
+
+def test_with_no_committed_answer_every_object_falls_to_the_gated_floor(
+        client, monkeypatch):
+    """
+    The floor path, asserted directly rather than by assuming the cache is
+    empty. This is what a fresh deployment serves before any generation has
+    been frozen, and what it goes on serving for any object whose generation
+    was never written.
+    """
+    from app.main import answer_store as bound
+    monkeypatch.setattr(bound, "load", lambda key: None)
+
+    for key in objects.KEYS:
+        body = client.get(f"/explain/{key}").json()
+        assert body["served_by"] == "deterministic_floor", key
+        assert body["source"] == "live-no-cache", key
+        assert body["floor_reason"] == (
+            "no watsonx credentials in the environment"), key
+        assert body["grounded"] is True, key
+        assert body["designation"] in body["text"], key
 
 
 def test_the_three_answers_are_distinct(client):
