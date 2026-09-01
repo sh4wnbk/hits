@@ -51,7 +51,7 @@ shows the gate accept a real figure and reject a fabricated one, with no model
 involved.
 
 **Status.** The solver, the three-object set, the groundedness gate, the agent
-layer, the API and the page are built and tested (337 passed, 1 skipped, 1
+layer, the API and the page are built and tested (347 passed, 1 skipped, 1
 xfailed), and deployed at
 [hits-f3s4.onrender.com](https://hits-f3s4.onrender.com). Granite Guardian and
 the judges page at `/judges` are not built, and nothing below describes them as
@@ -81,14 +81,15 @@ template; `served_by` on every answer says which path wrote it.
 Granite generates the explanation, the gate checks every numeric token in it
 against the solver's manifest, and a rejected candidate is regenerated with the
 offending tokens fed back; only if that still fails does the deterministic
-floor answer instead, and `served_by` names whichever path did. Since the gate
-learned to read dates and unit spellings whole, Granite cleared it ten times in
-fifteen, five live runs on each of the three objects. The block above is
-verbatim from a run on 2026-08-30 that fell through to the floor,
-`served_by: deterministic_floor`, and the floor is what is quoted here because
-it is the one path a reader reproduces offline, without credentials, byte for
-byte. The gate certifies grounding and not truth: it checks where a number came
-from, never whether the sentence around it is true.
+floor answer instead, and `served_by` names whichever path did. The block
+above is verbatim from a run on 2026-09-01, `served_by: deterministic_floor`,
+and the floor is what is quoted throughout because it is the path a reader
+reproduces offline, without credentials, byte for byte. Every committed answer
+currently ships the floor, honestly labelled; the raw model generations,
+including the ones the gate refused, are in `docs/generations/` for anyone who
+wants to run the gate over them. The gate certifies grounding and not truth:
+it checks where a number came from, never whether the sentence around it is
+true.
 
 ## The demand
 
@@ -310,7 +311,7 @@ verify/   extraction rule, groundedness gate, adversarial corpus loader
 agent/    Granite client, generate-and-gate loop, deterministic floor
 app/      the web service, cached answers, chips, gate exhibit
 web/      the page and the gate view, one self-contained file each
-tests/    347 tests, including the corpus and the invariant proofs
+tests/    349 tests, including the corpus and the invariant proofs
 data/     comment corpora, cluster report, committed state vectors, Lyra PDF
 docs/     architecture, verification, manifest contract, process record
 specs/    mission, tech stack, roadmap
